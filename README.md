@@ -1,5 +1,5 @@
 # Informatics-Preamble
-Helpful datastructures when doing informatics problems in C++. See `Preamble.cpp`  for example usage.
+Helpful datastructures and templates when doing informatics problems in C++. See `Preamble.cpp`  for example usage.
 
 Please let me know if there are any errors.
 

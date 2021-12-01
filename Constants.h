@@ -24,6 +24,10 @@
 #include <stack>
 #include <set>
 #include <map>
+#ifdef _MSC_VER
+#  include <intrin.h>
+#  define __builtin_popcount __popcnt
+#endif
 
 using namespace std;
 using namespace std::chrono;

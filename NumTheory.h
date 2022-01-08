@@ -19,23 +19,186 @@ ll lcm(ll a, ll b) {
 
 // O(log log A)
 // @returns the number of set bits in the binary represetnation of `A`
-ll bitcount(ll A) {
+/*ll bitcount(ll A) {
 	A = ((A & 1431655765) + ((A & 2863311530) >> (1 << 0)));
 	A = ((A & 858993459) + ((A & 3435973836) >> (1 << 1)));
 	A = ((A & 252645135) + ((A & 4042322160) >> (1 << 2)));
 	A = ((A & 16711935) + ((A & 4278255360) >> (1 << 3)));
 	A = ((A & 65535) + ((A & 4294901760) >> (1 << 4)));
 	return A;
-}
+}*/
 
 // O(log A)
-ll bitcountSlow(ll A) {
+/*ll bitcountSlow(ll A) {
 	ll total = 0;
 	for (; A; A /= 2) total += A % 2;
 	return total;
+}*/
+
+ll dot(pair<ll, ll> p1, pair<ll, ll> p2) {
+    //return p1.first * p2.first + p1.second * p2.second;
+    return p1.first * p2.second - p1.second * p2.first;
+}
+
+pair<ll, ll> sub(pair<ll, ll> p1, pair<ll, ll> p2) {
+    return { p1.first - p2.first, p1.second - p2.second };
+}
+
+
+bool polygonContainsPoint(pair<ll, ll> point, vector<pair<ll, ll>> poly) {
+    // on edge is counted
+    ll side = 0;
+    for (ll i0 = 0; i0 < poly.size(); ++i0) {
+        ll i1 = (i0 + 1) % poly.size();
+        ll curr = dot(sub(poly[i1], poly[i0]), sub(point, poly[i0]));
+        if (side < 0 && curr > 0) {
+            return false;
+        }
+        else if (side > 0 && curr < 0) {
+            return false;
+        }
+
+        if (side == 0) side = curr;
+    }
+    return !poly.empty();
 }
 
 class ModInt {
+	/************************************************
+	 *                INITIALISATION                *
+	 ************************************************/
+
+private:
+	ll num;
+
+public:
+	// O(1) Initialises a ModInt
+	ModInt(ll _num = 0) {
+		if (_num < 0) _num += (-_num) / MOD * MOD;
+		num = (_num + MOD) % MOD;
+		assert(0 <= num && num < MOD);
+	}
+
+	/************************************************
+	 *                    DISPLAY                   *
+	 ************************************************/
+
+	 // O(1)
+	 // @param `out` The string representation of the graph is piped to this output stream
+	 // @param `newLine` Indicates whether to end with a trailing `\\n`
+	void print(ostream& out = cout, bool newLine = false) {
+		out << num;
+		if (newLine) out << '\n';
+	}
+
+	/************************************************
+	 *                   PROPERTIES                 *
+	 ************************************************/
+
+	 // O(1) Gets num
+	ll getNum() {
+		return num;
+	}
+
+	/************************************************
+	 *                   OPERATIONS                 *
+	 ************************************************/
+	bool operator==(ModInt o) const {
+		return num == o.num;
+	}
+
+	bool operator==(ll o) const {
+		return num == o;
+	}
+
+	bool operator!=(ModInt o) const {
+		return num != o.num;
+	}
+
+	bool operator!=(ll o) const {
+		return num != o;
+	}
+
+	 // O(1) Standard modular addition
+	ModInt operator+(ModInt o) const {
+		return ModInt(num + o.num);
+	}
+
+	// O(1) Standard modular subtraction
+	ModInt operator-(ModInt o) const {
+		return ModInt(num - o.num);
+	}
+
+	// O(1) Addition assignment
+	ModInt operator+=(ModInt o) {
+		*this = *this + o;
+		return *this;
+	}
+
+	// O(1) Subtraction assignment
+	ModInt operator-=(ModInt o) {
+		*this = *this - o;
+		return *this;
+	}
+
+	// O(1) Prefix increment
+	ModInt operator++() {
+		*this = *this + 1;
+		return *this;
+	}
+
+	// O(1) Prefix decrement
+	ModInt operator--() {
+		*this = *this - 1;
+		return *this;
+	}
+
+	// O(1) Postfix increment
+	ModInt operator++(int) {
+		ModInt tmp = *this;
+		*this = *this + 1;
+		return tmp;
+	}
+
+	// O(1) Postfix decrement
+	ModInt operator--(int) {
+		ModInt tmp = *this;
+		*this = *this - 1;
+		return tmp;
+	}
+
+	// O(1) Standard modular multiplication
+	ModInt operator*(ModInt o) const {
+		return ModInt(num * o.num);
+	}
+	void operator*=(ModInt o) {
+		*this = *this * o;
+	}
+
+	// O(log o) Fast exponentiation of `this` to the power of `o`
+	ModInt pow(ll o) const {
+		assert(o >= 0);
+		ModInt output(1);
+		for (ModInt curr(num); o; o /= 2) {
+			if (o & 1) output *= curr;
+			curr *= curr;
+		}
+		return output;
+	}
+
+	ModInt modInv() {
+		ModInt x0(0), x1(1);
+		ll r0 = MOD, r1 = num;
+		while (r1) {
+			ll q = r0 / r1;
+			x0 -= x1 * q; swap(x0, x1);
+			r0 -= r1 * q; swap(r0, r1);
+		}
+		return x0;
+	}
+};
+
+/*class ModInt {
 	/************************************************
 	 *                INITIALISATION                *
 	 ************************************************/
@@ -48,6 +211,7 @@ public:
 	ModInt(ll _num = 0, ll _M = MOD) {
 		assert(_M > 0 && "Mod must be positive");
 		M = _M;
+		if (_num < 0) _num += (-_num) / M * M;
 		num = (_num + M) % _M;
 		assert(0 <= num && num < M);
 	}
@@ -151,7 +315,18 @@ public:
 		}
 		return output;
 	}
-};
+
+	ModInt modInv(ll a) {
+		ModInt x0(0, M), x1(1, M);
+		ll r0 = M, r1 = a;
+		while (r1) {
+			ll q = r0 / r1;
+			x0 -= x1 * q; swap(x0, x1);
+			r0 -= r1 * q; swap(r0, r1);
+		}
+		return x0;
+	}
+};*/
 
 /************************************************
  *                    DISPLAY                   *

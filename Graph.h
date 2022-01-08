@@ -17,7 +17,7 @@ private:
 	vector<multiset<pair<int, T>>> outEdges;
 	// A multiset of all edges
 	multiset<pair<pair<int, int>, T>> edges;
-	
+
 	// O(V) Initialises all non-temporary variables.
 	void init(int _V, bool _isWeighted = false, bool _isDirected = false) {
 		V = _V;
@@ -68,9 +68,9 @@ public:
 	 *                    DISPLAY                   *
 	 ************************************************/
 
-	// O(V + E) Displays the graph, showing the outwards edge connections of each edge in lexographic order
-	// @param `out` The string representation of the graph is piped to this output stream
-	// @param `newLine` Indicates whether to end with a trailing `\\n`
+	 // O(V + E) Displays the graph, showing the outwards edge connections of each edge in lexographic order
+	 // @param `out` The string representation of the graph is piped to this output stream
+	 // @param `newLine` Indicates whether to end with a trailing `\\n`
 	void print(ostream& out = cout, bool newLine = true) {
 		for (int u = 1; u <= V; ++u) {
 			out << u << ":\n";
@@ -89,8 +89,8 @@ public:
 	 *                   OPERATIONS                 *
 	 ************************************************/
 
-	// O(V + E log E) Finds the union of 2 graphs
-	// @note May cause edge doubling
+	 // O(V + E log E) Finds the union of 2 graphs
+	 // @note May cause edge doubling
 	Graph operator+(Graph<T> o) {
 		assert(V == o.V && isDirected == o.isDirected && isWeighted == o.isWeighted && "Can't find union of graphs with different properties");
 
@@ -242,7 +242,7 @@ public:
 	 *                    PROPERTIES
 	 ***********************************************/
 
-	// O(1) Gets whether the graph has directed edges
+	 // O(1) Gets whether the graph has directed edges
 	bool isDirectedGraph() {
 		return isDirected;
 	}
@@ -325,7 +325,7 @@ private:
 	// @param `backwards` Indicates whether to consider `inEdges` or `outEdges`
 	// @note If the graph is undirected, this becomes equivalent to a bfs (but slightly slower)
 	// @note If negative edge weights encountered, switches to `BellmanFord()`
-	void Dijkstra(int node, vector<int> &prevNode, vector<T> &dist, bool backwards = false) {
+	void Dijkstra(int node, vector<int>& prevNode, vector<T>& dist, bool backwards = false) {
 		dist[node] = T(0);
 		prevNode[node] = node;
 		priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> pq;
@@ -378,7 +378,7 @@ private:
 	}
 
 	// O(V^3 + E) Standard Floyd-Warshall algorithm - shortest path between every 2 pairs of nodes
-	void FloydWarshall(vector<vector<T>> &dists) {
+	void FloydWarshall(vector<vector<T>>& dists) {
 		for (int node = 1; node <= V; ++node) dists[node][node] = 0;
 		for (pair<pair<int, int>, T>& edge : edges) {
 			int u = edge.first.first, v = edge.first.second;
@@ -420,7 +420,7 @@ public:
 	T shortestDist(int u, int v) {
 		vector<int> prevNode = vector<int>(V + 1, 0);
 		vector<T> dist = vector<T>(V + 1, numeric_limits<T>::max());
-		Dijkstra(u);
+		Dijkstra(u, prevNode, dist);
 
 		return dist[v];
 	}
@@ -451,12 +451,12 @@ public:
 	// @param `root` If specified, consider its connected component. Otherwise consider the whole graph
 	// @returns Distance of the path, and a vector of nodes representing the path
 	// @note Cannot have negative weight cycles
-	pair<T, vector<int>> diameter(int root = -1) {
+	vector<int> diameter(int root = -1) {
 		if (root == -1) {
-			pair<T, vector<int>> output = { 0, {} };
+			vector<int> output;
 			for (vector<int> component : getComponents()) {
-				pair<T, vector<int>> curr = diameter(component[0]);
-				if (curr.first > output.first) output = curr;
+				vector<int> curr = diameter(component[0]);
+				if (curr.size() > output.size()) output = curr;
 			}
 			return output;
 		}
@@ -474,7 +474,10 @@ public:
 			}
 		}
 
-		Dijkstra(furthestNode1);
+		prevNode = vector<int>(V + 1, 0);
+		dist = vector<int>(V + 1, numeric_limits<T>::max());
+		Dijkstra(furthestNode1, prevNode, dist, false);
+
 		int furthestDist2 = numeric_limits<T>::min();
 		int furthestNode2 = root;
 		for (int node = 1; node <= V; ++node) {
@@ -484,13 +487,18 @@ public:
 			}
 		}
 
-		return shortestPath(furthestNode1, furthestNode2);
+		vector<int> path;
+		for (int node = furthestNode2; node != prevNode[node]; node = prevNode[node]) {
+			path.push_back(node);
+		}
+		path.push_back(furthestNode1);
+		return path;
 	}
 
 private:
 	// Amortised O(log V)
 	// @returns The parent node of the current disjoint set
-	int _getParent(int node, vector<int> &parent) {
+	int _getParent(int node, vector<int>& parent) {
 		if (parent[node] == node) return node;
 		return parent[node] = _getParent(parent[node], parent);
 	}
@@ -603,14 +611,14 @@ public:
 
 	// O(V + E) Copy the component at root to a new graph, maintaining the same graph properties and the same node numberings
 	Graph<T> getSubgraph(int root) {
-		Graph output(V, isWeighted, isDirected);
+		Graph output<T>(V, isWeighted, isDirected);
 		for (pair<pair<int, int>, T> edge : getAllEdges(root)) output.addEdge(edge.first.first, edge.first.second, edge.second);
 		return output;
 	}
 
 private:
 	// O(V + E) Standard DFS Bridge finding algorithm
-	int _getBridges(int u, int parent, int t, vector<pair<pair<int, int>, T>>& bridges, vector<bool> &seen, vector<int> &minTime, vector<int> &entryTime) {
+	int _getBridges(int u, int parent, int t, vector<pair<pair<int, int>, T>>& bridges, vector<bool>& seen, vector<int>& minTime, vector<int>& entryTime) {
 		seen[u] = true;
 		minTime[u] = entryTime[u] = ++t;
 
@@ -701,12 +709,12 @@ private:
 	}
 
 	// O(V) Stanard DFS topsort algorithm
-	void _dfsTopSort(int node, vector<int>& topSort, vector<int> &state) {
+	void _dfsTopSort(int node, vector<int>& topSort, vector<int>& state) {
 		if (state[node] == 2) return;
 		assert(state[node] == 1 && "Graph contains cycle");
 
 		state[node] = 1;
-		for (pair<int, T> edge : outEdges[node]) _topSort(edge.first, topSort, state);
+		for (pair<int, T> edge : outEdges[node]) _dfsTopSort(edge.first, topSort, state);
 		state[node] = 2;
 		topSort.push_back(node);
 	}
@@ -727,7 +735,7 @@ public:
 			vector<int> state = vector<int>(V + 1, 0);
 
 			vector<int> topSort;
-			for (int node = 1; node <= V; ++node) _topSort(node, topSort, state);
+			for (int node = 1; node <= V; ++node) _dfsTopSort(node, topSort, state);
 			reverse(topSort.begin(), topSort.end());
 			return topSort;
 		}
@@ -744,11 +752,11 @@ public:
 	 *       ALGORITHMS (COMPLEXITLY CLASS NP)      *
 	 ************************************************/
 
-	// TODO: hamiltonian path / tour
-	// TODO: euler path / tour
-	// TODO: covering set
-	// TODO: optimal colouring
-	// TODO: planar embedding?
+	 // TODO: hamiltonian path / tour
+	 // TODO: euler path / tour
+	 // TODO: covering set
+	 // TODO: optimal colouring
+	 // TODO: planar embedding?
 };
 
 /************************************************

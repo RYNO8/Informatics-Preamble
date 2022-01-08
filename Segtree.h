@@ -191,7 +191,7 @@ public:
         if (coveredBy(tl, tr)) return minVal;
 
         push();
-        return max(lChild->getMin(tl, tr), rChild->getMin(tl, tr));
+        return min(lChild->getMin(tl, tr), rChild->getMin(tl, tr));
     }
     // O(1) Range query: min of all entries
     T getMin() {
@@ -224,8 +224,9 @@ public:
     T getSum() {
         return getSum(l, r);
     }
+    
 
-    ll getMinIndex(ll tl, ll tr, T target) {
+    ll getMinIndexFirst(ll tl, ll tr, T target) {
         if (!touching(tl, tr)) return -1;
         if (coveredBy(tl, tr) && target == minVal) {
             Segtree* node = this;
@@ -237,21 +238,49 @@ public:
         }
 
         push(); // this is actually unnecessary, since `getMin` has already been called
-        ll lIndex = lChild->getMinIndex(tl, tr);
+        ll lIndex = lChild->getMinIndexFirst(tl, tr);
         if (lIndex != -1) return lIndex;
-        return rChild->getMinIndex(tl, tr);
+        return rChild->getMinIndexFirst(tl, tr);
     }
     // O(log N) Returns the index corresponding to the first minimum value in the range
-    ll getMinIndex(ll tl, ll tr) {
+    ll getMinIndexFirst(ll tl, ll tr) {
         T target = getMin(tl, tr);
-        return getMinIndex(tl, tr, target);
+        return getMinIndexFirst(tl, tr, target);
     }
     // O(log N) Returns the index corresponding to the first global minimum value
-    ll getMinIndex() {
-        return getMinIndex(l, r);
+    ll getMinIndexFirst() {
+        return getMinIndexFirst(l, r);
     }
 
-    ll getMaxIndex(ll tl, ll tr, T target) {
+
+    ll getMinIndexLast(ll tl, ll tr, T target) {
+        if (!touching(tl, tr)) return -1;
+        if (coveredBy(tl, tr) && target == minVal) {
+            Segtree* node = this;
+            while (node->l != node->r) {
+                node->push();
+                node = node->rChild->minVal == target ? node->rChild : node->lChild;
+            }
+            return node->l;
+        }
+
+        push(); // this is actually unnecessary, since `getMin` has already been called
+        ll rIndex = rChild->getMinIndexLast(tl, tr);
+        if (rIndex != -1) return rIndex;
+        return lChild->getMinIndexLast(tl, tr);
+    }
+    // O(log N) Returns the index corresponding to the last minimum value in the range
+    ll getMinIndexLast(ll tl, ll tr) {
+        T target = getMin(tl, tr);
+        return getMinIndexLast(tl, tr, target);
+    }
+    // O(log N) Returns the index corresponding to the last global minimum value
+    ll getMinIndexLast() {
+        return getMinIndexLast(l, r);
+    }
+
+
+    ll getMaxIndexFirst(ll tl, ll tr, T target) {
         if (!touching(tl, tr)) return -1;
         if (coveredBy(tl, tr) && target == maxVal) {
             Segtree* node = this;
@@ -263,18 +292,45 @@ public:
         }
 
         push(); // this is actually unnecessary, since `getMin` has already been called
-        ll lIndex = lChild->getMaxIndex(tl, tr);
+        ll lIndex = lChild->getMaxIndexFirst(tl, tr);
         if (lIndex != -1) return lIndex;
-        return rChild->getMaxIndex(tl, tr);
+        return rChild->getMaxIndexFirst(tl, tr);
     }
     // O(log N) Returns the index corresponding to the first maximum value in the range
-    ll getMaxIndex(ll tl, ll tr) {
+    ll getMaxIndexFirst(ll tl, ll tr) {
         T target = getMax(tl, tr);
-        return getMaxIndex(tl, tr, target);
+        return getMaxIndexFirst(tl, tr, target);
     }
     // O(log N) Returns the index corresponding to the first global maximum value
-    ll getMaxIndex() {
-        return getMaxIndex(l, r);
+    ll getMaxIndexFirst() {
+        return getMaxIndexFirst(l, r);
+    }
+
+
+    ll getMaxIndexLast(ll tl, ll tr, T target) {
+        if (!touching(tl, tr)) return -1;
+        if (coveredBy(tl, tr) && target == maxVal) {
+            Segtree* node = this;
+            while (node->l != node->r) {
+                node->push();
+                node = node->rChild->maxVal == target ? node->rChild : node->lChild;
+            }
+            return node->l;
+        }
+
+        push(); // this is actually unnecessary, since `getMin` has already been called
+        ll rIndex = rChild->getMaxIndexLast(tl, tr);
+        if (rIndex != -1) return rIndex;
+        return lChild->getMaxIndexLast(tl, tr);
+    }
+    // O(log N) Returns the index corresponding to the first maximum value in the range
+    ll getMaxIndexLast(ll tl, ll tr) {
+        T target = getMax(tl, tr);
+        return getMaxIndexLast(tl, tr, target);
+    }
+    // O(log N) Returns the index corresponding to the first global maximum value
+    ll getMaxIndexLast() {
+        return getMaxIndexLast(l, r);
     }
 
     // O(N log N) get the indexes of all elements with a minimum value
@@ -307,15 +363,6 @@ public:
             if (rChild->maxVal == maxVal) rChild->getMaxIndexes(output);
         }
         return output;
-    }
-
-    // O(log N) range query: {min, max, sum} as a tuple
-    tuple<ll, ll, ll> operator[](pair<ll, ll> range) {
-        return {
-            getMin(range.first, range.second),
-            getMax(range.first, range.second),
-            getSum(range.first, range.second)
-        };
     }
 
     // O(log N) get value at index `i`

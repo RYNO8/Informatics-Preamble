@@ -76,10 +76,10 @@ public:
 	 *                    DISPLAY                   *
 	 ************************************************/
 
-	 // O(V + E)
-	 // Displays the graph, showing the outwards edge connections of each edge in lexographic order
-	 // @param `out` The string representation of the graph is piped to this output stream
-	 // @param `newLine` Indicates whether to end with a trailing `\\n`
+	// O(V + E)
+	// Displays the graph, showing the outwards edge connections of each edge in lexographic order
+	// @param `out` The string representation of the graph is piped to this output stream
+	// @param `newLine` Indicates whether to end with a trailing `\\n`
 	void print(ostream& out = cout, bool newLine = true) const {
 		for (int u = 1; u <= V; ++u) {
 			out << u << ":\n";

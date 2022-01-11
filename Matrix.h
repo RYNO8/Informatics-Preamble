@@ -9,12 +9,14 @@ public:
 	using Grid<T>::Grid;
 	//using Grid<T>::rotClockwise;
 
-	// O(max(R, C)) Initialise a NxN identity matrix
+	// O(max(R, C))
+	// Initialise a NxN identity matrix
 	Matrix(int N) : Matrix(N, N, 0) {
 		for (int i = 0; i < N; ++i) this->setVal(i, i, 1);
 	}
 
-	// O(RC) Initialise Matrix from Grid
+	// O(RC)
+	// Initialise Matrix from Grid
 	Matrix(Grid<T> g) : Grid<T>(g) {
 
 	}
@@ -23,7 +25,10 @@ public:
 	 *                    DISPLAY                   *
 	 ************************************************/
 
-	void print(ostream& out = cout, bool newLine = true) {
+	// Displays the matrx
+	// @param `out` The string representation of the graph is piped to this output stream
+	// @param `newLine` Indicates whether to end with a trailing `\\n`
+	void print(ostream& out = cout, bool newLine = true) const {
 		out << "[\n";
 		for (int r = 0; r < this->getR(); ++r) {
 			out << ' ';
@@ -39,14 +44,25 @@ public:
 	 *                   OPERATIONS                 *
 	 ************************************************/
 
-	 // O(RC) Standard matrix transposition - flip along primary diagonal
-	Matrix transpose() {
+	// O(RC)
+	// Standard matrix transposition - flip along primary diagonal
+	Matrix transpose() const {
 		return Matrix(this->flipPrimaryDiag());
 	}
 
-	// O(RC) Standard matrix addition
-	Matrix operator+(Matrix o) {
-		assert(this->getC() == o.getC() && this->getR() == o.getR() && "Invalid matrix shapes for multiplication");
+	// O(N)
+	// @returns Matrix trace - sum of entries along main diagonal
+	T trace() {
+		assert(this->getR() == this->getC() && "Can't calculate trace of non-square matrix");
+		T total = T(0);
+		for (int i = 0; i < this->getR(); ++i) total += this->getVal(i, i);
+		return total;
+	}
+
+	// O(RC)
+	// Standard matrix addition
+	Matrix operator+(Matrix o) const {
+		assert(this->getC() == o.getC() && this->getR() == o.getR() && "Can't add matricies of different shapes");
 
 		Matrix* output = new Matrix<T>(*this);
 		for (int r = 0; r < this->getR(); ++r) {
@@ -56,13 +72,17 @@ public:
 		}
 		return *output;
 	}
+
+	// O(RC)
+	// Addition assignment
 	void operator+=(Matrix o) {
 		*this = *this + o;
 	}
-
-	// O(RC) Stamdard matrix subtraction
-	Matrix operator-(Matrix o) {
-		assert(this->getC() == o.getC() && this->getR() == o.getR() && "Invalid matrix shapes for multiplication");
+	
+	// O(RC)
+	// Stamdard matrix subtraction
+	Matrix operator-(Matrix o) const {
+		assert(this->getC() == o.getC() && this->getR() == o.getR() && "Can't subtract matricies of different shapes");
 
 		Matrix* output = new Matrix<T>(*this);
 		for (int r = 0; r < this->getR(); ++r) {
@@ -72,12 +92,16 @@ public:
 		}
 		return *output;
 	}
+
+	// O(RC)
+	// Subtraction assignment
 	void operator-=(Matrix o) {
 		*this = *this - o;
 	}
 
-	// O(RC) Scalar multiplication
-	Matrix operator*(ll mul) {
+	// O(RC)
+	// Scalar multiplication
+	Matrix operator*(ll mul) const {
 		Matrix* output = new Matrix<T>(*this);
 		for (int r = 0; r < this->getR(); ++r) {
 			for (int c = 0; c < this->getC(); ++c) {
@@ -86,13 +110,17 @@ public:
 		}
 		return *output;
 	}
+
+	// O(RC)
+	// Multiplication assignment
 	void operator*=(ll mul) {
 		*this = *this * mul;
 	}
 
-	// O(N^3) Naive matrix multiplication
-	Matrix operator*(Matrix o) {
-		assert(this->getC() == o.getR() && "Invalid matrix shapes for multiplication");
+	// O(N^3)
+	// Naive matrix multiplication
+	Matrix operator*(Matrix o) const {
+		assert(this->getC() == o.getR() && "Invalid shapes for multiplication");
 
 		Matrix output(this->getR(), o.getC(), 0);
 		for (int r = 0; r < this->getR(); ++r) {
@@ -104,13 +132,18 @@ public:
 		}
 		return output;
 	}
+	
+	// O(N^3)
+	// Multiplication assignment
 	void operator*=(Matrix o) {
 		*this = *this * o;
 	}
 
-	// O(N^3 log P) Fast exponentiation, since p an integer
-	Matrix pow(ll p) {
+	// O(N^3 log P)
+	// Fast exponentiation, since p an integer
+	Matrix pow(ll p) const {
 		assert(this->getR() == this->getC() && "Only square matricies can be raised to a power");
+		assert(p >= 0 && "Inversion of matricies hasn't been implmeneted");
 
 		Matrix output((int)this->getR());
 		for (Matrix* curr = new Matrix(*this); p; p /= 2, *curr = (*curr) * (*curr)) {
@@ -123,7 +156,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, Matrix<T> mat) {
+template<typename T> ostream& operator<<(ostream& out, const Matrix<T> mat) {
 	mat.print(out);
 	return out;
 }

@@ -70,10 +70,10 @@ void testTree() {
 }
 
 void testMatrix() {
-	Matrix<ModInt> fib1 = vector<vector<ModInt>>{
+	Matrix<ModInt> fib1 = Grid<ModInt>(vector<vector<ModInt>>{
 		{ 1, 1 },
 		{ 1, 0 }
-	};
+	});
 	for (int i = 0; i <= 50; ++i) cout << fib1.pow(i).getVal(0, 0) << "\n";
 }
 
@@ -184,12 +184,10 @@ signed main() {
 	//testGraph();
 	//testGrid();
 	//testTree();
-	//testMatrix();
+	testMatrix();
 	//testModInt();
 	//testPolynomial();
 	//testRanges();
 	//testSegtree();
 	//testSqrtDecomp();
-	set<int> a = { 1,3, 2 };
-	cout << &a;
 }

@@ -71,7 +71,7 @@ public:
 
 	// O(RC)
 	//Initialises grid from a 2d vector, assuming 0 indexed
-	Grid(vector<vector<T>> &_grid) {
+	Grid(vector<vector<T>> _grid) {
 		init((int)_grid.size(), (int)_grid[0].size());
 		for (int r = 0; r < R; ++r) {
 			assert(_grid[r].size() == grid[0].size() && "Invalid grid shape");
@@ -99,7 +99,7 @@ public:
 	// Displays the grid
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
-	void print(ostream& out = cout, bool newLine = true) {
+	void print(ostream& out = cout, bool newLine = true) const {
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				out << grid[r][c] << ' ';
@@ -229,19 +229,19 @@ public:
 
 	// O(1)
 	// @returns R - the number of rows
-	inline const size_t getR() const {
+	inline const int getR() const {
 		return R;
 	}
 
 	// O(1)
 	// @returns C - the number of columns
-	inline const size_t getC() const {
+	inline const int getC() const {
 		return C;
 	}
 
 	// O(1)
 	// @returns The size of the grid
-	inline const size_t size() const {
+	inline const int size() const {
 		return R * C;
 	}
 
@@ -256,7 +256,7 @@ public:
 
 	// O(RC)
 	// @returns The first (lexigraphically smallest) coordinate which satisfies `isValid`, otherwise returns {-1, -1}
-	pair<int, int> findVal(function<bool(int, int)> &isValid) {
+	pair<int, int> findVal(function<bool(int, int)> isValid) {
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				if (isValid(r, c)) return { r, c };
@@ -267,13 +267,13 @@ public:
 
 	// O(RC)
 	// @returns Whether there exists a coordinate that satisfies `isValid`
-	inline bool containsVal(function<bool(int, int)> &isValid) const {
+	inline bool containsVal(function<bool(int, int)> isValid) const {
 		return findVal(isValid).first != -1;
 	}
 
 	// O(RC)
 	// @returns A vector of coordinates which satisfies `isValid`
-	vector<pair<int, int>> findAllVal(function<bool(int, int)> &isValid) const {
+	vector<pair<int, int>> findAllVal(function<bool(int, int)> isValid) const {
 		vector<pair<int, int>> output;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
@@ -285,7 +285,7 @@ public:
 
 	// O(RC)
 	// @returns the number of cells that satisfy `isValid`
-	int count(function<bool(int, int)> &isValid) const {
+	int count(function<bool(int, int)> isValid) const {
 		int total = 0;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) total += (bool)isValid(r, c);
@@ -506,7 +506,7 @@ public:
 
 	// O(RC)
 	// @returns All coordinates in a vector, sorted by lexicographic order
-	vector<pair<int, int>> getAllCoords() {
+	vector<pair<int, int>> getAllCoords() const {
 		//return getSomeCoords(compAny);
 		vector<pair<int, int>> output;
 		for (int r = 0; r < R; ++r) {
@@ -520,7 +520,7 @@ public:
 	// O(RC) Finds all coordinates that satisfies `isValid`
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns aAl coordinates in a vector, sorted by lexicographic order
-	vector<pair<int, int>> getSomeCoords(function<bool(int, int)> &isValid) {
+	vector<pair<int, int>> getSomeCoords(function<bool(int, int)> isValid) const {
 		vector<pair<int, int>> output;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
@@ -533,7 +533,7 @@ public:
 	// O(1)
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns coordinates which are adjacent to `(r, c)`
-	vector<pair<int, int>> getAdjCoords(int r, int c, vector<pair<int, int>> &dirs) {
+	vector<pair<int, int>> getAdjCoords(int r, int c, vector<pair<int, int>> &dirs) const {
 		vector<pair<int, int>> output;
 		for (pair<int, int> dir : dirs) {
 			int newR = r + dir.first, newC = c + dir.second;
@@ -541,7 +541,7 @@ public:
 		}
 		return output;
 	}
-	vector<pair<int, int>> getAdjCoords(pair<int, int> coord, vector<pair<int, int>> &dirs) {
+	vector<pair<int, int>> getAdjCoords(pair<int, int> coord, vector<pair<int, int>> &dirs) const {
 		return getAdjCoords(coord.first, coord.second, dirs);
 	}
 
@@ -556,7 +556,7 @@ private:
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @param `depth` Stores the shortest distance to the starting node, and it is also used as the seen array
 	// @param `maxD` Indicates the number of BFS steps taken
-	void bfs(int r, int c, function<bool(int, int)> &isValid, vector<pair<int, int>> dirs, vector<vector<int>> &depth, int maxD = INT_MAX) {
+	void bfs(int r, int c, function<bool(int, int)> isValid, vector<pair<int, int>> dirs, vector<vector<int>> &depth, int maxD = INT_MAX) const {
 		if (!validCoord(r, c)) return;
 		if (!isValid(r, c)) return;
 
@@ -579,7 +579,7 @@ private:
 			}
 		}
 	}
-	void bfs(pair<int, int> coord, function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs, vector<vector<int>>& depth, int maxD = INT_MAX) {
+	void bfs(pair<int, int> coord, function<bool(int, int)> isValid, vector<pair<int, int>> &dirs, vector<vector<int>>& depth, int maxD = INT_MAX) const {
 		return bfs(coord, isValid, dirs, depth);
 	}
 
@@ -588,7 +588,7 @@ public:
 	// Finds coordinates that satisfy `isValid`, and are connected to (startR, startC)
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns a vector of coordinates, where each coordinate is a pair of (r, c)
-	vector<pair<int, int>> getRegion(int startR, int startC, function<bool(int, int)> &isValid, vector<pair<int, int>>& dirs) {
+	vector<pair<int, int>> getRegion(int startR, int startC, function<bool(int, int)> isValid, vector<pair<int, int>>& dirs) const {
 		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
 		bfs(startR, startC, isValid, dirs, depth);
 
@@ -600,7 +600,7 @@ public:
 		}
 		return output;
 	}
-	vector<pair<int, int>> getRegion(pair<int, int> coord, function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs) {
+	vector<pair<int, int>> getRegion(pair<int, int> coord, function<bool(int, int)> isValid, vector<pair<int, int>> &dirs) const {
 		return getRegion(coord.first, coord.second, isValid, dirs);
 	}
 
@@ -608,7 +608,7 @@ public:
 	// Finds regions whcih satisfy `isValid`
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns a vector of regions, where each region is a vector of coordinates
-	vector<vector<pair<int, int>>> getRegions(function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs) {
+	vector<vector<pair<int, int>>> getRegions(function<bool(int, int)> isValid, vector<pair<int, int>> &dirs) const {
 		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
 
 		vector<vector<pair<int, int>>> output;
@@ -625,7 +625,7 @@ public:
 
 	// O(RC)
 	// Determines whether a region of coordinates which satisfy `isValid` are commpletely surrounded coordinates which satisfy `isBoundary`
-	bool isSurroundedBy(int startR, int startC, function<bool(int, int)> &isValid, function<bool(int, int)> &isBoundary, vector<pair<int, int>> &dirs) {
+	bool isSurroundedBy(int startR, int startC, function<bool(int, int)> isValid, function<bool(int, int)> isBoundary, vector<pair<int, int>> &dirs) const {
 		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
 		bfs(startR, startC, isValid, dirs, depth);
 
@@ -640,14 +640,14 @@ public:
 		}
 		return true;
 	}
-	bool isSurroundedBy(pair<int, int> coord, T val, function<bool(int, int)> &isValid, function<bool(int, int)> &isBoundary, vector<pair<int, int>> &dirs) {
+	bool isSurroundedBy(pair<int, int> coord, T val, function<bool(int, int)> isValid, function<bool(int, int)> isBoundary, vector<pair<int, int>> &dirs) const {
 		return isSurroundedBy(coord.first, coord.second, val, isValid, isBoundary, dirs);
 	}
 
 	// O(RC)
 	// Finds the shortest path from (r1, c1) to (r2, c2) inclusive, where each coordinate on the path satisfies `isValid`
 	// @param `dirs` the valid directions to move to adjacent nodes
-	vector<pair<int, int>> shortestPath(int r1, int c1, int r2, int c2, function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs) {
+	vector<pair<int, int>> shortestPath(int r1, int c1, int r2, int c2, function<bool(int, int)> isValid, vector<pair<int, int>> &dirs) const {
 		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
 		bfs(r2, c2, isValid, dirs, depth);
 		assert(depth[r1][c1] != -1 && "No path found");
@@ -667,7 +667,7 @@ public:
 
 		return output;
 	}
-	vector<pair<int, int>> shortestPath(pair<int, int> coord1, pair<int, int> coord2, function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs) {
+	vector<pair<int, int>> shortestPath(pair<int, int> coord1, pair<int, int> coord2, function<bool(int, int)> isValid, vector<pair<int, int>> &dirs) const {
 		return shortestPath(coord1.first, coord1.second, coord2.first, coord2.second, isValid, dirs);
 	}
 };
@@ -675,7 +675,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, Grid<T> grid) {
+template<typename T> ostream& operator<<(ostream& out, const Grid<T> grid) {
 	grid.print(out);
 	return out;
 }

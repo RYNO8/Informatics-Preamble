@@ -28,8 +28,8 @@ private:
 	}
 	
 	// O(N) Find direction of edge each such that the tree can be rooted at 1
-	void makeDirected(Graph<T>& g, int node = 1, int par = -1) {
-		for (pair<int, T> child : g.getOutEdges(node)) {
+	void makeDirected(const Graph<T>& g, int node = 1, int par = -1) {
+		for (pair<int, T> child : g.getEdgesOut(node)) {
 			if (child.first == par) continue;
 			parent[0][child.first] = { node, child.second };
 			children[node].push_back(child);
@@ -37,7 +37,7 @@ private:
 		}
 
 		if (g.isDirectedGraph()) {
-			for (pair<int, T> child : g.getInEdges(node)) {
+			for (pair<int, T> child : g.getEdgesIn(node)) {
 				if (child.first == par) continue;
 				parent[0][child.first] = { node, child.second };
 				children[node].push_back(child);

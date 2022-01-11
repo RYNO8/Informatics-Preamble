@@ -1,10 +1,3 @@
-// @returns The number of characters of the printed representation of `obj` */
-template<typename T> int reprLen(T obj) {
-	stringstream s;
-	s << obj;
-	return s.str().size();
-}
-
 template<typename T> class Grid {
 	/************************************************
 	 *                INITIALISATION                *
@@ -22,7 +15,8 @@ private:
 	// Whether the graph hasn't been modified after the last precomp
 	bool hasPrecomp = false;
 
-	// O(RC) Initialises all variables
+	// O(RC)
+	// Initialises all variables
 	void init(int _R, int _C) {
 		R = _R;
 		C = _C;
@@ -33,12 +27,14 @@ private:
 	}
 
 public:
-	// O(1) initialises an empty grid
+	// O(1)
+	// Initialises an empty grid
 	Grid() {
 
 	}
 
-	// O(RC) Initialises a grid filled with `val`
+	// O(RC)
+	// Initialises a grid filled with `val`
 	Grid(int _R, int _C, T val = T(0)) {
 		init(_R, _C);
 		for (int r = 0; r < R; ++r) {
@@ -48,7 +44,8 @@ public:
 		}
 	}
 
-	// O(RC) Initialises grid from cin, assuming 0 indexed
+	// O(RC)
+	// Initialises grid from cin, assuming 0 indexed
 	Grid(int _R, int _C, istream& in = cin) {
 		init(_R, _C);
 		for (int r = 0; r < R; ++r) {
@@ -59,7 +56,8 @@ public:
 		buildPrefix();
 	}
 
-	// O(RC) Initialises grid from a 2d array, assuming 0 indexed
+	// O(RC)
+	// Initialises grid from a 2d array, assuming 0 indexed
 	template<size_t rows, size_t cols> Grid(T(&_grid)[rows][cols]) {
 		init(sizeof(_grid) / sizeof(_grid[0]), sizeof(_grid[0]) / sizeof(T));
 
@@ -71,8 +69,9 @@ public:
 		buildPrefix();
 	}
 
-	// O(RC) Initialises grid from a 2d vector, assuming 0 indexed
-	Grid(vector<vector<T>> _grid) {
+	// O(RC)
+	//Initialises grid from a 2d vector, assuming 0 indexed
+	Grid(vector<vector<T>> &_grid) {
 		init((int)_grid.size(), (int)_grid[0].size());
 		for (int r = 0; r < R; ++r) {
 			assert(_grid[r].size() == grid[0].size() && "Invalid grid shape");
@@ -96,7 +95,8 @@ public:
 	 *                    DISPLAY                   *
 	 ************************************************/
 
-	// O(RC) Displays the grid
+	// O(RC)
+	// Displays the grid
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
 	void print(ostream& out = cout, bool newLine = true) {
@@ -109,7 +109,8 @@ public:
 		if (newLine) out << '\n';
 	}
 
-	// O(RC) Displays the grid
+	// O(RC)
+	// Displays the grid with pretty borders
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
 	// @param `spacing` Indicates how large each cell is (use spacing = -1 for automatic spacing)
@@ -154,7 +155,8 @@ public:
 	 *             COMPARISON FUNCTIONS             *
 	 ************************************************/
 
-	// O(1) Filter generator, to determine whether cell values are equal to `val`
+	// O(1)
+	// Filter generator, to determine whether cell values are equal to `val`
 	// @returns A function which acts to "filter" cells 
 	function<bool(int, int)> compEQ(T val) {
 		return [&, val](int r, int c) {
@@ -163,7 +165,8 @@ public:
 		};
 	}
 
-	// O(1) Filter generator, to determine whether cell values are not equal to `val`
+	// O(1)
+	// Filter generator, to determine whether cell values are not equal to `val`
 	// @returns A function which acts to "filter" cells 
 	function<bool(int, int)> compNE(T val) {
 		return [&, val](int r, int c) {
@@ -172,7 +175,8 @@ public:
 		};
 	}
 
-	// O(1) Filter generator, to determine whether cell values are greater than `val`
+	// O(1)
+	// Filter generator, to determine whether cell values are greater than `val`
 	// @returns A function which acts to "filter" cells 
 	function<bool(int, int)> compGT(T val) {
 		return [&, val](int r, int c) {
@@ -181,7 +185,8 @@ public:
 		};
 	}
 
-	// O(1) Filter generator, to determine whether cell values are greater or equal to `val`
+	// O(1)
+	// Filter generator, to determine whether cell values are greater or equal to `val`
 	// @returns A function which acts to "filter" cells 
 	function<bool(int, int)> compGE(T val) {
 		return [&, val](int r, int c) {
@@ -189,8 +194,9 @@ public:
 			return false;
 		};
 	}
-
-	// O(1) Filter generator, to determine whether cell values are less than `val`
+	
+	// O(1)
+	// Filter generator, to determine whether cell values are less than `val`
 	// @returns A function which acts to "filter" cells 
 	function<bool(int, int)> compLT(T val) {
 		return [&, val](int r, int c) {
@@ -198,8 +204,9 @@ public:
 			return false;
 		};
 	}
-
-	// O(1) Filter generator, to determine whether cell values are less or equal to `val`
+	
+	// O(1)
+	// Filter generator, to determine whether cell values are less or equal to `val`
 	// @returns A function which acts to "filter" cells 
 	function<bool(int, int)> compLE(T val) {
 		return [&, val](int r, int c) {
@@ -208,7 +215,8 @@ public:
 		};
 	}
 
-	// O(1) Filter generator, which returns a truthy function - to consider any cell
+	// O(1)
+	// Filter generator, which returns a truthy function - to consider any cell
 	function<bool(int, int)> compAny() {
 		return [](int r, int c) {
 			return true;
@@ -219,39 +227,36 @@ public:
 	 *             COORDINATES & VALUES             *
 	 ************************************************/
 
-	// O(1) Gets R - the number of rows
-	int getR() {
+	// O(1)
+	// @returns R - the number of rows
+	inline const size_t getR() const {
 		return R;
 	}
 
-	// O(1) Gets C - the number of columns
-	int getC() {
+	// O(1)
+	// @returns C - the number of columns
+	inline const size_t getC() const {
 		return C;
 	}
 
-	// O(1) Gets the size of the grid
-	size_t size() {
+	// O(1)
+	// @returns The size of the grid
+	inline const size_t size() const {
 		return R * C;
 	}
 
 	// O(1)
-	// @returns whether a coordinate is within the grid
-	bool validCoord(int r, int c) {
+	// @returns Whether a coordinate is within the grid
+	inline bool validCoord(int r, int c) const {
 		return 0 <= r && r < R && 0 <= c && c < C;
 	}
-	bool validCoord(pair<int, int> coord) {
+	inline bool validCoord(pair<int, int> coord) const {
 		return validCoord(coord.first, coord.second);
 	}
 
 	// O(RC)
-	// @returns Whether there exists a coordinate that satisfies `isValid`
-	template<typename Condition> bool containsVal(Condition isValid) {
-		return findVal(isValid).first != -1;
-	}
-
-	// O(RC)
 	// @returns The first (lexigraphically smallest) coordinate which satisfies `isValid`, otherwise returns {-1, -1}
-	template<typename Condition> pair<int, int> findVal(Condition isValid) {
+	pair<int, int> findVal(function<bool(int, int)> &isValid) {
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				if (isValid(r, c)) return { r, c };
@@ -261,8 +266,14 @@ public:
 	}
 
 	// O(RC)
+	// @returns Whether there exists a coordinate that satisfies `isValid`
+	inline bool containsVal(function<bool(int, int)> &isValid) const {
+		return findVal(isValid).first != -1;
+	}
+
+	// O(RC)
 	// @returns A vector of coordinates which satisfies `isValid`
-	template<typename Condition> vector<pair<int, int>> findAllVal(Condition isValid) {
+	vector<pair<int, int>> findAllVal(function<bool(int, int)> &isValid) const {
 		vector<pair<int, int>> output;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
@@ -274,7 +285,7 @@ public:
 
 	// O(RC)
 	// @returns the number of cells that satisfy `isValid`
-	template<typename Condition> int count(Condition isValid) {
+	int count(function<bool(int, int)> &isValid) const {
 		int total = 0;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) total += (bool)isValid(r, c);
@@ -284,7 +295,7 @@ public:
 
 	// O(1)
 	// @returns If the provided coordinate is valid, set its value to `val`, otherwise silently do nothing
-	void setVal(int r, int c, T val) {
+	inline void setVal(int r, int c, T val) {
 		if (validCoord(r, c)) {
 			hasPrecomp = false;
 			grid[r][c] = val;
@@ -345,11 +356,11 @@ public:
 
 	// O(1)
 	// @returns The value at the coordinate (r, c) if it is valid, otherwise return `defaultVal`
-	T getVal(int r, int c, T defaultVal = T()) {
+	T getVal(int r, int c, T defaultVal = T()) const {
 		if (validCoord(r, c)) return grid[r][c];
 		return defaultVal;
 	}
-	T getVal(pair<int, int> coord, T defaultVal = T()) {
+	T getVal(pair<int, int> coord, T defaultVal = T()) const {
 		return getVal(coord.first, coord.second, defaultVal);
 	}
 
@@ -357,7 +368,7 @@ public:
 	// @returns The sum of all cells within a rectangular region (inclusive)
 	// @note This is only garunteed to be correct after initPrefix() is called, and the grid is not modified after that
 	// @note The rectangular region will be capped so it stays within the grid
-	T sumVals(int r1, int c1, int r2, int c2) {
+	T sumVals(int r1, int c1, int r2, int c2) const {
 		if (r1 > r2) swap(r1, r2);
 		if (c1 > c2) swap(c1, c2);
 		r1 = max(0, r1);
@@ -376,7 +387,7 @@ public:
 			return total;
 		}
 	}
-	T sumVals(pair<int, int> coord1, pair<int, int> coord2) {
+	T sumVals(pair<int, int> coord1, pair<int, int> coord2) const {
 		return sumVals(coord1.first, coord1.second, coord2.first, coord2.second);
 	}
 
@@ -385,7 +396,8 @@ public:
 	 ************************************************/
 
 	// O(RC)
-	bool operator==(Grid o) {
+	// @returns Whether 2 grids are identical
+	bool operator==(Grid o) const {
 		if (R != o.getR() || C != o.getC()) return false;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
@@ -399,25 +411,10 @@ public:
 	 *               TRANSFORMATIONS                *
 	 ************************************************/
 
-	// O(RC) Flips the grid over its primary diagonal (top left to bottom right)
-	// @returns grid object of the modified grid
-	Grid<T> flipPrimaryDiag() {
-		Grid<T> output(C, R, 0);
-		for (int r = 0; r < R; ++r) {
-			for (int c = 0; c < C; ++c) output.setVal(c, r, grid[r][c]);
-		}
-		return output;
-	}
-
-	// O(RC) Flips the grid over its secondary diagonal (top right to bottom left)
-	// @returns grid object of the modified grid
-	Grid<T> flipSecondaryDiag() {
-		return rot180().flipPrimaryDiag();
-	}
-
-	// O(RC) Flips the order of rows - first row becomes last row and vice versa
-	// @returns grid object of the modified grid
-	Grid<T> flipRows() {
+	// O(RC)
+	// Flips the order of rows - first row becomes last row and vice versa
+	// @returns Grid object of the modified grid
+	Grid<T> flipRows() const {
 		Grid<T> output(R, C, 0);
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) output.setVal(R - r - 1, c, grid[r][c]);
@@ -425,9 +422,10 @@ public:
 		return output;
 	}
 
-	// O(RC) Flips the order of columns - first column becomes last row and vice versa
+	// O(RC)
+	// Flips the order of columns - first column becomes last row and vice versa
 	// @returns grid object of the modified grid
-	Grid<T> flipCols() {
+	Grid<T> flipCols() const {
 		Grid<T> output(R, C, 0);
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) output.setVal(r, C - c - 1, grid[r][c]);
@@ -437,25 +435,46 @@ public:
 
 	// O(RC) Rotates the grid clockwise/anticlockwise by 180 degrees, about its center
 	// @returns grid object of the modified grid
-	Grid<T> rot180() {
+	Grid<T> rot180() const {
 		return flipRows().flipCols();
 	}
 
-	// O(RC) Rotates the grid clockwise by 90 degrees, about its center
+	// O(RC)
+	// Flips the grid over its primary diagonal (top left to bottom right)
+	// @returns Grid object of the modified grid
+	Grid<T> flipPrimaryDiag() const {
+		Grid<T> output(C, R, 0);
+		for (int r = 0; r < R; ++r) {
+			for (int c = 0; c < C; ++c) output.setVal(c, r, grid[r][c]);
+		}
+		return output;
+	}
+
+	// O(RC)
+	// Flips the grid over its secondary diagonal (top right to bottom left)
+	// @returns Grid object of the modified grid
+	Grid<T> flipSecondaryDiag() const {
+		return rot180().flipPrimaryDiag();
+	}
+
+	// O(RC)
+	// Rotates the grid clockwise by 90 degrees, about its center
 	// @returns grid object of the modified grid
 	Grid<T> rotClockwise() {
 		return flipPrimaryDiag().flipCols();
 	}
 
-	// O(RC) Rotates the grid anticlockwise by 90 degrees, about its center
+	// O(RC)
+	// Rotates the grid anticlockwise by 90 degrees, about its center
 	// @returns grid object of the modified grid
-	Grid<T> rotAnticlockwise() {
+	Grid<T> rotAnticlockwise() const {
 		return flipPrimaryDiag().flipRows();
 	}
 
-	// O(RC) Replaces every instance of `prevVal` with `newVal`
-	// @returns grid object of the modified grid`
-	Grid<T> replace(T prevVal, T newVal) {
+	// O(RC)
+	// Replaces every instance of `prevVal` with `newVal`
+	// @returns Grid object of the modified grid`
+	Grid<T> replace(T prevVal, T newVal) const {
 		Grid<T> *output = new Grid<T>(*this); // make a copy
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
@@ -470,16 +489,16 @@ public:
 	 ************************************************/
 
 	// O(C)
-	// @returns All coordinates in a particular row, sorted in increasing order
-	vector<pair<int, int>> getRowCoords(int r) {
+	// @returns All coordinates in a particular row, sorted by increasing order
+	vector<pair<int, int>> getRowCoords(int r) const {
 		vector<pair<int, int>> output;
 		for (int c = 0; c < C; ++c) output.push_back({ r, c });
 		return output;
 	}
 
 	// O(R)
-	// @returns All coordinates in a particular column, sorted in increasing order
-	vector<pair<int, int>> getColCoords(int c) {
+	// @returns All coordinates in a particular column, sorted by increasing order
+	vector<pair<int, int>> getColCoords(int c) const {
 		vector<pair<int, int>> output;
 		for (int r = 0; r < R; ++r) output.push_back({ r, c });
 		return output;
@@ -501,7 +520,7 @@ public:
 	// O(RC) Finds all coordinates that satisfies `isValid`
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns aAl coordinates in a vector, sorted by lexicographic order
-	vector<pair<int, int>> getSomeCoords(function<bool(int, int)> isValid) {
+	vector<pair<int, int>> getSomeCoords(function<bool(int, int)> &isValid) {
 		vector<pair<int, int>> output;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
@@ -514,15 +533,15 @@ public:
 	// O(1)
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns coordinates which are adjacent to `(r, c)`
-	vector<pair<int, int>> getAdjCoords(int r, int c, vector<pair<int, int>> dirs) {
+	vector<pair<int, int>> getAdjCoords(int r, int c, vector<pair<int, int>> &dirs) {
 		vector<pair<int, int>> output;
 		for (pair<int, int> dir : dirs) {
 			int newR = r + dir.first, newC = c + dir.second;
-			if (validCoord(newR, newC)) output.push_back({ newR, newC });
+			if (validCoord(r, c) && validCoord(newR, newC)) output.push_back({ newR, newC });
 		}
 		return output;
 	}
-	vector<pair<int, int>> getAdjCoords(pair<int, int> coord, vector<pair<int, int>> dirs) {
+	vector<pair<int, int>> getAdjCoords(pair<int, int> coord, vector<pair<int, int>> &dirs) {
 		return getAdjCoords(coord.first, coord.second, dirs);
 	}
 
@@ -531,13 +550,13 @@ public:
 	 ************************************************/
 
 private:
-	// O(size of region) <= O(RC)
-	// Standard Breath first search algorithm, starting from (r, c)
+	// O(RC)
+	// Standard Breadth First Search, starting from (r, c)
 	// @param `isValid` Specifies which coordinates to explore that satisfy in the directions of `dirs`, taking a maximum of `maxD` steps
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @param `depth` Stores the shortest distance to the starting node, and it is also used as the seen array
 	// @param `maxD` Indicates the number of BFS steps taken
-	void bfs(int r, int c, function<bool(int, int)> isValid, vector<pair<int, int>> dirs, vector<vector<int>> &depth, int maxD = MAXN) {
+	void bfs(int r, int c, function<bool(int, int)> &isValid, vector<pair<int, int>> dirs, vector<vector<int>> &depth, int maxD = INT_MAX) {
 		if (!validCoord(r, c)) return;
 		if (!isValid(r, c)) return;
 
@@ -560,15 +579,16 @@ private:
 			}
 		}
 	}
-	void bfs(pair<int, int> coord, function<bool(int, int)> isValid, vector<pair<int, int>> dirs, vector<vector<int>>& depth, int maxD = MAXN) {
+	void bfs(pair<int, int> coord, function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs, vector<vector<int>>& depth, int maxD = INT_MAX) {
 		return bfs(coord, isValid, dirs, depth);
 	}
 
 public:
-	// O(RC) Finds coordinates that satisfy `isValid`, and are connected to (startR, startC)
+	// O(RC)
+	// Finds coordinates that satisfy `isValid`, and are connected to (startR, startC)
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns a vector of coordinates, where each coordinate is a pair of (r, c)
-	vector<pair<int, int>> getRegion(int startR, int startC, function<bool(int, int)> isValid, vector<pair<int, int>> dirs) {
+	vector<pair<int, int>> getRegion(int startR, int startC, function<bool(int, int)> &isValid, vector<pair<int, int>>& dirs) {
 		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
 		bfs(startR, startC, isValid, dirs, depth);
 
@@ -580,14 +600,15 @@ public:
 		}
 		return output;
 	}
-	vector<pair<int, int>> getRegion(pair<int, int> coord, function<bool(int, int)> isValid, vector<pair<int, int>> dirs) {
+	vector<pair<int, int>> getRegion(pair<int, int> coord, function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs) {
 		return getRegion(coord.first, coord.second, isValid, dirs);
 	}
 
-	// O(RC) Finds regions whcih satisfy `isValid`
+	// O(RC)
+	// Finds regions whcih satisfy `isValid`
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns a vector of regions, where each region is a vector of coordinates
-	vector<vector<pair<int, int>>> getRegions(function<bool(int, int)> isValid, vector<pair<int, int>> dirs) {
+	vector<vector<pair<int, int>>> getRegions(function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs) {
 		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
 
 		vector<vector<pair<int, int>>> output;
@@ -602,8 +623,9 @@ public:
 		return output;
 	}
 
-	// O(RC) Determines whether a region of coordinates which satisfy `isValid` are commpletely surrounded coordinates which satisfy `isBoundary`
-	bool isSurroundedBy(int startR, int startC, function<bool(int, int)> isValid, function<bool(int, int)> isBoundary, vector<pair<int, int>> dirs) {
+	// O(RC)
+	// Determines whether a region of coordinates which satisfy `isValid` are commpletely surrounded coordinates which satisfy `isBoundary`
+	bool isSurroundedBy(int startR, int startC, function<bool(int, int)> &isValid, function<bool(int, int)> &isBoundary, vector<pair<int, int>> &dirs) {
 		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
 		bfs(startR, startC, isValid, dirs, depth);
 
@@ -618,13 +640,14 @@ public:
 		}
 		return true;
 	}
-	bool isSurroundedBy(pair<int, int> coord, T val, function<bool(int, int)> isValid, function<bool(int, int)> isBoundary, vector<pair<int, int>> dirs) {
+	bool isSurroundedBy(pair<int, int> coord, T val, function<bool(int, int)> &isValid, function<bool(int, int)> &isBoundary, vector<pair<int, int>> &dirs) {
 		return isSurroundedBy(coord.first, coord.second, val, isValid, isBoundary, dirs);
 	}
 
+	// O(RC)
 	// Finds the shortest path from (r1, c1) to (r2, c2) inclusive, where each coordinate on the path satisfies `isValid`
 	// @param `dirs` the valid directions to move to adjacent nodes
-	vector<pair<int, int>> shortestPath(int r1, int c1, int r2, int c2, function<bool(int, int)> isValid, vector<pair<int, int>> dirs) {
+	vector<pair<int, int>> shortestPath(int r1, int c1, int r2, int c2, function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs) {
 		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
 		bfs(r2, c2, isValid, dirs, depth);
 		assert(depth[r1][c1] != -1 && "No path found");
@@ -644,7 +667,7 @@ public:
 
 		return output;
 	}
-	vector<pair<int, int>> shortestPath(pair<int, int> coord1, pair<int, int> coord2, function<bool(int, int)> isValid, vector<pair<int, int>> dirs) {
+	vector<pair<int, int>> shortestPath(pair<int, int> coord1, pair<int, int> coord2, function<bool(int, int)> &isValid, vector<pair<int, int>> &dirs) {
 		return shortestPath(coord1.first, coord1.second, coord2.first, coord2.second, isValid, dirs);
 	}
 };

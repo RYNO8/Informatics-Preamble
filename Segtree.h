@@ -390,3 +390,5 @@ template<typename T> ostream& operator<<(ostream& out, Segtree<T> tree) {
     tree.print(out);
     return out;
 }
+
+

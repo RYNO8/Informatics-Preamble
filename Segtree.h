@@ -70,7 +70,8 @@ public:
     Segtree(ll _l, ll _r, T initVal = 0) : l(_l), r(_r) {
         assert(0 <= l && l <= r);
         m = (l + r) / 2;
-        minVal = maxVal = sumVal = initVal;
+        minVal = maxVal = sumVal = lazyVal = initVal;
+        lazyMode = 2;
     }
 
     // O(1) Initialises segtree from existing segtree

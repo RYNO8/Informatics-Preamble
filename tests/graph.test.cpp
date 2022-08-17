@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 using namespace std;
+using namespace DS;
 
 void testGraph() {
 	ifstream cin{ "graphin.txt" };

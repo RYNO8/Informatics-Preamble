@@ -41,6 +41,8 @@ namespace DS {
 	/************************************************
 	 *                   CONSTANTS                  *
 	 ************************************************/
+	typedef unsigned int uint;
+	
 	typedef long double ld;
 	constexpr ld PI =    3.1415926535897932384626433832795;
 	constexpr ld E =     2.7182818284590452353602874713527;
@@ -67,6 +69,7 @@ namespace DS {
 	std::random_device rd;
 	std::mt19937_64 rng(rd());
 	std::uniform_int_distribution<int> int_dis(0, std::numeric_limits<int>::max());
+	std::uniform_int_distribution<uint> uint_dis(0, std::numeric_limits<uint>::max());
 	std::uniform_int_distribution<ll> ll_dis(0, std::numeric_limits<ll>::max());
 	std::uniform_int_distribution<ull> ull_dis(0, std::numeric_limits<ull>::max());
 	std::uniform_real_distribution<ld> prob_dist(0, 1);

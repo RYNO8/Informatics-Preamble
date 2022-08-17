@@ -1,6 +1,6 @@
-﻿#include "../src/Constants.h"
-#include "../src/Segtree.h"
+﻿#include "../src/Segtree.h"
 using namespace std;
+using namespace DS;
 
 void testSegtree() {
 	ll N;
@@ -50,7 +50,7 @@ void testSegtree() {
 		cout << string(int(iMax) * 2, ' ') << "^ max\n";
 	}
 }
+
 signed main() {
-	cin.tie(0); ios::sync_with_stdio(0);
 	testSegtree();
 }

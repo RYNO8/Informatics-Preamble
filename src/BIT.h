@@ -40,9 +40,9 @@ template<class T, int N, int... Ns> struct BIT<T, N, Ns...> {
         return 1 + bit[0].dimensions();
     }
 
-    vector<size_t> shape() const {
-        vector<size_t> output = { N };
-        vector<size_t> inner = bit[0].shape();
+    std::vector<size_t> shape() const {
+        std::vector<size_t> output = { N };
+        std::vector<size_t> inner = bit[0].shape();
         output.insert(output.end(), inner.begin(), inner.end());
         return output;
     }
@@ -69,19 +69,19 @@ template<class T, int N, int... Ns> struct BIT<T, N, Ns...> {
     }
 };
 
-template<class T> ostream& operator<<(ostream& out, const BIT<T> b) {
+template<class T> std::ostream& operator<<(std::ostream& out, const BIT<T> b) {
     out << "[ " << b.val << " ]\n";
     return out;
 }
 
-template<class T, int N> ostream& operator<<(ostream& out, const BIT<T, N> b) {
+template<class T, int N> std::ostream& operator<<(std::ostream& out, const BIT<T, N> b) {
     out << "[ ";
     for (int i = 0; i < N; ++i) out << b.getVal(i) << ' ';
     out << " ]\n";
     return out;
 }
 
-template<class T, int N, int M> ostream& operator<<(ostream& out, const BIT<T, N, M> b) {
+template<class T, int N, int M> std::ostream& operator<<(std::ostream& out, const BIT<T, N, M> b) {
     out << "[ \n";
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < M; ++j) out << ' ' << b.getVal(i, j);

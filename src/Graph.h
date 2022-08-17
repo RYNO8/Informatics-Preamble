@@ -1,4 +1,15 @@
 #pragma once
+#include <vector>
+#include <unordered_set>
+#include <set>
+#include <iostream>
+#include <cassert>
+#include <stack>
+#include <queue>
+#include <map>
+#include <limits>
+#include <algorithm>
+#include <numeric>
 
 template<typename T> class Graph {
 	/************************************************
@@ -14,11 +25,11 @@ private:
 	// Whether edges are directed or bidirectional
 	bool isDirected;
 	// `inEdges[node]` is the multiset of edges leading into `node`
-	vector<multiset<pair<int, T>>> inEdges;
+	std::vector<std::multiset<std::pair<int, T>>> inEdges;
 	// `outEdges[node]` is the multiset of edges leading out of `node`
-	vector<multiset<pair<int, T>>> outEdges;
+	std::vector<std::multiset<std::pair<int, T>>> outEdges;
 	// A multiset of all edges
-	multiset<pair<pair<int, int>, T>> edges;
+	std::multiset<std::pair<std::pair<int, int>, T>> edges;
 
 	// O(V) Initialises all non-temporary variables.
 	void init(int _V, bool _isWeighted = false, bool _isDirected = false) {
@@ -42,7 +53,7 @@ public:
 
 	// O(V)
 	// Initalises a graph from cin, assuming 1 indexed
-	Graph(int _V, int M, istream& in = cin, bool _isWeighted = false, bool _isDirected = false) {
+	Graph(int _V, int M, std::istream& in = std::cin, bool _isWeighted = false, bool _isDirected = false) {
 		init(_V, _isWeighted, _isDirected);
 
 		for (int u, v, i = 0; i < M; ++i) {
@@ -59,18 +70,18 @@ public:
 
 	// O(V + E log E)
 	// Initalises an unweighted graph from vector of edges, assuming 1 indexed
-	Graph(int _V, vector<pair<int, int>>& _edges, bool _isDirected = false) {
+	Graph(int _V, std::vector<std::pair<int, int>>& _edges, bool _isDirected = false) {
 		init(_V, false, _isDirected);
 
-		for (pair<int, int> edge : _edges) addEdge(edge.first, edge.second);
+		for (std::pair<int, int> edge : _edges) addEdge(edge.first, edge.second);
 	}
 
 	// O(V + E log E)
 	// Initalises a weighted graph from vector of edges, assuming 1 indexed
-	Graph(int _V, vector<pair<pair<int, int>, T>>& _edges, bool _isDirected = false) {
+	Graph(int _V, std::vector<std::pair<std::pair<int, int>, T>>& _edges, bool _isDirected = false) {
 		init(_V, true, _isDirected);
 
-		for (pair<pair<int, int>, T> edge : _edges) addEdge(edge.first.first, edge.first.second, edge.second);
+		for (std::pair<std::pair<int, int>, T> edge : _edges) addEdge(edge.first.first, edge.first.second, edge.second);
 	}
 
 
@@ -82,10 +93,10 @@ public:
 	// Displays the graph, showing the outwards edge connections of each edge in lexographic order
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
-	void print(ostream& out = cout, bool newLine = true) const {
+	void print(std::ostream& out = std::cout, bool newLine = true) const {
 		for (int u = 1; u <= V; ++u) {
 			out << u << ":\n";
-			for (pair<int, T> edge : outEdges[u]) {
+			for (std::pair<int, T> edge : outEdges[u]) {
 				// on an undirected graph, don't print edges twice
 				if (!isDirected && u > edge.first) continue;
 
@@ -119,7 +130,7 @@ public:
 			inEdges[v].insert({ u, w });
 			edges.insert({ {u, v}, w });
 
-			swap(u, v);
+			std::swap(u, v);
 		}
 	}
 
@@ -139,8 +150,8 @@ public:
 	inline int numEdges(int u, int v) const {
 		assert(validNode(u) && validNode(v) && "Node index out of range");
 
-		auto lowest = edges.lower_bound({ { u, v }, numeric_limits<T>::min() });
-		auto highest = edges.upper_bound({ { u, v }, numeric_limits<T>::max() });
+		auto lowest = edges.lower_bound({ { u, v }, std::numeric_limits<T>::min() });
+		auto highest = edges.upper_bound({ { u, v }, std::numeric_limits<T>::max() });
 		return distance(lowest, highest);
 	}
 
@@ -149,7 +160,7 @@ public:
 	inline bool containsEdge(int u, int v) const {
 		assert(validNode(u) && validNode(v) && "Node index out of range");
 
-		auto iter = edges.lower_bound({ { u, v }, numeric_limits<T>::min() });
+		auto iter = edges.lower_bound({ { u, v }, std::numeric_limits<T>::min() });
 		return iter != edges.end() && iter->first.first == u && iter->first.second == v;
 	}
 
@@ -170,19 +181,19 @@ public:
 		if (!containsEdge(u, v)) return;
 		for (int rep = 0; rep <= int(!isDirected && u != v); ++rep) {
 			outEdges[u].erase(
-				outEdges[u].lower_bound({ v, numeric_limits<T>::min() }),
-				outEdges[u].upper_bound({ v, numeric_limits<T>::max() })
+				outEdges[u].lower_bound({ v, std::numeric_limits<T>::min() }),
+				outEdges[u].upper_bound({ v, std::numeric_limits<T>::max() })
 			);
 			inEdges[v].erase(
-				inEdges[v].lower_bound({ u, numeric_limits<T>::min() }),
-				inEdges[v].upper_bound({ u, numeric_limits<T>::max() })
+				inEdges[v].lower_bound({ u, std::numeric_limits<T>::min() }),
+				inEdges[v].upper_bound({ u, std::numeric_limits<T>::max() })
 			);
 			edges.erase(
-				edges.lower_bound({ { u, v }, numeric_limits<T>::min() }),
-				edges.upper_bound({ { u, v }, numeric_limits<T>::max() })
+				edges.lower_bound({ { u, v }, std::numeric_limits<T>::min() }),
+				edges.upper_bound({ { u, v }, std::numeric_limits<T>::max() })
 			);
 
-			swap(u, v);
+			std::swap(u, v);
 		}
 	}
 
@@ -198,14 +209,14 @@ public:
 			outEdges[u].erase({ v, w });
 			inEdges[v].erase({ u, w });
 			edges.erase({ { u, v }, w });
-			swap(u, v);
+			std::swap(u, v);
 		}
 	}
 
 	// O(E)
 	// Finds the edges that travel into `node`
 	// @returns A multiset of (neighbour, weight) pairs
-	inline const multiset<pair<int, T>> getEdgesIn(int node) const {
+	inline const std::multiset<std::pair<int, T>> getEdgesIn(int node) const {
 		assert(validNode(node) && "Node index out of range");
 		return inEdges[node];
 	}
@@ -213,7 +224,7 @@ public:
 	// O(E)
 	// Finds the edges that travel out of `node`
 	// @returns A multiset of (neighbour, weight) pairs
-	inline const multiset<pair<int, T>> getEdgesOut(int node) const {
+	inline const std::multiset<std::pair<int, T>> getEdgesOut(int node) const {
 		assert(validNode(node) && "Node index out of range");
 		return outEdges[node];
 	}
@@ -221,9 +232,9 @@ public:
 	// O(E log E)
 	// Finds the edges that travel into OR out of `node`
 	// @returns A multiset of (neighbour, weight) pairs
-	inline const multiset<pair<int, T>> getEdges(int node) const {
+	inline const std::multiset<std::pair<int, T>> getEdges(int node) const {
 		assert(validNode(node) && "Node index out of range");
-		multiset<pair<int, T>> output = inEdges[node];
+		std::multiset<std::pair<int, T>> output = inEdges[node];
 		if (isDirected) {
 			output.insert(outEdges[node].begin(), outEdges[node].end());
 		}
@@ -232,7 +243,7 @@ public:
 
 	// O(E)
 	// @returns The multiset of all edges
-	inline const multiset<pair<pair<int, int>, T>> getEdges() const {
+	inline const std::multiset<std::pair<std::pair<int, int>, T>> getEdges() const {
 		return edges;
 	}
 
@@ -269,21 +280,21 @@ public:
 
 	// O(V)
 	// @returns All nodes, in ascending order
-	inline const vector<int> getNodes() const {
-		vector<int> output(V);
-		iota(output.begin(), output.end(), 1);
+	inline const std::vector<int> getNodes() const {
+		std::vector<int> output(V);
+		std::iota(output.begin(), output.end(), 1);
 		return output;
 	}
 
 	// O(V_component log V_component + E_component)
 	// @returns All nodes in the same component as `root`, in ascending order
-	vector<int> getComponentNodes(int root = -1) const {
+	std::vector<int> getComponentNodes(int root = -1) const {
 		if (root == -1) return getNodes();
 
 		assert(validNode(root) && "Node index out of range");
-		set<int> seen; // TODO: maybe use unordered set to remove the log factor?
+		std::unordered_set<int> seen;
 		seen.insert(root);
-		queue<int> q;
+		std::queue<int> q;
 		q.push(root);
 
 		while (!q.empty()) {
@@ -291,7 +302,7 @@ public:
 			q.pop();
 
 			for (int type = 0; type <= 1; ++type) {
-				for (pair<int, T> edge : (type ? inEdges : outEdges)[u]) {
+				for (std::pair<int, T> edge : (type ? inEdges : outEdges)[u]) {
 					int v = edge.first;
 					if (seen.find(v) == seen.end()) {
 						seen.insert(v);
@@ -301,15 +312,15 @@ public:
 			}
 		}
 
-		return vector<int>(seen.begin(), seen.end());
+		return std::vector<int>(seen.begin(), seen.end());
 	}
 
 	// O(V + E)
 	// @returns All nodes grouped by their component
-	vector<vector<int>> getComponentsNodes() const {
-		vector<vector<int>> output;
-		vector<bool> seen = vector<bool>(V + 1, false);
-		queue<int> q;
+	std::vector<std::vector<int>> getComponentsNodes() const {
+		std::vector<std::vector<int>> output;
+		std::vector<bool> seen = std::vector<bool>(V + 1, false);
+		std::queue<int> q;
 
 		for (int node = 1; node <= V; ++node) {
 			if (!seen[node]) {
@@ -321,7 +332,7 @@ public:
 					int u = q.front();
 					q.pop();
 
-					for (pair<int, T> edge : inEdges[u]) {
+					for (std::pair<int, T> edge : inEdges[u]) {
 						int v = edge.first;
 						if (!seen[v]) {
 							seen[v] = true;
@@ -343,7 +354,7 @@ public:
 		Graph<T> output(V, isWeighted, isDirected);
 
 		for (int u : getComponentNodes(root)) {
-			for (pair<int, T> edge : outEdges[u]) {
+			for (std::pair<int, T> edge : outEdges[u]) {
 				if (!isDirected && edge.first > u) break;
 				output.addEdge(u, edge.first, edge.second);
 			}
@@ -363,7 +374,7 @@ public:
 		assert(V == o.V && isDirected == o.isDirected && isWeighted == o.isWeighted && "Can't find union of graphs with different properties");
 
 		Graph<T>* output = new Graph(*this); // make a copy
-		for (pair<pair<int, int>, T> edge : o.edges) output->edges.insert({ {edge.first.second, edge.first.first}, edge.second });
+		for (std::pair<std::pair<int, int>, T> edge : o.edges) output->edges.insert({ {edge.first.second, edge.first.first}, edge.second });
 		for (int node = 1; node <= V; ++node) {
 			output->inEdges[node].insert(output->inEdges[node].end(), o.inEdges[node].begin(), o.inEdges[node].end());
 			output->outEdges[node].insert(output->outEdges[node].end(), o.outEdges[node].begin(), o.outEdges[node].end());
@@ -374,7 +385,7 @@ public:
 	// O(V + E log E)
 	Graph<T> operator~() const {
 		Graph<T> output(V, isWeighted, isDirected);
-		for (pair<pair<int, int>, T> edge : edges) output.edges.insert({ {edge.first.second, edge.first.first}, edge.second });
+		for (std::pair<std::pair<int, int>, T> edge : edges) output.edges.insert({ {edge.first.second, edge.first.first}, edge.second });
 		output.inEdges = outEdges;
 		output.outEdges = inEdges;
 		return output;
@@ -394,10 +405,10 @@ private:
 	// @param `backwards` Indicates whether to consider `inEdges` or `outEdges`
 	// @note If the graph is undirected, this becomes equivalent to a bfs (but slightly slower)
 	// @note If negative edge weights encountered, switches to `BellmanFord()`
-	void Dijkstra(int node, vector<int>& prevNode, vector<T>& dist, bool backwards = false) const {
+	void Dijkstra(int node, std::vector<int>& prevNode, std::vector<T>& dist, bool backwards = false) const {
 		dist[node] = T(0);
 		prevNode[node] = node;
-		priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> pq;
+		std::priority_queue<std::pair<T, int>, std::vector<std::pair<T, int>>, std::greater<std::pair<T, int>>> pq;
 		pq.push({ 0, node });
 
 		while (!pq.empty()) {
@@ -406,11 +417,11 @@ private:
 			pq.pop();
 			if (cost > dist[currNode]) continue;
 
-			for (pair<int, T> child : (backwards ? inEdges : outEdges)[currNode]) {
+			for (std::pair<int, T> child : (backwards ? inEdges : outEdges)[currNode]) {
 				if (child.second < 0) {
 					// negative edge weight, try `BellmanFord()` isntead
 					fill(prevNode.begin(), prevNode.end(), 0);
-					fill(dist.begin(), dist.end(), numeric_limits<T>::max());
+					fill(dist.begin(), dist.end(), std::numeric_limits<T>::max());
 					BellmanFord(node, prevNode, dist, backwards);
 					return;
 				}
@@ -428,13 +439,13 @@ private:
 
 	// O(VE) Standard Bellman-Ford algorithm - shortest path from `node` to all other nodes
 	// @param `backwards` Indicates whether to consider `inEdges` or `outEdges`
-	void BellmanFord(int node, vector<int>& prevNode, vector<int>& dist, bool backwards = false) const {
+	void BellmanFord(int node, std::vector<int>& prevNode, std::vector<int>& dist, bool backwards = false) const {
 		for (int rep = 0; rep < V; ++rep) {
-			for (pair<pair<int, int>, T> edge : edges) {
+			for (std::pair<std::pair<int, int>, T> edge : edges) {
 				int u = edge.first.first, v = edge.first.second;
-				if (backwards) swap(u, v);
+				if (backwards) std::swap(u, v);
 
-				if (dist[u] == numeric_limits<T>::max()) continue;
+				if (dist[u] == std::numeric_limits<T>::max()) continue;
 				T newCost = dist[u] + edge.second;
 				if (newCost < dist[v]) {
 					// last rep, but the minimum distance can still be reduced
@@ -453,8 +464,8 @@ public:
 	// @note Component containing `u` and `v` cannot have negative weight cycles
 	T shortestDist(int u, int v) const {
 		assert(validNode(u) && validNode(v) && "Node index out of range");
-		vector<int> prevNode = vector<int>(V + 1, 0);
-		vector<T> dist = vector<T>(V + 1, numeric_limits<T>::max());
+		std::vector<int> prevNode = std::vector<int>(V + 1, 0);
+		std::vector<T> dist = std::vector<T>(V + 1, std::numeric_limits<T>::max());
 		Dijkstra(u, prevNode, dist);
 
 		return dist[v];
@@ -463,14 +474,14 @@ public:
 	// O(V + E log V), but O(VE) if negative edge weights
 	// @returns Distance of the shortest path from `u` to `v`, and a vector of nodes representing the path
 	// @note Component containing `u` and `v` cannot have negative weight cycles
-	pair<T, vector<int>> shortestPath(int u, int v) const {
+	std::pair<T, std::vector<int>> shortestPath(int u, int v) const {
 		assert(validNode(u) && validNode(v) && "Node index out of range");
-		vector<int> prevNode = vector<int>(V + 1, 0);
-		vector<T> dist = vector<T>(V + 1, numeric_limits<T>::max());
+		std::vector<int> prevNode = std::vector<int>(V + 1, 0);
+		std::vector<T> dist = std::vector<T>(V + 1, std::numeric_limits<T>::max());
 		Dijkstra(u, prevNode, dist);
 
-		vector<int> path;
-		if (dist[v] != numeric_limits<T>::max()) {
+		std::vector<int> path;
+		if (dist[v] != std::numeric_limits<T>::max()) {
 			for (int node = v; node != u; node = prevNode[node]) path.push_back(node);
 			path.push_back(u);
 		}
@@ -484,12 +495,12 @@ public:
 	T eccentricity(int root) const {
 		assert(validNode(root) && "Node index out of range");
 		// uh should i return the furthest node too?
-		vector<int> prevNode = vector<int>(V + 1, 0);
-		vector<int> dist = vector<int>(V + 1, numeric_limits<T>::max());
+		std::vector<int> prevNode = std::vector<int>(V + 1, 0);
+		std::vector<int> dist = std::vector<int>(V + 1, std::numeric_limits<T>::max());
 		Dijkstra(root, prevNode, dist);
 		T furthest = 0;
 		for (int node = 1; node <= V; ++node) {
-			if (dist[node] != numeric_limits<T>::max()) furthest = max(furthest, dist[node]);
+			if (dist[node] != std::numeric_limits<T>::max()) furthest = std::max(furthest, dist[node]);
 		}
 		return furthest;
 	}
@@ -498,44 +509,44 @@ public:
 	// @param `root` If specified, consider its connected component. Otherwise consider the whole graph
 	// @returns Distance of the path, and a vector of nodes representing the path
 	// @note Component containing `root` cannot have negative weight cycles
-	vector<int> diameter(int root = -1) {
+	std::vector<int> diameter(int root = -1) {
 		if (root == -1) {
-			vector<int> output;
-			for (vector<int>& component : getComponentsNodes()) {
-				vector<int> curr = diameter(component[0]);
+			std::vector<int> output;
+			for (std::vector<int>& component : getComponentsNodes()) {
+				std::vector<int> curr = diameter(component[0]);
 				if (curr.size() > output.size()) output = curr;
 			}
 			return output;
 		}
 
 		assert(validNode(root) && "Node index out of range");
-		vector<int> prevNode = vector<int>(V + 1, 0);
-		vector<int> dist = vector<int>(V + 1, numeric_limits<T>::max());
+		std::vector<int> prevNode = std::vector<int>(V + 1, 0);
+		std::vector<int> dist = std::vector<int>(V + 1, std::numeric_limits<T>::max());
 		Dijkstra(root, prevNode, dist, true);
 
-		T furthestDist1 = numeric_limits<T>::min();
+		T furthestDist1 = std::numeric_limits<T>::min();
 		int furthestNode1 = root;
 		for (int node = 1; node <= V; ++node) {
-			if (dist[node] != numeric_limits<T>::max() && dist[node] > furthestDist1) {
+			if (dist[node] != std::numeric_limits<T>::max() && dist[node] > furthestDist1) {
 				furthestDist1 = dist[node];
 				furthestNode1 = node;
 			}
 		}
 
-		prevNode = vector<int>(V + 1, 0);
-		dist = vector<int>(V + 1, numeric_limits<T>::max());
+		prevNode = std::vector<int>(V + 1, 0);
+		dist = std::vector<int>(V + 1, std::numeric_limits<T>::max());
 		Dijkstra(furthestNode1, prevNode, dist, false);
 
-		T furthestDist2 = numeric_limits<T>::min();
+		T furthestDist2 = std::numeric_limits<T>::min();
 		int furthestNode2 = root;
 		for (int node = 1; node <= V; ++node) {
-			if (dist[node] != numeric_limits<T>::max() && dist[node] > furthestDist2) {
+			if (dist[node] != std::numeric_limits<T>::max() && dist[node] > furthestDist2) {
 				furthestDist2 = dist[node];
 				furthestNode2 = node;
 			}
 		}
 
-		vector<int> path;
+		std::vector<int> path;
 		for (int node = furthestNode2; node != prevNode[node]; node = prevNode[node]) {
 			path.push_back(node);
 		}
@@ -545,18 +556,18 @@ public:
 
 private:
 	// O(V^3 + E) Standard Floyd-Warshall algorithm - shortest path between every 2 pairs of nodes
-	void FloydWarshall(vector<vector<T>>& dists) const {
+	void FloydWarshall(std::vector<std::vector<T>>& dists) const {
 		for (int node = 1; node <= V; ++node) dists[node][node] = 0;
-		for (pair<pair<int, int>, T>& edge : edges) {
+		for (std::pair<std::pair<int, int>, T>& edge : edges) {
 			int u = edge.first.first, v = edge.first.second;
-			dists[u][v] = min(dists[u][v], edge.second);
+			dists[u][v] = std::min(dists[u][v], edge.second);
 		}
 
 		for (int mid = 1; mid <= V; ++mid) {
 			for (int u = 1; u <= V; ++u) {
 				for (int v = 1; v <= V; ++v) {
-					if (max(dists[u][mid], dists[mid][v]) != numeric_limits<T>::max()) {
-						dists[u][v] = min(dists[u][v], dists[u][mid] + dists[mid][v]);
+					if (std::max(dists[u][mid], dists[mid][v]) != std::numeric_limits<T>::max()) {
+						dists[u][v] = std::min(dists[u][v], dists[u][mid] + dists[mid][v]);
 					}
 				}
 			}
@@ -566,8 +577,8 @@ private:
 public:
 	// O(V^3 + E) Finds the minimum distance between every pair of nodes
 	// @returns A vector of vectors, with `dist[u][v]` being the minimim distance on the path from `u` to `v`
-	vector<vector<T>> allShortestDist() const {
-		vector<vector<int>> dists = vector<vector<int>>(V + 1, vector<int>(V + 1, numeric_limits<T>::max()));
+	std::vector<std::vector<T>> allShortestDist() const {
+		std::vector<std::vector<int>> dists = std::vector<std::vector<int>>(V + 1, std::vector<int>(V + 1, std::numeric_limits<T>::max()));
 		FloydWarshall();
 		return dists;
 	}
@@ -575,7 +586,7 @@ public:
 private:
 	// Amortised O(log V)
 	// @returns The parent node of the current disjoint set
-	int DSUgetParent(int node, vector<int>& parent) const {
+	int DSUgetParent(int node, std::vector<int>& parent) const {
 		if (parent[node] == node) return node;
 		return parent[node] = DSUgetParent(parent[node], parent);
 	}
@@ -583,17 +594,17 @@ private:
 	// Amortised O(E log V)
 	// Standard Kruskal's algorithm - finds the cost of the minimum spanning tree, using union find (DSU)
 	T KruskalCost() const {
-		vector<int> parent = vector<int>(V + 1);
-		iota(parent.begin(), parent.end(), 0);
+		std::vector<int> parent = std::vector<int>(V + 1);
+		std::iota(parent.begin(), parent.end(), 0);
 
-		vector<pair<T, pair<int, int>>> sortedEdges;
-		for (pair<pair<int, int>, T> edge : edges) {
+		std::vector<std::pair<T, std::pair<int, int>>> sortedEdges;
+		for (std::pair<std::pair<int, int>, T> edge : edges) {
 			sortedEdges.push_back({ edge.second, edge.first });
 		}
 		sort(sortedEdges.begin(), sortedEdges.end());
 
 		T cost = 0;
-		for (pair<T, pair<int, int>>& edge : sortedEdges) {
+		for (std::pair<T, std::pair<int, int>>& edge : sortedEdges) {
 			int parentU = DSUgetParent(edge.second.first, parent), parentV = DSUgetParent(edge.second.second, parent);
 			if (parentU != parentV) {
 				cost += edge.first;
@@ -606,17 +617,17 @@ private:
 	// Amortised O(E log V)
 	// Standard Kruskal's algorithm - finds the minimum spanning tree, using union find (DSU)
 	Graph<T> Kruskal() const {
-		vector<int> parent = vector<int>(V + 1);
-		iota(parent.begin(), parent.end(), 0);
+		std::vector<int> parent = std::vector<int>(V + 1);
+		std::iota(parent.begin(), parent.end(), 0);
 
-		vector<pair<T, pair<int, int>>> sortedEdges;
-		for (pair<pair<int, int>, T> edge : edges) {
+		std::vector<std::pair<T, std::pair<int, int>>> sortedEdges;
+		for (std::pair<std::pair<int, int>, T> edge : edges) {
 			sortedEdges.push_back({ edge.second, edge.first });
 		}
 		sort(sortedEdges.begin(), sortedEdges.end());
 
 		Graph<T> output(V, isWeighted, isDirected);
-		for (pair<T, pair<int, int>>& edge : sortedEdges) {
+		for (std::pair<T, std::pair<int, int>>& edge : sortedEdges) {
 			int parentU = DSUgetParent(edge.second.first, parent), parentV = DSUgetParent(edge.second.second, parent);
 			if (parentU != parentV) {
 				output.addEdge(parentU, parentV, edge.first);
@@ -642,20 +653,20 @@ public:
 private:
 	// O(V + E)
 	// Standard Tarjan algorithm - find strongly connected components
-	int Tarjan(int u, int index, vector<vector<int>>& components, vector<int>& s, vector<bool>& seen, vector<int>& getIndex, vector<int>& lowLink) {
+	int Tarjan(int u, int index, std::vector<std::vector<int>>& components, std::vector<int>& s, std::vector<bool>& seen, std::vector<int>& getIndex, std::vector<int>& lowLink) {
 		getIndex[u] = lowLink[u] = index;
 		++index;
 		s.push_back(u);
 		seen[u] = true;
 
-		for (pair<int, T> edge : outEdges[u]) {
+		for (std::pair<int, T> edge : outEdges[u]) {
 			int v = edge.first;
 			if (getIndex[v] == -1) {
 				index = Tarjan(v, index, components, s, seen, getIndex, lowLink);
-				lowLink[u] = min(lowLink[u], lowLink[v]);
+				lowLink[u] = std::min(lowLink[u], lowLink[v]);
 			}
 			else if (seen[v]) {
-				lowLink[u] = min(lowLink[u], getIndex[v]);
+				lowLink[u] = std::min(lowLink[u], getIndex[v]);
 			}
 		}
 
@@ -677,12 +688,12 @@ private:
 public:
 	// O(V + E) 
 	// @returns Vector of all strongly connected components, where each component is a vector of nodes
-	vector<vector<int>> getSCCnodes() const {
-		vector<bool> seen = vector<bool>(V + 1, false);
-		vector<int> getIndex = vector<int>(V + 1, -1);
-		vector<int> lowLink = vector<int>(V + 1, 0);
-		vector<vector<int>> components;
-		vector<int> s;
+	std::vector<std::vector<int>> getSCCnodes() const {
+		std::vector<bool> seen = std::vector<bool>(V + 1, false);
+		std::vector<int> getIndex = std::vector<int>(V + 1, -1);
+		std::vector<int> lowLink = std::vector<int>(V + 1, 0);
+		std::vector<std::vector<int>> components;
+		std::vector<int> s;
 
 		for (int node = 1; node <= V; ++node) {
 			if (getIndex[node] == -1) Tarjan(node, 1, components, s, seen, getIndex, lowLink);
@@ -694,15 +705,15 @@ public:
 	// Finds a strongly connected component
 	// @param `root` Consider its connected component
 	// @returns The connected components reachable from root, where each component is represented as a vector of nodes
-	vector<int> getSCCnodes(int root) const {
+	std::vector<int> getSCCnodes(int root) const {
 		assert(isDirected && "In an undirected graph, all components are strongly connected components");
 		assert(validNode(root) && "Node index out of range");
 
-		vector<bool> seen = vector<bool>(V + 1, false);
-		vector<int> getIndex = vector<int>(V + 1, -1);
-		vector<int> lowLink = vector<int>(V + 1, 0);
-		vector<vector<int>> components;
-		vector<int> s;
+		std::vector<bool> seen = std::vector<bool>(V + 1, false);
+		std::vector<int> getIndex = std::vector<int>(V + 1, -1);
+		std::vector<int> lowLink = std::vector<int>(V + 1, 0);
+		std::vector<std::vector<int>> components;
+		std::vector<int> s;
 
 		Tarjan(root, 1, components, s, seen, getIndex, lowLink);
 		assert(components.size() == 1 && "Sanity check!");
@@ -712,20 +723,20 @@ public:
 private:
 	// O(V + E)
 	// Standard DFS Bridge finding algorithm
-	int _getBridges(int u, int parent, int t, vector<pair<pair<int, int>, T>>& bridges, vector<bool>& seen, vector<int>& minTime, vector<int>& entryTime) const {
+	int _getBridges(int u, int parent, int t, std::vector<std::pair<std::pair<int, int>, T>>& bridges, std::vector<bool>& seen, std::vector<int>& minTime, std::vector<int>& entryTime) const {
 		seen[u] = true;
 		minTime[u] = entryTime[u] = ++t;
 
-		for (pair<int, T> child : outEdges[u]) {
+		for (std::pair<int, T> child : outEdges[u]) {
 			int v = child.first;
 			T w = child.second;
 			if (v == parent) continue;
 			if (seen[v]) {
-				minTime[u] = min(minTime[u], entryTime[v]);
+				minTime[u] = std::min(minTime[u], entryTime[v]);
 			}
 			else {
 				t = _getBridges(v, u, t, bridges, seen, minTime, entryTime);
-				minTime[u] = min(minTime[u], minTime[v]);
+				minTime[u] = std::min(minTime[u], minTime[v]);
 
 				// bridge iff minTime[childNode] > entryTime[node] and the edge is not a double edge
 				if (minTime[v] > entryTime[u]) {
@@ -741,11 +752,11 @@ public:
 	// Find all bridges
 	// @param `root` If specified, consider its connected component. Otherwise consider the whole graph
 	// @return A vector of edges, where each edge is represented by ((u, v), w)
-	vector<pair<pair<int, int>, T>> getBridges(int root = -1) const {
-		vector<bool> seen = vector<bool>(V + 1, false);
-		vector<int> minTime = vector<int>(V + 1, 0), entryTime = vector<int>(V + 1, 0);
+	std::vector<std::pair<std::pair<int, int>, T>> getBridges(int root = -1) const {
+		std::vector<bool> seen = std::vector<bool>(V + 1, false);
+		std::vector<int> minTime = std::vector<int>(V + 1, 0), entryTime = std::vector<int>(V + 1, 0);
 
-		vector<pair<pair<int, int>, T>> bridges;
+		std::vector<std::pair<std::pair<int, int>, T>> bridges;
 		if (root == -1) {
 			for (int node = 1; node <= V; ++node) {
 				if (!seen[node]) _getBridges(node, -1, 0, bridges, seen, minTime, entryTime);
@@ -761,15 +772,15 @@ public:
 private:
 	// O(V + E log E)
 	// Greedy colouring
-	void _greedyColouring(int node, vector<int>& colours) const {
+	void _greedyColouring(int node, std::vector<int>& colours) const {
 		if (colours[node] != -1) return;
 
 		// calculate mex of neighbours colours
-		set<int> usedColours;
-		for (pair<int, T> edge : getEdges(node)) usedColours.insert(colours[edge.first]);
+		std::set<int> usedColours;
+		for (std::pair<int, T> edge : getEdges(node)) usedColours.insert(colours[edge.first]);
 		for (colours[node] = 0; usedColours.find(colours[node]) != usedColours.end(); ++colours[node]);
 
-		for (pair<int, T> edge : getEdges(node)) _greedyColouring(edge.first, colours);
+		for (std::pair<int, T> edge : getEdges(node)) _greedyColouring(edge.first, colours);
 	}
 
 public:
@@ -777,9 +788,9 @@ public:
 	// @returns A possible greedy colouring of the graph - `0 <= colour[node] < max_colours`
 	// @param `root` If specified, consider its connected component. Otherwise consider the whole graph
 	// @note Ignore colour[0]
-	vector<int> greedyColouring(int root = -1) const {
+	std::vector<int> greedyColouring(int root = -1) const {
 		assert((root == -1 || validNode(root)) && "Node index out of range");
-		vector<int> colours(V + 1, -1);
+		std::vector<int> colours(V + 1, -1);
 		for (int node : getComponentNodes(root)) _greedyColouring(node, colours);
 		return colours;
 	}
@@ -787,10 +798,10 @@ public:
 private:
 	// O(V_component log V_component + E_component)
 	// Standard Kahn's algorithm - topological sort
-	vector<int> Kahn(int root = -1) const {
-		vector<int> depths = vector<int>(V + 1, 0);
+	std::vector<int> Kahn(int root = -1) const {
+		std::vector<int> depths = std::vector<int>(V + 1, 0);
 
-		vector<int> q, topSort;
+		std::vector<int> q, topSort;
 		for (int node : getComponentNodes(root)) {
 			depths[node] = inEdges[node].size();
 			if (inEdges[node].empty()) q.push_back(node);
@@ -801,7 +812,7 @@ private:
 			q.pop_back();
 			topSort.push_back(u);
 
-			for (pair<int, T> edge : outEdges[u]) {
+			for (std::pair<int, T> edge : outEdges[u]) {
 				int v = edge.first;
 				depths[v]--;
 				if (depths[v] == 0) q.push_back(v);
@@ -812,12 +823,12 @@ private:
 
 	// O(V_component)
 	// Standard DFS topsort
-	void dfsTopSort(int node, vector<int>& topSort, vector<int>& state) const {
+	void dfsTopSort(int node, std::vector<int>& topSort, std::vector<int>& state) const {
 		if (state[node] == 2) return;
 		assert(state[node] == 1 && "Graph contains cycle");
 
 		state[node] = 1;
-		for (pair<int, T> edge : outEdges[node]) dfsTopSort(edge.first, topSort, state);
+		for (std::pair<int, T> edge : outEdges[node]) dfsTopSort(edge.first, topSort, state);
 		state[node] = 2;
 		topSort.push_back(node);
 	}
@@ -827,21 +838,21 @@ public:
 	// @returns A topological sorted order of nodes
 	// @param `root` If specified, consider its connected component. Otherwise consider the whole graph
 	// @note Graph cannot be bidirectional or cyclical
-	vector<int> getTopSort(int root = -1, bool doKahn = false) const {
+	std::vector<int> getTopSort(int root = -1, bool doKahn = false) const {
 		assert(isDirected && "Can't get a topological sort for a bidirectional graph");
 		assert((root == -1 || validNode(root)) && "Node index out of range");
 
 		if (doKahn) {
-			vector<int> topSort = Kahn(root);
+			std::vector<int> topSort = Kahn(root);
 			assert(topSort.size() <= V && "Sanity check!");
 			assert(topSort.size() == V && "Graph contains cycle");
 			return topSort;
 		}
 
 		else {
-			vector<int> state = vector<int>(V + 1, 0);
+			std::vector<int> state = std::vector<int>(V + 1, 0);
 
-			vector<int> topSort;
+			std::vector<int> topSort;
 			for (int node : getComponentNodes(root)) dfsTopSort(node, topSort, state);
 			reverse(topSort.begin(), topSort.end());
 			return topSort;
@@ -849,11 +860,11 @@ public:
 	}
 
 private:
-	T addFlow(int source, int sink, const vector<int> &prev, map<pair<int, int>, T> &remainingCap) const {
+	T addFlow(int source, int sink, const std::vector<int> &prev, std::map<std::pair<int, int>, T> &remainingCap) const {
 		// find max flow of augmenting path
-		T newFlow = numeric_limits<T>::max();
+		T newFlow = std::numeric_limits<T>::max();
 		for (int u = sink; u != source; u = prev[u]) {
-			newFlow = min(newFlow, remainingCap[{prev[u], u}]);
+			newFlow = std::min(newFlow, remainingCap[{prev[u], u}]);
 		}
 
 		// update path
@@ -869,18 +880,18 @@ public:
 	// @returns The value of max flow, using (fast) Dinic's or (slow) Edmonds-Karp
 	T maxFlow(int source, int sink, bool doSlow = false) const {
 		assert(validNode(source) && validNode(sink) && "Node index out of range");
-		if (source == sink) return numeric_limits<T>::max();
-		map<pair<int, int>, T> remainingCap;
-		for (pair<pair<int, int>, T> edge : edges) {
+		if (source == sink) return std::numeric_limits<T>::max();
+		std::map<std::pair<int, int>, T> remainingCap;
+		for (std::pair<std::pair<int, int>, T> edge : edges) {
 			remainingCap[edge.first] += edge.second;
 		}
 
 		T totalFlow = T(0);
 
 		while (true) {
-			vector<int> prev = vector<int>(V + 1, -1);
-			vector<int> levels = vector<int>(V + 1, -1);
-			queue<int> q;
+			std::vector<int> prev = std::vector<int>(V + 1, -1);
+			std::vector<int> levels = std::vector<int>(V + 1, -1);
+			std::queue<int> q;
 			levels[source] = 0;
 			q.push(source);
 
@@ -888,7 +899,7 @@ public:
 				int u = q.front();
 				q.pop();
 				for (int type = 0; type <= 1; ++type) {
-					for (pair<int, T> edge : (type ? inEdges : outEdges)[u]) {
+					for (std::pair<int, T> edge : (type ? inEdges : outEdges)[u]) {
 						int v = edge.first;
 						if (prev[v] == -1 && remainingCap[{u, v}] > 0) {
 							prev[v] = u;
@@ -910,14 +921,14 @@ public:
 				// Dinic's - find best augmenting path in residual "level" graph
 				int newFlow;
 				do {
-					stack<int> s;
+					std::stack<int> s;
 					s.push(source);
 					while (!s.empty() && s.top() != sink) {
 						int u = s.top();
 						s.pop();
 
 						for (int type = 0; type <= 1; ++type) {
-							for (pair<int, T> edge : (type ? inEdges : outEdges)[u]) {
+							for (std::pair<int, T> edge : (type ? inEdges : outEdges)[u]) {
 								int v = edge.first;
 								if (levels[v] == levels[u] + 1 && remainingCap[{u, v}] > 0) {
 									prev[v] = u;
@@ -971,7 +982,7 @@ public:
 	bool hasDoubleEdges(int root = -1) const {
 		for (int node : getComponentNodes(root)) {
 			for (int type = 0; type <= 1; ++type) {
-				const multiset<pair<int, T>> *currEdges = &(type ? inEdges[node] : outEdges[node]);
+				const std::multiset<std::pair<int, T>> *currEdges = &(type ? inEdges[node] : outEdges[node]);
 				if (currEdges->empty()) continue;
 				for (auto it1 = currEdges->begin(), it2 = ++currEdges->begin(); it2 != currEdges->end(); ++it1, ++it2) {
 					if (it1->first == it2->first) return true;
@@ -1013,10 +1024,10 @@ public:
 		assert((root == -1 || validNode(root)) && "Node index out of range");
 		if (hasCycle(root) || hasDoubleEdges(root)) return false;
 
-		vector<int> component = getComponentNodes(root);
+		std::vector<int> component = getComponentNodes(root);
 		int numEdges = 0, numLeaves = 0, numRoots = 0;
 		for (int node : component) {
-			for (pair<int, T> edge : outEdges[node]) {
+			for (std::pair<int, T> edge : outEdges[node]) {
 				if (!isDirected && edge.first > node) break;
 				else ++numEdges;
 			}
@@ -1030,7 +1041,7 @@ public:
 
 	// O(V + E) Determines whether the graph is a forest
 	bool isForest() const {
-		for (vector<int>& component : getComponentsNodes()) {
+		for (std::vector<int>& component : getComponentsNodes()) {
 			if (!isTree(component[0])) return false;
 		}
 		return true;
@@ -1050,7 +1061,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, Graph<T> graph) {
+template<typename T> std::ostream& operator<<(std::ostream& out, Graph<T> graph) {
 	graph.print(out);
 	return out;
 }

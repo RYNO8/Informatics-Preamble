@@ -9,7 +9,7 @@ struct Line_ {
     // Displays the line
     // @param `out` The string representation of the graph is piped to this output stream
     // @param `newLine` Indicates whether to end with a trailing `\\n`
-    void print(ostream& out = cout, bool newLine = true) const {
+    void print(std::ostream& out = std::cout, bool newLine = true) const {
         out << m << " x + " << b;
         if (newLine) out << '\n';
     }
@@ -28,7 +28,7 @@ struct Line_ {
     }
 };
 
-ostream& operator<<(ostream& out, Line_ line) {
+std::ostream& operator<<(std::ostream& out, Line_ line) {
     line.print(out);
     return out;
 }
@@ -36,7 +36,7 @@ ostream& operator<<(ostream& out, Line_ line) {
 // Convex Hull Trick
 // "infinte" range and domain, but added lines need to have non-decreasing gradient
 struct CHT {
-    vector<Line_> cht;
+    std::vector<Line_> cht;
 
     // O(1)
     // Initialisation
@@ -48,7 +48,7 @@ struct CHT {
     // Displays the convex hull, showing the lines in increasing order
     // @param `out` The string representation of the graph is piped to this output stream
     // @param `newLine` Indicates whether to end with a trailing `\\n`
-    void print(ostream& out = cout, bool newLine = true) const {
+    void print(std::ostream& out = std::cout, bool newLine = true) const {
         out << cht;
         if (newLine) out << '\n';
     }
@@ -68,7 +68,7 @@ struct CHT {
     // O(log n)
     // @returns Minimum y value when x=`x`
     ll getLine(ll x) const {
-        if (cht.empty()) return numeric_limits<ll>::max();
+        if (cht.empty()) return std::numeric_limits<ll>::max();
         int l = -1, r = cht.size() - 1;
         while (l + 1 < r) {
             int m = (l + r) / 2;
@@ -79,7 +79,7 @@ struct CHT {
     }
 };
 
-ostream& operator<<(ostream& out, CHT cht) {
+std::ostream& operator<<(std::ostream& out, CHT cht) {
     cht.print(out);
     return out;
 }
@@ -125,7 +125,7 @@ struct LiChaoTree {
         assert(l <= x && x <= r && "x out of range");
 
         while (true) {
-            ans = max(ans, tree[node].eval(x));
+            ans = std::max(ans, tree[node].eval(x));
             int m = (l + r) / 2;
             
             if (l == r) return ans;

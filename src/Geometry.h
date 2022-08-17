@@ -18,7 +18,7 @@ public:
 	// O(1)
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
-	void print(ostream& out = cout, bool newLine = false) {
+	void print(std::ostream& out = std::cout, bool newLine = false) {
 		out << '(' << this->real() << ", " << this->imag() << ')';
 		if (newLine) out << '\n';
 	}
@@ -135,14 +135,14 @@ public:
 	// O(1)
 	// whether `*this` lies in the bounding box of `pq`
 	bool onSegment(Point p, Point q) {
-		return min(p.real(), q.real()) <= this->real() && this->real() <= max(p.real(), q.real()) && min(p.imag(), q.imag()) <= this->imag() && this->imag() <= max(p.imag(), q.imag());
+		return std::min(p.real(), q.real()) <= this->real() && this->real() <= std::max(p.real(), q.real()) && std::min(p.imag(), q.imag()) <= this->imag() && this->imag() <= std::max(p.imag(), q.imag());
 	}
 };
 
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, Point<T> val) {
+template<typename T> std::ostream& operator<<(std::ostream& out, Point<T> val) {
 	val.print(out);
 	return out;
 }
@@ -166,7 +166,7 @@ public:
 	// O(1)
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
-	void print(ostream& out = cout, bool newLine = false) {
+	void print(std::ostream& out = std::cout, bool newLine = false) {
 		out << a << " -- " << b;
 		if (newLine) out << '\n';
 	}
@@ -175,7 +175,7 @@ public:
 	 *                   PROPERTIES                 *
 	 ************************************************/
 	// O(1) Gets both endpoints of the line, in no particular order
-	const pair<Point<T>, Point<T>> getPoints() {
+	const std::pair<Point<T>, Point<T>> getPoints() {
 		return { a, b };
 	}
 	
@@ -199,7 +199,7 @@ public:
 			// TODO: collinear, case bash to check for overlap
 			return false;
 		}
-		return 0 < min(numerator1, numerator2) && max(numerator1, numerator2) < denom;
+		return 0 < std::min(numerator1, numerator2) && std::max(numerator1, numerator2) < denom;
 	}
 
 	// TODO: ccw algorithm to determine line line intersection
@@ -222,7 +222,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, Line<T> val) {
+template<typename T> std::ostream& operator<<(std::ostream& out, Line<T> val) {
 	val.print(out);
 	return out;
 }
@@ -232,11 +232,11 @@ template<typename T> class Polygon {
 	 *                INITIALISATION                *
 	 ************************************************/
 private:
-	vector<Point<T>> points;
+	std::vector<Point<T>> points;
 
 public:
 	// O(n^2) Initialises a Polygon
-	Polygon(vector<Point<T>> points_, bool makeConvex = true) : points(points_) {
+	Polygon(std::vector<Point<T>> points_, bool makeConvex = true) : points(points_) {
 		assert(points.size() >= 3 && "This is a degenerate polygon");
 		// also assuming that all points are unique
 		if (makeConvex) makeConvexHull();
@@ -248,7 +248,7 @@ public:
 	 // O(1)
 	 // @param `out` The string representation of the graph is piped to this output stream
 	 // @param `newLine` Indicates whether to end with a trailing `\\n`
-	void print(ostream& out = cout, bool newLine = false) {
+	void print(std::ostream& out = std::cout, bool newLine = false) {
 		out << points;
 		if (newLine) out << '\n';
 	}
@@ -259,7 +259,7 @@ public:
 	 // O(n^2) Gift wrapping algorithm to find convex hull
 	 // @note updates in place
 	void makeConvexHull() {
-		vector<Point<T>> hull;
+		std::vector<Point<T>> hull;
 		int p = min_element(points.begin(), points.end()) - points.begin();
 		do {
 			hull.push_back(points[p]);
@@ -313,7 +313,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, Polygon<T> val) {
+template<typename T> std::ostream& operator<<(std::ostream& out, Polygon<T> val) {
 	val.print(out);
 	return out;
 }

@@ -61,16 +61,16 @@ constexpr ll MOD_POW = 1; // highest value such that MOD-1 is divisible by 2^MOD
 
 typedef unsigned long long ull;
 
-vector<pair<int, int>> DIRS_RECTILINEAR = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
-vector<pair<int, int>> DIRS_DIAG = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
-vector<pair<int, int>> DIRS_ALL = { {0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1} };
-vector<pair<int, int>> DIRS = DIRS_RECTILINEAR;
+std::vector<std::pair<int, int>> DIRS_RECTILINEAR = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
+std::vector<std::pair<int, int>> DIRS_DIAG = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
+std::vector<std::pair<int, int>> DIRS_ALL = { {0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1} };
+std::vector<std::pair<int, int>> DIRS = DIRS_RECTILINEAR;
 
 random_device rd;
 mt19937_64 rng(rd());
-uniform_int_distribution<int> int_dis(0, numeric_limits<int>::max());
-uniform_int_distribution<ll> ll_dis(0, numeric_limits<ll>::max());
-uniform_int_distribution<ull> ull_dis(0, numeric_limits<ull>::max());
+uniform_int_distribution<int> int_dis(0, std::numeric_limits<int>::max());
+uniform_int_distribution<ll> ll_dis(0, std::numeric_limits<ll>::max());
+uniform_int_distribution<ull> ull_dis(0, std::numeric_limits<ull>::max());
 uniform_real_distribution<ld> prob_dist(0, 1);
 
 /************************************************
@@ -78,14 +78,14 @@ uniform_real_distribution<ld> prob_dist(0, 1);
  ************************************************/
 // Displays a pair:
 // (A, B)
-template<typename A, typename B> ostream& operator<<(ostream& out, const pair<A, B>& c) {
+template<typename A, typename B> std::ostream& operator<<(std::ostream& out, const std::pair<A, B>& c) {
 	out << "(" << c.first << ", " << c.second << ")";
 	return out;
 }
 
 // Displays a vector:
 // [ T, T, ..., T ]
-template<typename T> ostream& operator<<(ostream& out, const vector<T>& v) {
+template<typename T> std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
 	out << "[ ";
 	for (int i = 0; i < (int)v.size(); ++i) {
 		out << v[i];
@@ -97,13 +97,13 @@ template<typename T> ostream& operator<<(ostream& out, const vector<T>& v) {
 
 // Displays an array:
 // T T T ... T
-#define printArr0(a, N) for (int i = 0; i < N; ++i) cout << a[i] << " ";
-#define printArr1(a, N) for (int i = 1; i <= N; ++i) cout << a[i] << " ";
+#define printArr0(a, N) for (int i = 0; i < N; ++i) std::cout << a[i] << " ";
+#define printArr1(a, N) for (int i = 1; i <= N; ++i) std::cout << a[i] << " ";
 #define printArr(a, N) printArr0(a, N);
 
 // Displays a queue:
 // < T, T, ..., T >
-template<typename T> ostream& operator<<(ostream& out, const queue<T>& q) {
+template<typename T> std::ostream& operator<<(std::ostream& out, const std::queue<T>& q) {
 	out << "< ";
 	for (int i = 0; i < (int)q.size(); ++i) {
 		out << q.front();
@@ -117,7 +117,7 @@ template<typename T> ostream& operator<<(ostream& out, const queue<T>& q) {
 
 // Displays a stack:
 // < T, T, ..., T >
-template<typename T> ostream& operator<<(ostream& out, const stack<T>& s) {
+template<typename T> std::ostream& operator<<(std::ostream& out, const std::stack<T>& s) {
 	out << "< ";
 	for (int i = 0; i < (int)s.size(); ++i) {
 		out << s.top();
@@ -131,7 +131,7 @@ template<typename T> ostream& operator<<(ostream& out, const stack<T>& s) {
 
 // Displays a deque:
 // < T, T, ..., T >
-template<typename T> ostream& operator<<(ostream& out, const deque<T>& q) {
+template<typename T> std::ostream& operator<<(std::ostream& out, const deque<T>& q) {
 	out << "< ";
 	for (int i = 0; i < (int)q.size(); ++i) {
 		out << q.front();
@@ -145,7 +145,7 @@ template<typename T> ostream& operator<<(ostream& out, const deque<T>& q) {
 
 // Displays a map:
 // { A:B, A:B, ..., A:B }
-template<typename A, typename B> ostream& operator<<(ostream& out, const map<A, B> &m) {
+template<typename A, typename B> std::ostream& operator<<(std::ostream& out, const std::map<A, B> &m) {
 	out << "{ ";
 	for (auto it = m.begin(); it != m.end(); ) {
 		out << it->first << ':' << it->second;
@@ -157,7 +157,7 @@ template<typename A, typename B> ostream& operator<<(ostream& out, const map<A, 
 
 // Displays an unordered map:
 // { A:B, A:B, ..., A:B }
-template<typename A, typename B> ostream& operator<<(ostream& out, const unordered_map<A, B>& m) {
+template<typename A, typename B> std::ostream& operator<<(std::ostream& out, const unordered_map<A, B>& m) {
 	out << "{ ";
 	for (auto it = m.begin(); it != m.end(); ) {
 		out << it->first << ':' << it->second;
@@ -169,7 +169,7 @@ template<typename A, typename B> ostream& operator<<(ostream& out, const unorder
 
 // Displays a set:
 // { T, T, ..., T }
-template<typename T> ostream& operator<<(ostream& out, const set<T>& m) {
+template<typename T> std::ostream& operator<<(std::ostream& out, const std::set<T>& m) {
 	out << "{ ";
 	for (auto it = m.begin(); it != m.end(); ) {
 		out << *it;
@@ -181,7 +181,7 @@ template<typename T> ostream& operator<<(ostream& out, const set<T>& m) {
 
 // Displays an unordered set:
 // { T, T, ..., T }
-template<typename T> ostream & operator<<(ostream & out, const unordered_set<T> & m) {
+template<typename T> std::ostream & operator<<(std::ostream & out, const unordered_set<T> & m) {
 	out << "{ ";
 	for (auto it = m.begin(); it != m.end(); ) {
 		out << *it;
@@ -193,7 +193,7 @@ template<typename T> ostream & operator<<(ostream & out, const unordered_set<T> 
 
 // Displays a multiset:
 // { T, T, ..., T }
-template<typename T> ostream & operator<<(ostream & out, const multiset<T> & m) {
+template<typename T> std::ostream & operator<<(std::ostream & out, const std::multiset<T> & m) {
 	out << "{ ";
 	for (auto it = m.begin(); it != m.end(); ) {
 		out << *it;

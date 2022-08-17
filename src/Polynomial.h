@@ -5,14 +5,14 @@ template<typename T> class Polynomial {
 	 *                INITIALISATION                *
 	 ************************************************/
 private:
-	vector<T> coeff;
+	std::vector<T> coeff;
 
 public:
 	Polynomial() {
 
 	}
 
-	Polynomial(vector<T> _coeff) : coeff(_coeff) {
+	Polynomial(std::vector<T> _coeff) : coeff(_coeff) {
 		
 	}
 
@@ -24,7 +24,7 @@ public:
 	// Displays the coefficients of the polynomial
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
-	void print(ostream& out = cout, bool newLine = false) const {
+	void print(std::ostream& out = std::cout, bool newLine = false) const {
 		out << coeff;
 		if (newLine) out << '\n';
 	}
@@ -33,8 +33,8 @@ public:
 	// Displays the natural maths representation of the polynomial
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
-	void pprint(ostream& out = cout, bool newLine = false) const {
-		for (int d = deg(); d >= 0; --d) cout << coeff[d] << " x^" << d << ' ';
+	void pprint(std::ostream& out = std::cout, bool newLine = false) const {
+		for (int d = deg(); d >= 0; --d) std::cout << coeff[d] << " x^" << d << ' ';
 		if (newLine) out << '\n';
 	}
 
@@ -135,10 +135,10 @@ public:
 	// O(n log n)
 	// Number Theoric Transform (in place & iterative)
 	// evaluate P(omega), P(omega^2), ..., P(omega^n), where omega is a primative `MOD` root of unity
-	vector<T> NTT(int n, bool inv = false) const {
+	std::vector<T> NTT(int n, bool inv = false) const {
 		assert(popcount(n) == 1);
 
-		vector<T> a = coeff;
+		std::vector<T> a = coeff;
 		a.resize(n);
 
 		// chance bit order, so that in place transform is possible
@@ -146,7 +146,7 @@ public:
 			int bit = n / 2;
 			for (; j >= bit; bit /= 2) j -= bit;
 			j += bit;
-			if (i < j) swap(a[i], a[j]);
+			if (i < j) std::swap(a[i], a[j]);
 		}
 
 		// ???
@@ -179,11 +179,11 @@ public:
 	// Fast fourier transform
 	// evaluate P(omega), P(omega^2), ..., P(omega^n), where omega is a complex `n`th root of unity
 	// TODO: implement
-	vector<T> FFT(int n, bool inv = false) const {
+	std::vector<T> FFT(int n, bool inv = false) const {
 
 	}
 
-	vector<T> FT(int n, bool inv = false) const {
+	std::vector<T> FT(int n, bool inv = false) const {
 		/// TODO: check the type of T
 		// if T in [int, int, ModInt]
 		return NTT(n, inv);
@@ -195,7 +195,7 @@ public:
 	// Polynomial<T> addition
 	Polynomial<T> operator+(Polynomial<T> o) const {
 		Polynomial<T> copy;
-		for (int i = 0; i < max(N(), o.N()); ++i) {
+		for (int i = 0; i < std::max(N(), o.N()); ++i) {
 			copy.coeff.push_back((i < N() ? coeff[i] : 0) + (i < o.N() ? o.coeff[i] : 0));
 		}
 		return copy;
@@ -211,7 +211,7 @@ public:
 	// Polynomial<T> subtraction
 	Polynomial<T> operator-(Polynomial<T> o) const {
 		Polynomial<T> copy;
-		for (int i = 0; i < max(N(), o.N()); ++i) {
+		for (int i = 0; i < std::max(N(), o.N()); ++i) {
 			copy.coeff.push_back((i < N() ? coeff[i] : 0) - (i < o.N() ? o.coeff[i] : 0));
 		}
 		return copy;
@@ -227,10 +227,10 @@ public:
 	// Polynomial<T> multiplication
 	Polynomial<T> operator*(Polynomial<T> o) const {
 		int n = 1;
-		while (n < 2ll * max(N(), o.N()))  n *= 2;
+		while (n < 2ll * std::max(N(), o.N()))  n *= 2;
 
-		vector<T> aPoints = this->FT(n, false);
-		vector<T> bPoints = o.FT(n, false);
+		std::vector<T> aPoints = this->FT(n, false);
+		std::vector<T> bPoints = o.FT(n, false);
 
 		Polynomial<T> output;
 		for (int i = 0; i < n; ++i) output.coeff.push_back(aPoints[i] * bPoints[i]);
@@ -290,10 +290,10 @@ private:
 	// O(n log^2 n)
 	// Build subproduct tree, where the root is v[1], left child is 2n, and right child is 2n+1
 	// Each node contains the product of all the leaf node polynomials that it covers
-	vector<Polynomial<T>> buildSubproduct(vector<T> points) const {
+	std::vector<Polynomial<T>> buildSubproduct(std::vector<T> points) const {
 		int treeSize = 1;
 		while (treeSize < points.size()) treeSize *= 2;
-		vector<Polynomial<T>> v = vector<Polynomial<T>>(treeSize);
+		std::vector<Polynomial<T>> v = std::vector<Polynomial<T>>(treeSize);
 
 		for (int i = 0; i < points.size(); ++i) v[i + treeSize] = Polynomial<T>({ -points[i], 1ll });
 		for (int i = points.size(); i < treeSize; ++i) v[i + treeSize] = Polynomial<T>({ 1ll });
@@ -305,12 +305,12 @@ private:
 
 	// O(n log^2 n)
 	// Divide and conquer, degree of f = degree of v[node] - 1
-	vector<T> fastEval_(vector<Polynomial<T>> &v, int node = 1) const {
+	std::vector<T> fastEval_(std::vector<Polynomial<T>> &v, int node = 1) const {
 		if (2 * node >= v.size()) {
 			return { coeff[0] };
 		}
-		vector<T> leftVals = (*this % v[node * 2]).fastEval(v, node * 2);
-		vector<T> rightVals = (*this % v[node * 2 + 1]).fastEval(v, node * 2 + 1);
+		std::vector<T> leftVals = (*this % v[node * 2]).fastEval(v, node * 2);
+		std::vector<T> rightVals = (*this % v[node * 2 + 1]).fastEval(v, node * 2 + 1);
 		leftVals.insert(leftVals.end(), rightVals.begin(), rightVals.end());
 		return leftVals;
 	}
@@ -319,8 +319,8 @@ public:
 	// O(n log^2 n)
 	// Fast multipoint evaluation
 	// @return P(points[0]), P(points[1]), ...
-	vector<T> fastEval(vector<T> points) const {
-		vector<Polynomial<T>> v = buildSubproduct(points);
+	std::vector<T> fastEval(std::vector<T> points) const {
+		std::vector<Polynomial<T>> v = buildSubproduct(points);
 		return fastEval_(v);
 	}
 };
@@ -328,7 +328,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, const Polynomial<T>& val) {
+template<typename T> std::ostream& operator<<(std::ostream& out, const Polynomial<T>& val) {
 	val.print(out);
 	return out;
 }

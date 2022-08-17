@@ -11,9 +11,9 @@ private:
 	// Number of columns;
 	int C = 0;
 	// Grid
-	vector<vector<T>> grid;
+	std::vector<std::vector<T>> grid;
 	// Prefix sum of grid
-	vector<vector<T>> prefix;
+	std::vector<std::vector<T>> prefix;
 	// Whether the graph hasn't been modified after the last precomp
 	bool hasPrecomp = false;
 
@@ -22,10 +22,10 @@ private:
 	void init(int _R, int _C) {
 		R = _R;
 		C = _C;
-		grid = vector<vector<T>>(R);
-		for (int r = 0; r < R; ++r) grid[r] = vector<T>(C);
-		prefix = vector<vector<T>>(R + 1);
-		for (int r = 0; r < R + 1; ++r) prefix[r] = vector<T>(C + 1);
+		grid = std::vector<std::vector<T>>(R);
+		for (int r = 0; r < R; ++r) grid[r] = std::vector<T>(C);
+		prefix = std::vector<std::vector<T>>(R + 1);
+		for (int r = 0; r < R + 1; ++r) prefix[r] = std::vector<T>(C + 1);
 	}
 
 public:
@@ -48,7 +48,7 @@ public:
 
 	// O(RC)
 	// Initialises grid from cin, assuming 0 indexed
-	Grid(int _R, int _C, istream& in = cin) {
+	Grid(int _R, int _C, std::istream& in = std::cin) {
 		init(_R, _C);
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
@@ -73,7 +73,7 @@ public:
 
 	// O(RC)
 	//Initialises grid from a 2d vector, assuming 0 indexed
-	Grid(vector<vector<T>> _grid) {
+	Grid(std::vector<std::vector<T>> _grid) {
 		init((int)_grid.size(), (int)_grid[0].size());
 		for (int r = 0; r < R; ++r) {
 			assert(_grid[r].size() == grid[0].size() && "Invalid grid shape");
@@ -101,7 +101,7 @@ public:
 	// Displays the grid
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
-	void print(ostream& out = cout, bool newLine = true) const {
+	void print(std::ostream& out = std::cout, bool newLine = true) const {
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				out << grid[r][c] << ' ';
@@ -116,11 +116,11 @@ public:
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
 	// @param `spacing` Indicates how large each cell is (use spacing = -1 for automatic spacing)
-	void pprint(ostream& out = cout, bool newLine = true, int spacing = -1) {
+	void pprint(std::ostream& out = std::cout, bool newLine = true, int spacing = -1) {
 		if (spacing == -1) {
 			// find max repr length of grid values
 			for (int r = 0; r < R; ++r) {
-				for (int c = 0; c < C; ++c) spacing = max(spacing, (reprLen(grid[r][c])+3) / 4);
+				for (int c = 0; c < C; ++c) spacing = std::max(spacing, (reprLen(grid[r][c])+3) / 4);
 			}
 		}
 
@@ -139,8 +139,8 @@ public:
 
 			out << '|';
 			for (int c = 0; c < C; ++c) {
-				int paddingL = max(0, 2 * spacing - reprLen(grid[r][c]) / 2);
-				int paddingR = max(0, 2 * spacing - (reprLen(grid[r][c]) - 1) / 2);
+				int paddingL = std::max(0, 2 * spacing - reprLen(grid[r][c]) / 2);
+				int paddingR = std::max(0, 2 * spacing - (reprLen(grid[r][c]) - 1) / 2);
 
 				out << string(paddingL, ' ') << grid[r][c] << string(paddingR, ' ') << '|';
 			}
@@ -252,13 +252,13 @@ public:
 	inline bool validCoord(int r, int c) const {
 		return 0 <= r && r < R && 0 <= c && c < C;
 	}
-	inline bool validCoord(pair<int, int> coord) const {
+	inline bool validCoord(std::pair<int, int> coord) const {
 		return validCoord(coord.first, coord.second);
 	}
 
 	// O(RC)
 	// @returns The first (lexigraphically smallest) coordinate which satisfies `isValid`, otherwise returns {-1, -1}
-	pair<int, int> findVal(function<bool(int, int)> isValid) {
+	std::pair<int, int> findVal(function<bool(int, int)> isValid) {
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				if (isValid(r, c)) return { r, c };
@@ -275,8 +275,8 @@ public:
 
 	// O(RC)
 	// @returns A vector of coordinates which satisfies `isValid`
-	vector<pair<int, int>> findAllVal(function<bool(int, int)> isValid) const {
-		vector<pair<int, int>> output;
+	std::vector<std::pair<int, int>> findAllVal(function<bool(int, int)> isValid) const {
+		std::vector<std::pair<int, int>> output;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				if (isValid(r, c)) output.push_back({ r, c });
@@ -303,7 +303,7 @@ public:
 			grid[r][c] = val;
 		}
 	}
-	void setVal(pair<int, int> coord, T val) {
+	void setVal(std::pair<int, int> coord, T val) {
 		setVal(coord.first, coord.second, val);
 	}
 
@@ -311,18 +311,18 @@ public:
 	// @note The rectangular region will be capped so it stays within the grid
 	void setVals(int r1, int c1, int r2, int c2, T val) {
 		hasPrecomp = false;
-		if (r1 > r2) swap(r1, r2);
-		if (c1 > c2) swap(c1, c2);
-		r1 = max(0, r1);
-		c1 = max(0, c1);
-		r2 = min(R - 1, r2);
-		c2 = max(C - 1, c2);
+		if (r1 > r2) std::swap(r1, r2);
+		if (c1 > c2) std::swap(c1, c2);
+		r1 = std::max(0, r1);
+		c1 = std::max(0, c1);
+		r2 = std::min(R - 1, r2);
+		c2 = std::max(C - 1, c2);
 
 		for (int r = r1; r <= r2; ++r) {
 			for (int c = c1; c <= c2; ++c) grid[r][c] = val;
 		}
 	}
-	void setVals(pair<int, int> coord1, pair<int, int> coord2, T val) {
+	void setVals(std::pair<int, int> coord1, std::pair<int, int> coord2, T val) {
 		setVals(coord1.first, coord1.second, coord2.first, coord2.second, val);
 	}
 	
@@ -333,7 +333,7 @@ public:
 			grid[r][c] += val;
 		}
 	}
-	void incrVal(pair<int, int> coord, T val) {
+	void incrVal(std::pair<int, int> coord, T val) {
 		incrVal(coord.first, coord.second, val);
 	}
 
@@ -341,18 +341,18 @@ public:
 	// @note The rectangular region will be capped so it stays within the grid
 	void incrVals(int r1, int c1, int r2, int c2, T val) {
 		hasPrecomp = false;
-		if (r1 > r2) swap(r1, r2);
-		if (c1 > c2) swap(c1, c2);
-		r1 = max(0, r1);
-		c1 = max(0, c1);
-		r2 = min(R - 1, r2);
-		c2 = max(C - 1, c2);
+		if (r1 > r2) std::swap(r1, r2);
+		if (c1 > c2) std::swap(c1, c2);
+		r1 = std::max(0, r1);
+		c1 = std::max(0, c1);
+		r2 = std::min(R - 1, r2);
+		c2 = std::max(C - 1, c2);
 
 		for (int r = r1; r <= r2; ++r) {
 			for (int c = c1; c <= c2; ++c) grid[r][c] += val;
 		}
 	}
-	void incrVals(pair<int, int> coord1, pair<int, int> coord2, T val) {
+	void incrVals(std::pair<int, int> coord1, std::pair<int, int> coord2, T val) {
 		incrVals(coord1.first, coord1.second, coord2.first, coord2.second, val);
 	}
 
@@ -362,7 +362,7 @@ public:
 		if (validCoord(r, c)) return grid[r][c];
 		return defaultVal;
 	}
-	T getVal(pair<int, int> coord, T defaultVal = T()) const {
+	T getVal(std::pair<int, int> coord, T defaultVal = T()) const {
 		return getVal(coord.first, coord.second, defaultVal);
 	}
 
@@ -371,12 +371,12 @@ public:
 	// @note This is only garunteed to be correct after initPrefix() is called, and the grid is not modified after that
 	// @note The rectangular region will be capped so it stays within the grid
 	T sumVals(int r1, int c1, int r2, int c2) const {
-		if (r1 > r2) swap(r1, r2);
-		if (c1 > c2) swap(c1, c2);
-		r1 = max(0, r1);
-		c1 = max(0, c1);
-		r2 = min(R - 1, r2);
-		c2 = max(C - 1, c2);
+		if (r1 > r2) std::swap(r1, r2);
+		if (c1 > c2) std::swap(c1, c2);
+		r1 = std::max(0, r1);
+		c1 = std::max(0, c1);
+		r2 = std::min(R - 1, r2);
+		c2 = std::max(C - 1, c2);
 
 		if (hasPrecomp) {
 			return prefix[r2 + 1][c2 + 1] + prefix[r1][c1] - prefix[r2 + 1][c1] - prefix[r1][c2 + 1];
@@ -389,7 +389,7 @@ public:
 			return total;
 		}
 	}
-	T sumVals(pair<int, int> coord1, pair<int, int> coord2) const {
+	T sumVals(std::pair<int, int> coord1, std::pair<int, int> coord2) const {
 		return sumVals(coord1.first, coord1.second, coord2.first, coord2.second);
 	}
 
@@ -492,25 +492,25 @@ public:
 
 	// O(C)
 	// @returns All coordinates in a particular row, sorted by increasing order
-	vector<pair<int, int>> getRowCoords(int r) const {
-		vector<pair<int, int>> output;
+	std::vector<std::pair<int, int>> getRowCoords(int r) const {
+		std::vector<std::pair<int, int>> output;
 		for (int c = 0; c < C; ++c) output.push_back({ r, c });
 		return output;
 	}
 
 	// O(R)
 	// @returns All coordinates in a particular column, sorted by increasing order
-	vector<pair<int, int>> getColCoords(int c) const {
-		vector<pair<int, int>> output;
+	std::vector<std::pair<int, int>> getColCoords(int c) const {
+		std::vector<std::pair<int, int>> output;
 		for (int r = 0; r < R; ++r) output.push_back({ r, c });
 		return output;
 	}
 
 	// O(RC)
 	// @returns All coordinates in a vector, sorted by lexicographic order
-	vector<pair<int, int>> getAllCoords() const {
+	std::vector<std::pair<int, int>> getAllCoords() const {
 		//return getSomeCoords(compAny);
-		vector<pair<int, int>> output;
+		std::vector<std::pair<int, int>> output;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				output.push_back({ r, c });
@@ -522,8 +522,8 @@ public:
 	// O(RC) Finds all coordinates that satisfies `isValid`
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns aAl coordinates in a vector, sorted by lexicographic order
-	vector<pair<int, int>> getSomeCoords(function<bool(int, int)> isValid) const {
-		vector<pair<int, int>> output;
+	std::vector<std::pair<int, int>> getSomeCoords(function<bool(int, int)> isValid) const {
+		std::vector<std::pair<int, int>> output;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				if (isValid(r, c)) output.push_back({ r, c });
@@ -535,15 +535,15 @@ public:
 	// O(1)
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns coordinates which are adjacent to `(r, c)`
-	vector<pair<int, int>> getAdjCoords(int r, int c, vector<pair<int, int>> &dirs) const {
-		vector<pair<int, int>> output;
-		for (pair<int, int> dir : dirs) {
+	std::vector<std::pair<int, int>> getAdjCoords(int r, int c, std::vector<std::pair<int, int>> &dirs) const {
+		std::vector<std::pair<int, int>> output;
+		for (std::pair<int, int> dir : dirs) {
 			int newR = r + dir.first, newC = c + dir.second;
 			if (validCoord(r, c) && validCoord(newR, newC)) output.push_back({ newR, newC });
 		}
 		return output;
 	}
-	vector<pair<int, int>> getAdjCoords(pair<int, int> coord, vector<pair<int, int>> &dirs) const {
+	std::vector<std::pair<int, int>> getAdjCoords(std::pair<int, int> coord, std::vector<std::pair<int, int>> &dirs) const {
 		return getAdjCoords(coord.first, coord.second, dirs);
 	}
 
@@ -558,11 +558,11 @@ private:
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @param `depth` Stores the shortest distance to the starting node, and it is also used as the seen array
 	// @param `maxD` Indicates the number of BFS steps taken
-	void bfs(int r, int c, function<bool(int, int)> isValid, vector<pair<int, int>> dirs, vector<vector<int>> &depth, int maxD = INT_MAX) const {
+	void bfs(int r, int c, function<bool(int, int)> isValid, std::vector<std::pair<int, int>> dirs, std::vector<std::vector<int>> &depth, int maxD = INT_MAX) const {
 		if (!validCoord(r, c)) return;
 		if (!isValid(r, c)) return;
 
-		queue<pair<int, int>> q;
+		std::queue<std::pair<int, int>> q;
 		q.push({ r, c });
 		depth[r][c] = 0;
 
@@ -572,7 +572,7 @@ private:
 				auto curr = q.front();
 				q.pop();
 
-				for (pair<int, int> adj : getAdjCoords(curr.first, curr.second, dirs)) {
+				for (std::pair<int, int> adj : getAdjCoords(curr.first, curr.second, dirs)) {
 					if (depth[adj.first][adj.second] == -1 && isValid(adj.first, adj.second)) {
 						q.push(adj);
 						depth[adj.first][adj.second] = d;
@@ -581,7 +581,7 @@ private:
 			}
 		}
 	}
-	void bfs(pair<int, int> coord, function<bool(int, int)> isValid, vector<pair<int, int>> &dirs, vector<vector<int>>& depth, int maxD = INT_MAX) const {
+	void bfs(std::pair<int, int> coord, function<bool(int, int)> isValid, std::vector<std::pair<int, int>> &dirs, std::vector<std::vector<int>>& depth, int maxD = INT_MAX) const {
 		return bfs(coord, isValid, dirs, depth);
 	}
 
@@ -590,11 +590,11 @@ public:
 	// Finds coordinates that satisfy `isValid`, and are connected to (startR, startC)
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns a vector of coordinates, where each coordinate is a pair of (r, c)
-	vector<pair<int, int>> getRegion(int startR, int startC, function<bool(int, int)> isValid, vector<pair<int, int>>& dirs) const {
-		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
+	std::vector<std::pair<int, int>> getRegion(int startR, int startC, function<bool(int, int)> isValid, std::vector<std::pair<int, int>>& dirs) const {
+		std::vector<std::vector<int>> depth = std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
 		bfs(startR, startC, isValid, dirs, depth);
 
-		vector<pair<int, int>> output;
+		std::vector<std::pair<int, int>> output;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				if (depth[r][c] >= 0) output.push_back({ r, c });
@@ -602,7 +602,7 @@ public:
 		}
 		return output;
 	}
-	vector<pair<int, int>> getRegion(pair<int, int> coord, function<bool(int, int)> isValid, vector<pair<int, int>> &dirs) const {
+	std::vector<std::pair<int, int>> getRegion(std::pair<int, int> coord, function<bool(int, int)> isValid, std::vector<std::pair<int, int>> &dirs) const {
 		return getRegion(coord.first, coord.second, isValid, dirs);
 	}
 
@@ -610,10 +610,10 @@ public:
 	// Finds regions whcih satisfy `isValid`
 	// @param `dirs` the valid directions to move to adjacent nodes
 	// @returns a vector of regions, where each region is a vector of coordinates
-	vector<vector<pair<int, int>>> getRegions(function<bool(int, int)> isValid, vector<pair<int, int>> &dirs) const {
-		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
+	std::vector<std::vector<std::pair<int, int>>> getRegions(function<bool(int, int)> isValid, std::vector<std::pair<int, int>> &dirs) const {
+		std::vector<std::vector<int>> depth = std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
 
-		vector<vector<pair<int, int>>> output;
+		std::vector<std::vector<std::pair<int, int>>> output;
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				if (depth[r][c] == -1 && isValid(r, c)) {
@@ -627,14 +627,14 @@ public:
 
 	// O(RC)
 	// Determines whether a region of coordinates which satisfy `isValid` are commpletely surrounded coordinates which satisfy `isBoundary`
-	bool isSurroundedBy(int startR, int startC, function<bool(int, int)> isValid, function<bool(int, int)> isBoundary, vector<pair<int, int>> &dirs) const {
-		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
+	bool isSurroundedBy(int startR, int startC, function<bool(int, int)> isValid, function<bool(int, int)> isBoundary, std::vector<std::pair<int, int>> &dirs) const {
+		std::vector<std::vector<int>> depth = std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
 		bfs(startR, startC, isValid, dirs, depth);
 
 		for (int r = 0; r < R; ++r) {
 			for (int c = 0; c < C; ++c) {
 				if (isValid(r, c)) {
-					for (pair<int, int> adj : getAdjCoords(r, c, dirs)) {
+					for (std::pair<int, int> adj : getAdjCoords(r, c, dirs)) {
 						if (!isValid(adj.first, adj.second) && !isBoundary(adj.first, adj.second)) return false;
 					}
 				}
@@ -642,22 +642,22 @@ public:
 		}
 		return true;
 	}
-	bool isSurroundedBy(pair<int, int> coord, T val, function<bool(int, int)> isValid, function<bool(int, int)> isBoundary, vector<pair<int, int>> &dirs) const {
+	bool isSurroundedBy(std::pair<int, int> coord, T val, function<bool(int, int)> isValid, function<bool(int, int)> isBoundary, std::vector<std::pair<int, int>> &dirs) const {
 		return isSurroundedBy(coord.first, coord.second, val, isValid, isBoundary, dirs);
 	}
 
 	// O(RC)
 	// Finds the shortest path from (r1, c1) to (r2, c2) inclusive, where each coordinate on the path satisfies `isValid`
 	// @param `dirs` the valid directions to move to adjacent nodes
-	vector<pair<int, int>> shortestPath(int r1, int c1, int r2, int c2, function<bool(int, int)> isValid, vector<pair<int, int>> &dirs) const {
-		vector<vector<int>> depth = vector<vector<int>>(R, vector<int>(C, -1));
+	std::vector<std::pair<int, int>> shortestPath(int r1, int c1, int r2, int c2, function<bool(int, int)> isValid, std::vector<std::pair<int, int>> &dirs) const {
+		std::vector<std::vector<int>> depth = std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
 		bfs(r2, c2, isValid, dirs, depth);
 		assert(depth[r1][c1] != -1 && "No path found");
 
-		vector<pair<int, int>> output;
+		std::vector<std::pair<int, int>> output;
 		for (int r = r1, c = c1; !(r == r2 && c == c2); ) {
 			output.push_back({ r, c });
-			for (pair<int, int> adj : getAdjCoords(r, c, dirs)) {
+			for (std::pair<int, int> adj : getAdjCoords(r, c, dirs)) {
 				int newDepth = depth[adj.first][adj.second];
 				if (newDepth != -1 && newDepth < depth[r][c]) {
 					r = adj.first;
@@ -669,7 +669,7 @@ public:
 
 		return output;
 	}
-	vector<pair<int, int>> shortestPath(pair<int, int> coord1, pair<int, int> coord2, function<bool(int, int)> isValid, vector<pair<int, int>> &dirs) const {
+	std::vector<std::pair<int, int>> shortestPath(std::pair<int, int> coord1, std::pair<int, int> coord2, function<bool(int, int)> isValid, std::vector<std::pair<int, int>> &dirs) const {
 		return shortestPath(coord1.first, coord1.second, coord2.first, coord2.second, isValid, dirs);
 	}
 };
@@ -677,7 +677,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, const Grid<T> grid) {
+template<typename T> std::ostream& operator<<(std::ostream& out, const Grid<T> grid) {
 	grid.print(out);
 	return out;
 }

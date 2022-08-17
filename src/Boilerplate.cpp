@@ -13,17 +13,17 @@ void solve() {
 }
 
 signed main() {
-	cin.tie(0); ios::sync_with_stdio(0);
-	//ifstream cin{ ")in.txt" };
-	//ofstream cout{ ")out.txt" };
+	std::cin.tie(0); ios::sync_with_stdio(0);
+	//ifstream std::cin{ "_in.txt" };
+	//ofstream std::cout{ "_out.txt" };
 
 	solve();
 
 	/*
-	cin >> T;
+	std::cin >> T;
 	for (int t = 1; t <= T; ++t) {
-		cout << "Case #" << t << ": ";
+		std::cout << "Case #" << t << ": ";
 		solve();
-		cout << "\n";
+		std::cout << "\n";
 	*/
 }

@@ -32,16 +32,16 @@ public:
 	// Displays the matrx
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
-	void print(ostream& out = cout, bool newLine = true) const {
+	void print(std::ostream& out = std::cout, bool newLine = true) const {
 		out << "[\n";
 		for (int r = 0; r < this->getR(); ++r) {
 			out << ' ';
 			for (int c = 0; c < this->getC(); ++c) out << this->getVal(r, c) << ' ';
 			out << '\n';
 		}
-		cout << "]\n";
+		std::cout << "]\n";
 
-		if (newLine) cout << '\n';
+		if (newLine) std::cout << '\n';
 	}
 
 	/************************************************
@@ -160,7 +160,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, const Matrix<T> mat) {
+template<typename T> std::ostream& operator<<(std::ostream& out, const Matrix<T> mat) {
 	mat.print(out);
 	return out;
 }

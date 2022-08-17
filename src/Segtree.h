@@ -53,8 +53,8 @@ private:
 
     // O(1) update values from values of children
     void pull() {
-        minVal = min(lChild->minVal, rChild->minVal);
-        maxVal = max(lChild->maxVal, rChild->maxVal);
+        minVal = std::min(lChild->minVal, rChild->minVal);
+        maxVal = std::max(lChild->maxVal, rChild->maxVal);
         sumVal = lChild->sumVal + rChild->sumVal;
     }
 
@@ -83,7 +83,7 @@ public:
     Segtree(Segtree<T> t, ll _l, ll _r) : l(_l), r(_r) {
         assert(0 <= l && l <= r);
         m = (l + r) / 2;
-        for (ll i = _l; i <= _r; ++i) set(i, t.getVal(i));
+        for (ll i = _l; i <= _r; ++i) std::set(i, t.getVal(i));
     }
 
     // O(1) Initialise segtree given an existing left and right child
@@ -91,8 +91,8 @@ public:
         assert(0 <= l && l <= r);
         assert(lChild->r + 1 == rChild->l);
         m = (l + r) / 2;
-        minVal = min(lChild->minVal, rChild->minVal);
-        maxVal = max(lChild->maxVal, rChild->maxVal);
+        minVal = std::min(lChild->minVal, rChild->minVal);
+        maxVal = std::max(lChild->maxVal, rChild->maxVal);
         sumVal = lChild->sumVal + rChild->sumVal;
     }
 
@@ -114,14 +114,14 @@ public:
      ************************************************/
 
      // O(1) print the first 20 elements
-    void print(ostream& out = cout, bool newLine = false) {
-        for (ll i = l; i <= min(l + 20, r); ++i) out << getVal(i) << ' ';
+    void print(std::ostream& out = std::cout, bool newLine = false) {
+        for (ll i = l; i <= std::min(l + 20, r); ++i) out << getVal(i) << ' ';
         if (newLine) out << '\n';
     }
 
     // O(1)
-    void printDebug(ostream& out = cout, bool newLine = false) {
-        out << '[' << l << ".." << r << "] min=" << minVal << ", max=" << maxVal << ", sum=" << sumVal;
+    void printDebug(std::ostream& out = std::cout, bool newLine = false) {
+        out << '[' << l << ".." << r << "] std::min=" << minVal << ", std::max=" << maxVal << ", sum=" << sumVal;
         if (newLine) out << '\n';
     }
 
@@ -154,7 +154,7 @@ public:
     }
 
     // O(log N) Range update: set
-    Segtree* set(ll tl, ll tr, T x, bool persistent = false) {
+    Segtree* std::set(ll tl, ll tr, T x, bool persistent = false) {
         if (tl > r || l > tr) return this;
 
         push();
@@ -167,19 +167,19 @@ public:
             newNode->lazyMode = 2;
         }
         else if (touching(tl, tr)) {
-            newNode->lChild = lChild->set(tl, tr, x, persistent);
-            newNode->rChild = rChild->set(tl, tr, x, persistent);
+            newNode->lChild = lChild->std::set(tl, tr, x, persistent);
+            newNode->rChild = rChild->std::set(tl, tr, x, persistent);
             newNode->pull();
         }
         return newNode;
     }
-    Segtree* set(ll i, T x) {
-        return set(i, i, x);
+    Segtree* std::set(ll i, T x) {
+        return std::set(i, i, x);
     }
 
     // O(log N) Range update: set all values to T(0)
     void clear() {
-        set(l, r, T(0));
+        std::set(l, r, T(0));
     }
 
     /************************************************
@@ -188,11 +188,11 @@ public:
 
      // O(log N) Range query: mininum
     T getMin(ll tl, ll tr) {
-        if (!touching(tl, tr)) return numeric_limits<T>::max();
+        if (!touching(tl, tr)) return std::numeric_limits<T>::max();
         if (coveredBy(tl, tr)) return minVal;
 
         push();
-        return min(lChild->getMin(tl, tr), rChild->getMin(tl, tr));
+        return std::min(lChild->getMin(tl, tr), rChild->getMin(tl, tr));
     }
     // O(1) Range query: min of all entries
     T getMin() {
@@ -201,11 +201,11 @@ public:
 
     // O(log N) Range query: maximum
     T getMax(ll tl, ll tr) {
-        if (!touching(tl, tr)) return numeric_limits<T>::min();
+        if (!touching(tl, tr)) return std::numeric_limits<T>::min();
         if (coveredBy(tl, tr)) return maxVal;
 
         push();
-        return max(lChild->getMax(tl, tr), rChild->getMax(tl, tr));
+        return std::max(lChild->getMax(tl, tr), rChild->getMax(tl, tr));
     }
     // O(1) Range query: max of all entries
     T getMax() {
@@ -335,12 +335,12 @@ public:
     }
 
     // O(N log N) get the indexes of all elements with a minimum value
-    vector<ll> getMinIndexes() {
-        vector<ll> output;
+    std::vector<ll> getMinIndexes() {
+        std::vector<ll> output;
         getMinIndexes(output);
         return output;
     }
-    vector<ll> getMinIndexes(vector<ll>& output) {
+    std::vector<ll> getMinIndexes(std::vector<ll>& output) {
         if (l == r) output.push_back(l);
         else {
             push();
@@ -351,12 +351,12 @@ public:
     }
 
     // O(N log N) get the indexes of all elements with a maximum value
-    vector<ll> getMaxIndexes() {
-        vector<ll> output;
+    std::vector<ll> getMaxIndexes() {
+        std::vector<ll> output;
         getMaxIndexes(output);
         return output;
     }
-    vector<ll> getMaxIndexes(vector<ll>& output) {
+    std::vector<ll> getMaxIndexes(std::vector<ll>& output) {
         if (l == r) output.push_back(l);
         else {
             push();
@@ -387,7 +387,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-template<typename T> ostream& operator<<(ostream& out, Segtree<T> tree) {
+template<typename T> std::ostream& operator<<(std::ostream& out, Segtree<T> tree) {
     tree.print(out);
     return out;
 }

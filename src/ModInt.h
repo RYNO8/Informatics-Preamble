@@ -24,7 +24,7 @@ public:
 	// O(1)
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
-	void print(ostream& out = cout, bool newLine = false) const {
+	void print(std::ostream& out = std::cout, bool newLine = false) const {
 		out << num << " ( mod " << MOD << " )";
 		if (newLine) out << '\n';
 	}
@@ -148,8 +148,8 @@ public:
 		ll r0 = MOD, r1 = num;
 		while (r1) {
 			ll q = r0 / r1;
-			x0 -= x1 * q; swap(x0, x1);
-			r0 -= r1 * q; swap(r0, r1);
+			x0 -= x1 * q; std::swap(x0, x1);
+			r0 -= r1 * q; std::swap(r0, r1);
 		}
 		return x0;
 	}
@@ -158,7 +158,7 @@ public:
 /************************************************
  *                    DISPLAY                   *
  ************************************************/
-ostream& operator<<(ostream& out, const ModInt val) {
+std::ostream& operator<<(std::ostream& out, const ModInt val) {
 	val.print(out);
 	return out;
 }

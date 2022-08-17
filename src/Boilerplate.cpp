@@ -14,8 +14,8 @@ void solve() {
 
 signed main() {
 	cin.tie(0); ios::sync_with_stdio(0);
-	//ifstream cin{ "robotin.txt" };
-	//ofstream cout{ "robotout.txt" };
+	//ifstream cin{ ")in.txt" };
+	//ofstream cout{ ")out.txt" };
 
 	solve();
 

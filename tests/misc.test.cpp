@@ -1,19 +1,16 @@
-// constants come first
-#include "Constants.h"
-
-// include the data structures you want
-// TODO: make sure all orderings work (https://www.learncpp.com/cpp-tutorial/header-guards/)
-#include "CHT.h"
-#include "Geometry.h"
-#include "Graph.h"
-#include "Grid.h"
-#include "Matrix.h" // must come after grid
-#include "ModInt.h"
-#include "Polynomial.h"
-#include "Ranges.h"
-#include "Segtree.h"
-#include "SqrtDecomp.h"
-#include "Tree.h" // must come after graph
+#include "../src/BIT.h"
+#include "../src/CHT.h"
+#include "../src/Constants.h"
+#include "../src/Geometry.h"
+#include "../src/Grid.h"
+#include "../src/Graph.h"
+#include "../src/Matrix.h"
+#include "../src/ModInt.h"
+#include "../src/Polynomial.h"
+#include "../src/Ranges.h"
+#include "../src/Segtree.h"
+#include "../src/SqrtDecomp.h"
+#include "../src/Tree.h"
 using namespace std;
 
 

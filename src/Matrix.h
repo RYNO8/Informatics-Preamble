@@ -1,3 +1,7 @@
+#pragma once
+#include "Constants.h"
+#include "Grid.h"
+
 template<typename T> class Matrix : public Grid<T> {
 	/************************************************
 	 *                INITIALISATION                *

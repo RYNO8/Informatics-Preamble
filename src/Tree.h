@@ -1,4 +1,8 @@
-﻿template<typename T> class Tree {
+﻿#pragma once
+#include "Constants.h"
+#include "Graph.h"
+
+template<typename T> class Tree {
 	/************************************************
 	 *                INITIALISATION                *
 	 ************************************************/

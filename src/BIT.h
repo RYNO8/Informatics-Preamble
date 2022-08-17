@@ -1,3 +1,6 @@
+#pragma once
+#include "Constants.h"
+
 // TODO: initialisation from vector, array
 // TODO: function to fill range with value
 // TODO: conversion between Grid

@@ -23,6 +23,7 @@ Functionalities include
 [] fast factorisation, fast isPrime, how?? Pollard rho was dodgy
 [] check through everything for consistency
 [] change arguments to references if possible
+[] write + fix tests
 */
 
 # Notes

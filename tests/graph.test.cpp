@@ -1,6 +1,6 @@
-﻿// constants come first
-#include "../src/Constants.h"
-#include "../src/Graph.h"
+﻿#include "../src/Graph.h"
+#include <iostream>
+#include <fstream>
 using namespace std;
 
 void testGraph() {
@@ -13,7 +13,6 @@ void testGraph() {
 	cout << ~graph;
 }
 
-
-signed main() {
+int main() {
 	testGraph();
 }

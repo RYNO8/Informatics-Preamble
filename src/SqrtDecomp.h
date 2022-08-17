@@ -1,3 +1,5 @@
+#pragma once
+
 // O(Q + N log N), where Q is the size of `queries_` and N is the total size of the interval to be considered
 // Mo's algorithm
 template<typename T> vector<T> chunkQueries(vector<pair<int, int>> &queries_, function<void(int)> add, function<void(int)> rem, function<T(int, int)> answer) {

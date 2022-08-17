@@ -1,3 +1,5 @@
+#pragma once
+
 // TODO: test all
 template<typename T> class Point : public complex<T> {
 	/************************************************

@@ -1,3 +1,5 @@
+#pragma once
+
 // @returns A mapping between original coordinates and compressed coordinates
 template<typename Iterator>
 map<typename iterator_traits<Iterator>::value_type, typename iterator_traits<Iterator>::value_type> coordCompressMap(Iterator begin, Iterator end, int startI = 0) {

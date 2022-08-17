@@ -1,6 +1,6 @@
+#pragma once
 
 // `T` should preferably be a real number
-
 template<typename T> class Segtree {
     /************************************************
      *                INITIALISATION                *

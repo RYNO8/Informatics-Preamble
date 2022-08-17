@@ -1,3 +1,6 @@
+#pragma once
+#include "Constants.h"
+
 // Representation of an infinite line using intersection gradient form
 struct Line_ {
     ll m, b;

@@ -1,18 +1,12 @@
 // TODO: test all
-template<typename T> class Point {
+template<typename T> class Point : public complex<T> {
 	/************************************************
 	 *                INITIALISATION                *
 	 ************************************************/
 
-private:
-    T x, y;
-
 public:
 	// O(1) Initialises a Point
-    Point(T x_, T y_) {
-		assert(max(abs(x_), abs(y_)) <= sqrt(numeric_limits<T>::max()) && "Operations of points will cause overflow");
-		x = x_;
-		y = y_;
+    Point(T x, T y) : complex<T>(x, y) {
     }
 
 	/************************************************
@@ -23,7 +17,7 @@ public:
 	// @param `out` The string representation of the graph is piped to this output stream
 	// @param `newLine` Indicates whether to end with a trailing `\\n`
 	void print(ostream& out = cout, bool newLine = false) {
-		out << '(' << x << ", " << y << ')';
+		out << '(' << this->real() << ", " << this->imag() << ')';
 		if (newLine) out << '\n';
 	}
 
@@ -31,37 +25,37 @@ public:
 	 *                   PROPERTIES                 *
 	 ************************************************/
 
-	// O(1) Gets x coordinate
+	// O(1) Gets this->real() coordinate
 	const T getX() {
-		return x;
+		return this->real();
 	}
 
-	// O(1) Gets y coordinate
+	// O(1) Gets this->imag() coordinate
 	const T getY() {
-		return y;
+		return this->imag();
 	}
 
 	/************************************************
 	 *               BASCIC OPERATIONS              *
 	 ************************************************/
-	bool operator==(Point o) const {
+	/*bool operator==(Point o) const {
 		// TODO: if `T` is a floating point type, account for floating point imprecisions
-		return x == o.x && y == o.y;
+		return this->real() == o.real() && this->imag() == o.imag();
 	}
 
 	bool operator!=(Point o) const {
 		// TODO: if `T` is a floating point type, account for floating point imprecisions
-		return x != o.x || y != o.y;
+		return this->real() != o.real() || this->imag() != o.imag();
 	}
 
 	// O(1) Standard modular addition
 	Point operator+(Point o) const {
-		return Point(x + o.x, y + o.y);
+		return Point(this->real() + o.real(), this->imag() + o.imag());
 	}
 
 	// O(1) Standard modular subtraction
 	Point operator-(Point o) const {
-		return Point(x - o.x, y - o.y);
+		return Point(this->real() - o.real(), this->imag() - o.imag());
 	}
 
 	// O(1) Addition assignment
@@ -74,15 +68,15 @@ public:
 	Point operator-=(Point o) {
 		*this = *this - o;
 		return *this;
-	}
+	}*/
 	
 	/************************************************
 	 *               VECTOR OPERATIONS              *
 	 ************************************************/
 
-	// O(1) Scale by `k`
+	// O(1) Scale up by `k`
 	Point operator*(T k) {
-		return Point(x * k, y * k);
+		return Point(this->real() * k, this->imag() * k);
 	}
 
 	// O(1) Multiplication assignment
@@ -91,24 +85,36 @@ public:
 		return *this;
 	}
 
+	// O(1) Scale down by `k`
+	Point operator/(T k) {
+		return Point(this->real() / k, this->imag() / k);
+	}
+
+	// O(1) Division assignment
+	Point operator/=(T k) {
+		*this = *this / k;
+		return *this;
+	}
+
 	// O(1) Dot product
 	T dot(Point o) {
-		return x * o.x + y * o.y;
+		return this->real() * o.real() + this->imag() * o.imag();
 	}
 
 	// O(1) Skew product
 	T skew(Point o) {
-		return x * o.x - y * o.y;
+		return this->real() * o.real() - this->imag() * o.imag();
 	}
 
 	// O(1) Pythagorean distance from origin
 	ld length() {
-		return sqrt(x * x + y * y);
+		return sqrt(this->real() * this->real() + this->imag() * this->imag());
 	}
+
 	// O(1)
 	// @returns anticlockwise order from `*this` to `q` to `r`
 	T ccw(Point<T> &q, Point<T> &r) {
-		return (q.y - y) * (r.x - q.x) - (q.x - x) * (r.y - q.y);
+		return (q.imag() - this->imag()) * (r.real() - q.real()) - (q.real() - this->real()) * (r.imag() - q.imag());
 	}
 
 	// O(1)
@@ -127,7 +133,7 @@ public:
 	// O(1)
 	// whether `*this` lies in the bounding box of `pq`
 	bool onSegment(Point p, Point q) {
-		return min(p.x, q.x) <= x && x <= max(p.x, q.x) && min(p.y, q.y) <= y && y <= max(p.y, q.y);
+		return min(p.real(), q.real()) <= this->real() && this->real() <= max(p.real(), q.real()) && min(p.imag(), q.imag()) <= this->imag() && this->imag() <= max(p.imag(), q.imag());
 	}
 };
 
@@ -196,7 +202,7 @@ public:
 
 	// TODO: ccw algorithm to determine line line intersection
 	bool intersects2(Line<T>& l) {
-
+		return true;
 	}
 
 	// O(1)
@@ -298,6 +304,7 @@ public:
 	// @returns whether point is stictly within the boundary of the polygon
 	bool isContained2(Point<T> point) {
 		// TODO: use ray tracing
+		return true;
 	}
 };
 

@@ -2,37 +2,37 @@
  *                    IMPORTS                   *
  ************************************************/
 
-// alternatively `#include <bits/stdc++.h>`, but my compiler doesn't support that :'(
-#include <unordered_map>
-#include <unordered_set>
-#include <functional>
-#include <algorithm>
-#include <iostream>
-#include <assert.h>
-#include <iterator>
-#include <utility>
-#include <numeric>
-#include <cstddef>
-#include <fstream>
-#include <iomanip>
-#include <sstream>
-#include <bitset>
-#include <random>
-#include <chrono>
-#include <math.h>
-#include <time.h>
-#include <string>
-#include <vector>
-#include <limits>
-#include <queue>
-#include <stack>
-#include <set>
-#include <map>
+#include <bits/stdc++.h>
+// #include <unordered_map>
+// #include <unordered_set>
+// #include <functional>
+// #include <algorithm>
+// #include <iostream>
+// #include <assert.h>
+// #include <iterator>
+// #include <utility>
+// #include <numeric>
+// #include <cstddef>
+// #include <fstream>
+// #include <iomanip>
+// #include <sstream>
+// #include <climits>
+// #include <bitset>
+// #include <random>
+// #include <chrono>
+// #include <math.h>
+// #include <time.h>
+// #include <string>
+// #include <vector>
+// #include <limits>
+// #include <queue>
+// #include <stack>
+// #include <set>
+// #include <map>
 #ifdef _MSC_VER
 #	include <intrin.h>
-#	define popcount __popcnt
-#else
-#	define popcount __builtin_popcount
+#	define __builtin_popcount __popcnt
+#	define __builtin_popcountll __popcntll
 #endif
 
 using namespace std;
@@ -57,11 +57,19 @@ constexpr ll SQRT_MAXN = 724; // or 300
 constexpr ll MOD = 1000000007;
 constexpr ll MOD_POW = 1; // highest value such that MOD-1 is divisible by 2^MOD_POW
 
+typedef unsigned long long ull;
+
 vector<pair<int, int>> DIRS_RECTILINEAR = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
 vector<pair<int, int>> DIRS_DIAG = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
 vector<pair<int, int>> DIRS_ALL = { {0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1} };
 vector<pair<int, int>> DIRS = DIRS_RECTILINEAR;
 
+random_device rd;
+mt19937_64 rng(rd());
+uniform_int_distribution<int> int_dis(0, numeric_limits<int>::max());
+uniform_int_distribution<ll> ll_dis(0, numeric_limits<ll>::max());
+uniform_int_distribution<ull> ull_dis(0, numeric_limits<ull>::max());
+uniform_real_distribution<ld> prob_dist(0, 1);
 
 /************************************************
  *                    DISPLAY                   *
@@ -221,22 +229,32 @@ template<typename T> T lcm(T a, T b) {
 }
 
 
-// O(log log A) = O(1)
+// O(12)
 // @returns the number of set bits in the binary represetnation of `A`
-ll popcountManual(ll A) {
-	A = ((A & 1431655765) + ((A & 2863311530) >> (1 << 0)));
-	A = ((A & 858993459) + ((A & 3435973836) >> (1 << 1)));
-	A = ((A & 252645135) + ((A & 4042322160) >> (1 << 2)));
-	A = ((A & 16711935) + ((A & 4278255360) >> (1 << 3)));
-	A = ((A & 65535) + ((A & 4294901760) >> (1 << 4)));
-	return A;
+int32_t popcount(int32_t x) {
+    x -= ((x >> 1) & 0b01010101010101010101010101010101);
+    x = ((x >> 2) & 0b00110011001100110011001100110011) + (x & 0b00110011001100110011001100110011);
+    return ((x + (x >> 4) & 0b00001111000011110000111100001111) * 0x1010101) >> 24;
 }
 
-// O(log A) = O(1)
-ll popcountManualSlow(ll A) {
-	ll total = 0;
-	for (; A; A /= 2) total += A % 2;
-	return total;
+uint32_t popcount(uint32_t x) {
+    x -= ((x >> 1) & 0b01010101010101010101010101010101);
+    x = ((x >> 2) & 0b00110011001100110011001100110011) + (x & 0b00110011001100110011001100110011);
+    return ((x + (x >> 4) & 0b00001111000011110000111100001111) * 0x1010101) >> 24;
+}
+
+int64_t popcount(int64_t x) {
+    x = (x & 0x5555555555555555ULL) + ((x >> 1) & 0x5555555555555555ULL);
+    x = (x & 0x3333333333333333ULL) + ((x >> 2) & 0x3333333333333333ULL);
+    x = (x & 0x0F0F0F0F0F0F0F0FULL) + ((x >> 4) & 0x0F0F0F0F0F0F0F0FULL);
+    return (x * 0x0101010101010101ULL) >> 56;
+}
+
+uint64_t popcount(uint64_t x) {
+    x = (x & 0x5555555555555555ULL) + ((x >> 1) & 0x5555555555555555ULL);
+    x = (x & 0x3333333333333333ULL) + ((x >> 2) & 0x3333333333333333ULL);
+    x = (x & 0x0F0F0F0F0F0F0F0FULL) + ((x >> 4) & 0x0F0F0F0F0F0F0F0FULL);
+    return (x * 0x0101010101010101ULL) >> 56;
 }
 
 // O(1)

@@ -322,7 +322,7 @@ public:
 					for (pair<int, T> edge : inEdges[u]) {
 						int v = edge.first;
 						if (!seen[v]) {
-							seen.insert(v);
+							seen[v] = true;
 							q.push(v);
 							output.back().push_back(v);
 						}
@@ -340,7 +340,6 @@ public:
 		assert(validNode(root) && "Node index out of range");
 		Graph<T> output(V, isWeighted, isDirected);
 
-		multiset<pair<pair<int, int>, T>> output;
 		for (int u : getComponentNodes(root)) {
 			for (pair<int, T> edge : outEdges[u]) {
 				if (!isDirected && edge.first > u) break;
@@ -583,7 +582,7 @@ private:
 	// Standard Kruskal's algorithm - finds the cost of the minimum spanning tree, using union find (DSU)
 	T KruskalCost() const {
 		vector<int> parent = vector<int>(V + 1);
-		iota(parent.begin(), parent.end());
+		iota(parent.begin(), parent.end(), 0);
 
 		vector<pair<T, pair<int, int>>> sortedEdges;
 		for (pair<pair<int, int>, T> edge : edges) {
@@ -606,7 +605,7 @@ private:
 	// Standard Kruskal's algorithm - finds the minimum spanning tree, using union find (DSU)
 	Graph<T> Kruskal() const {
 		vector<int> parent = vector<int>(V + 1);
-		iota(parent.begin(), parent.end());
+		iota(parent.begin(), parent.end(), 0);
 
 		vector<pair<T, pair<int, int>>> sortedEdges;
 		for (pair<pair<int, int>, T> edge : edges) {
@@ -866,7 +865,7 @@ private:
 public:
 	// O(V E^2 log E) or O(V^2 E log E)
 	// @returns The value of max flow, using (fast) Dinic's or (slow) Edmonds-Karp
-	T maxFlow(int source = 1, int sink = V, bool doSlow = false) const {
+	T maxFlow(int source, int sink, bool doSlow = false) const {
 		assert(validNode(source) && validNode(sink) && "Node index out of range");
 		if (source == sink) return numeric_limits<T>::max();
 		map<pair<int, int>, T> remainingCap;

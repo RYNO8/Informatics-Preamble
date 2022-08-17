@@ -133,7 +133,7 @@ public:
 	void pprint(std::ostream& out = std::cout, bool newLine = true, bool showWeight = true, int node = 1, string prefix = "", bool isLast = true) const {
 		out << prefix << "|\n" << prefix << (isLast ? "`" : "|");
 		if (showWeight) {
-			out << string(parent[0][node].second, '-');
+			out << std::string(parent[0][node].second, '-');
 		}
 		else {
 			out << '-';
@@ -141,7 +141,7 @@ public:
 		out << node << '\n';
 
 		prefix += (isLast ? " " : "|");
-		if (showWeight) prefix += string(parent[0][node].second, ' ');
+		if (showWeight) prefix += std::string(parent[0][node].second, ' ');
 		for (std::pair<int, T> child : children[node]) {
 			pprint(out, false, showWeight, child.first, prefix, child == children[node].back());
 		}

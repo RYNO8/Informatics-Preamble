@@ -28,12 +28,12 @@ public:
 	 ************************************************/
 
 	// O(1) Gets this->real() coordinate
-	const T getX() {
+	const T getX() const {
 		return this->real();
 	}
 
 	// O(1) Gets this->imag() coordinate
-	const T getY() {
+	const T getY() const {
 		return this->imag();
 	}
 

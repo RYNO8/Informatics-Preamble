@@ -1,6 +1,8 @@
-﻿#include "../src/Constants.h"
-#include "../src/Grid.h"
+﻿#include "../src/Grid.h"
+#include <iostream>
+#include <fstream>
 using namespace std;
+using namespace DS;
 
 void testGrid() {
 	ifstream cin{ "gridin.txt" };

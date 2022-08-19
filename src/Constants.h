@@ -233,31 +233,12 @@ namespace DS {
 
 
 	// O(12)
-	// @returns the number of set bits in the binary represetnation of `A`
-	int32_t popcount(int32_t x) {
-		x -= ((x >> 1) & 0b01010101010101010101010101010101);
-		x = ((x >> 2) & 0b00110011001100110011001100110011) + (x & 0b00110011001100110011001100110011);
-		return ((x + (x >> 4) & 0b00001111000011110000111100001111) * 0x1010101) >> 24;
-	}
-
-	uint32_t popcount(uint32_t x) {
-		x -= ((x >> 1) & 0b01010101010101010101010101010101);
-		x = ((x >> 2) & 0b00110011001100110011001100110011) + (x & 0b00110011001100110011001100110011);
-		return ((x + (x >> 4) & 0b00001111000011110000111100001111) * 0x1010101) >> 24;
-	}
-
-	int64_t popcount(int64_t x) {
-		x = (x & 0x5555555555555555ULL) + ((x >> 1) & 0x5555555555555555ULL);
-		x = (x & 0x3333333333333333ULL) + ((x >> 2) & 0x3333333333333333ULL);
-		x = (x & 0x0F0F0F0F0F0F0F0FULL) + ((x >> 4) & 0x0F0F0F0F0F0F0F0FULL);
-		return (x * 0x0101010101010101ULL) >> 56;
-	}
-
-	uint64_t popcount(uint64_t x) {
-		x = (x & 0x5555555555555555ULL) + ((x >> 1) & 0x5555555555555555ULL);
-		x = (x & 0x3333333333333333ULL) + ((x >> 2) & 0x3333333333333333ULL);
-		x = (x & 0x0F0F0F0F0F0F0F0FULL) + ((x >> 4) & 0x0F0F0F0F0F0F0F0FULL);
-		return (x * 0x0101010101010101ULL) >> 56;
+	// @returns the number of set bits in the binary represetnation of `x`
+	template<typename T> T popcount(T x) {
+		x -= (x >> 1) & 0x5555555555555555;
+		x = (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333);
+		x = (x + (x >> 4)) & 0x0f0f0f0f0f0f0f0f;
+		return (x * 0x0101010101010101) >> 56;
 	}
 
 	// O(1)

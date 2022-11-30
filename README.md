@@ -17,8 +17,9 @@ Functionalities include
 
 # todo list (no particular order)
 [] implement coordinate geometry (eww)
+[] implement ranges
+[] vector .find .erase
 [] wrapper for sqrt decomp
-[] n dimensional fenwick tree
 [] dynamic tree for Tree.h, how??
 [] fast factorisation, fast isPrime, how?? Pollard rho was dodgy
 [] check through everything for consistency

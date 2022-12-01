@@ -5,6 +5,7 @@
 # done
 
 g++ util.test.cpp -O3 -Wall -o temp && ./temp; 
+g++ misc.test.cpp -O3 -Wall -o temp && ./temp; 
 g++ cht.test.cpp -O3 -Wall -o temp && diff <(echo "4
 -1 10 -20
 2 2 3 4" | ./temp) <(echo 9);

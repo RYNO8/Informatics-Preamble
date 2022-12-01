@@ -11,15 +11,17 @@
 #include "../src/Segtree.h"
 #include "../src/SqrtDecomp.h"
 #include "../src/Tree.h"
+#include "../src/Util.h"
 using namespace std;
 using namespace DS;
 
 void testFib() {
-	Matrix<ModInt> fib1 = Grid<ModInt>(vector<vector<ModInt>>{
+	constexpr uint mod = 1e9;
+	Matrix<ModInt<mod>> fib1 = Grid<ModInt<mod>>(vector<vector<ModInt<mod>>>{
 		{ 1, 1 },
 		{ 1, 0 }
 	});
-	for (int i = 0; i <= 50; ++i) cout << fib1.pow(i).getVal(0, 0) << "\n";
+	assert(fib1.pow(100000).getVal(1, 0) == 428746875);
 }
 
 

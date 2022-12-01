@@ -1,4 +1,5 @@
 #pragma once
+#include "Util.h"
 
 namespace DS {
 	template<typename T> class Polynomial {

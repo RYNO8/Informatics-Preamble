@@ -1,5 +1,14 @@
 #pragma once
 #include <iostream>
+#include <vector>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <sstream>
 
 namespace DS {
     /************************************************
@@ -170,7 +179,7 @@ namespace DS {
     }
 
     /************************************************
-     *                   UTILITIES                  *
+     *           NUMERICAL TYPE UTILITIES           *
      ************************************************/
 
     // O(log a + log b)
@@ -232,4 +241,14 @@ namespace DS {
         s << obj;
         return s.str().size();
     }
+
+    /************************************************
+     *            ITERATOR TYPE UTILITIES           *
+     ************************************************/
+    // vector<int>::iterator vector<int>::find() {
+
+    // }
+    // int int::find() {
+    //     return 2;
+    // }
 };

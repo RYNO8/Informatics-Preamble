@@ -1,6 +1,15 @@
 // solution to Commando
 // https://dmoj.ca/problem/apio10p1
-#include "../src/Constants.h"
+/*
+SAMPLE INPUT
+4
+-1 10 -20
+2 2 3 4
+
+SAMPLE OUTPUT
+9
+*/
+
 #include "../src/CHT.h"
 using namespace std;
 using namespace DS;

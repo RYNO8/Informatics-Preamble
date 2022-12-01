@@ -1,6 +1,7 @@
 #pragma once
-#include "Constants.h"
-using namespace std;
+#include <assert.h>
+#include <iostream>
+#include <vector>
 
 namespace DS {
     // TODO: initialisation from vector, array

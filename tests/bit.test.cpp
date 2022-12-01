@@ -1,5 +1,8 @@
-#include "../src/Constants.h"
 #include "../src/BIT.h"
+#include <assert.h>
+#include <vector>
+#include <random>
+#include <time.h>
 using namespace std;
 using namespace DS;
 
@@ -84,7 +87,6 @@ void testBIT_pqru() {
         }
     }
 }
-
 
 int main() {
     srand(time(NULL));

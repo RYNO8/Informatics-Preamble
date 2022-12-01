@@ -1,56 +1,69 @@
 ﻿#include "../src/Segtree.h"
+#include "../src/Constants.h"
 #include "../src/Ranges.h"
 using namespace std;
 using namespace DS;
 
-// void testSegtree_manual() {
-//     ll N;
-//     cin >> N;
+void testSegtree_manual() {
+    ll N;
+    cin >> N;
 
-//     Segtree<ll> t(N);
-//     cout << "Enter operation: set (S), add (A), min (m), max (M), total (T), quit (Q)\n\n";
+    SumSegtree<ll> *tSum = new SumSegtree<ll>(0, N - 1, 0);
+    MaxSegtree<ll> *tMax = new MaxSegtree<ll>(0, N - 1, 0);
+    MinSegtree<ll> *tMin = new MinSegtree<ll>(0, N - 1, 0);
+    cout << "Enter operation: set (S), add (A), min (m), max (M), total (T), quit (Q)\n\n";
 
-//     while (true) {
-//         char op;
-//         cin >> op;
+    while (true) {
+        char op;
+        cin >> op;
 
-//         ll tl, tr, x;
-//         switch (op) {
-//         case 'S':
-//             cin >> tl >> tr >> x;
-//             t = *t.set(tl, tr, x);
-//             break;
-//         case 'A':
-//             cin >> tl >> tr >> x;
-//             t = *t.add(tl, tr, x);
-//             break;
-//         case 'm':
-//             cin >> tl >> tr;
-//             cout << t.getMin(tl, tr) << '\n';
-//             break;
-//         case 'M':
-//             cin >> tl >> tr;
-//             cout << t.getMax(tl, tr) << '\n';
-//             break;
-//         case 'T':
-//             cin >> tl >> tr;
-//             cout << t.query(tl, tr) << '\n';
-//             break;
-//         case 'Q':
-//             return;
-//         }
+        ll tl, tr, x;
+        switch (op) {
+        case 'S':
+            cin >> tl >> tr >> x;
+            tSum->set({tl, tr}, x);
+            tMax->set({tl, tr}, x);
+            tMin->set({tl, tr}, x);
+            break;
+        case 'A':
+            cin >> tl >> tr >> x;
+            tSum->add({tl, tr}, x);
+            tMax->add({tl, tr}, x);
+            tMin->add({tl, tr}, x);
+            break;
+        case 'm':
+            cin >> tl >> tr;
+            cout << tMin->query({tl, tr}) << '\n';
+            break;
+        case 'M':
+            cin >> tl >> tr;
+            cout << tMax->query({tl, tr}) << '\n';
+            break;
+        case 'T':
+            cin >> tl >> tr;
+            cout << tSum->query({tl, tr}) << '\n';
+            break;
+        case 'Q':
+            return;
+        }
 
-//         cout << t << '\n';
+        cout << tSum << '\n';
 
-//         ll iMin = t.getMinIndexFirst();
-//         assert(t[iMin] == t.getMin() && t.getMin(0, iMin - 1) > t[iMin]);
-//         cout << string(int(iMin) * 2, ' ') << "^ min\n";
 
-//         ll iMax = t.getMaxIndexFirst();
-//         assert(t[iMax] == t.getMax() && t.getMax(0, iMax - 1) < t[iMax]);
-//         cout << string(int(iMax) * 2, ' ') << "^ max\n";
-//     }
-// }
+        function<bool(MinSegtree<ll>*)> isMin = [&](MinSegtree<ll>* node) {
+            return node->query() == tMin->query();
+        };
+        function<bool(MaxSegtree<ll>*)> isMax = [&](MaxSegtree<ll>* node) {
+            return node->query() == tMax->query();
+        };
+        
+        ll iMin = tMin->findFirst(isMin)->l();
+        cout << string(int(iMin) * 2, ' ') << "^ min\n";
+
+        ll iMax = tMax->findFirst(isMax)->l();
+        cout << string(int(iMax) * 2, ' ') << "^ max\n";
+    }
+}
 
 struct fakeSegtree {
     int N;

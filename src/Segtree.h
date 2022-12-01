@@ -1,6 +1,8 @@
 #pragma once
 #include "Constants.h"
 #include "Ranges.h"
+#include <functional>
+#include <algorithm>
 
 namespace DS {
     // `T` should preferably be a real number

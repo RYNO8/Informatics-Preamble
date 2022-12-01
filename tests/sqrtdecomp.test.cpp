@@ -1,5 +1,26 @@
 ﻿// solution to Omo
 // https://orac.amt.edu.au/cgi-bin/train/problem.pl?problemid=1102
+/*
+
+SAMPLE INPUT
+22 6
+87 79 87 95 83 85 67 72 95 68 79 71 69 95 71 79 68 95 72 67 85 83
+4 22
+9 9
+10 17
+10 11
+9 17
+10 18
+
+SAMPLE OUTPUT
+YES
+YES
+NO
+NO
+YES
+YES
+
+*/
 #include "../src/Constants.h"
 #include "../src/SqrtDecomp.h"
 #include "../src/Ranges.h"

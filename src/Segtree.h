@@ -89,16 +89,6 @@ namespace DS {
             for (ll i = l(); i <= r(); ++i) set(i, t.query(i));
         }
 
-        // O(1) Initialise segtree given an existing left and right child
-        // Segtree(Segtree<T, I, Combine, CombineAgg, Null, Update> _lChild, Segtree<T, I, Combine, CombineAgg, Null, Update> _rChild) : 
-        //     l(_lChild.l), r(_rChild.r), lChild(&_lChild), rChild(&_rChild)
-        // {
-        //     assert(0 <= l && l <= r);
-        //     assert(lChild->r + 1 == rChild->l);
-        //     midpoint() = (l + r) / 2;
-        //     val = Combine()(lChild->val, rChild->val);
-        // }
-
         /************************************************
          *                    DISPLAY                   *
          ************************************************/
@@ -238,6 +228,25 @@ namespace DS {
             return node;
         }
 
+        Segtree* extendRight(int initVal) {
+            Segtree *root = new Segtree(l(), r() + length(), initVal);
+            root->lazy = Null;
+            root->lazyMode = CLEAN;
+            root->lChild = this;
+            root->rChild = new Segtree(l() + length(), r() + length(), initVal);
+            root->pull();
+            return root;
+        }
+
+        Segtree* extendLeft(int initVal) {
+            Segtree *root = new Segtree(l(), r() + length(), initVal);
+            root->lazy = Null;
+            root->lazyMode = CLEAN;
+            root->lChild = new Segtree(l() + length(), r() + length(), initVal);
+            root->rChild = this;
+            root->pull();
+            return root;
+        }
     };
 
     template<typename T> class MaxOp {

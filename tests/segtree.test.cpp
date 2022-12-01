@@ -52,59 +52,118 @@ using namespace DS;
 //     }
 // }
 
+struct fakeSegtree {
+    int N;
+    vector<int> t;
+    fakeSegtree(int _N, int initVal) : N(_N) {
+        t = vector<int>(N, initVal);
+    }
+
+    void set(int l, int r, int x) {
+        for (int i = l; i <= r; ++i) t[i] = x;
+    }
+
+    void add(int l, int r, int x) {
+        for (int i = l; i <= r; ++i) t[i] += x;
+    }
+
+    int sum(int l, int r) {
+        return accumulate(t.begin() + l, t.begin() + r + 1, 0);
+    }
+
+    int min(int l, int r) {
+        return *min_element(t.begin() + l, t.begin() + r + 1);
+    }
+
+    int max(int l, int r) {
+        return *max_element(t.begin() + l, t.begin() + r + 1);
+    }
+
+    int minIndex() {
+        return min_element(t.begin(), t.end()) - t.begin();
+    }
+
+    int maxIndex() {
+        return max_element(t.begin(), t.end()) - t.begin();
+    }
+
+    void extendRight(int x) {
+        int s = t.size();
+        for (int rep = 0; rep < s; ++rep) {
+            t.push_back(x);
+        }
+    }
+
+    size_t size() {
+        return t.size();
+    }
+};
 
 void testSegtree_auto() {
-    for (int t = 0; t < 20; ++t) {
-        cout << "REP: " << t << "\n";
+    for (int tI = 0; tI < 20; ++tI) {
+        cout << "REP: " << tI << "\n";
 
-        int fakeSegtree[10000] = {};
+        int N = 5;
+        int initVal = 69;
+        fakeSegtree t(N, initVal);
         ll shift = -rand();
-        fill(begin(fakeSegtree), end(fakeSegtree), 69);
-        SumSegtree<ll> tSum(0 + shift, 9999 + shift, 69);
-        MaxSegtree<ll> tMax(0 + shift, 9999 + shift, 69);
-        MinSegtree<ll> tMin(0 + shift, 9999 + shift, 69);
+        
+        SumSegtree<ll> *tSum = new SumSegtree<ll>(0 + shift, N - 1 + shift, initVal);
+        MaxSegtree<ll> *tMax = new MaxSegtree<ll>(0 + shift, N - 1 + shift, initVal);
+        MinSegtree<ll> *tMin = new MinSegtree<ll>(0 + shift, N - 1 + shift, initVal);
 
         for (int rep = 0; rep < 10000; ++rep) {
-            int opt = rand() % 7;
-            int l = rand() % 10000, r = rand() % 10000;
+            int opt = rand() % 8;
+            int l = rand() % t.size(), r = rand() % t.size();
             if (l > r) swap(l, r);
+            int x = (rand() % 100) - 50;
 
             if (opt == 0) {
                 // set
-                int x = (rand() % 100) - 50;
-                for (int i = l; i <= r; ++i) fakeSegtree[i] = x;
-                tSum.set({l + shift, r + shift}, x);
-                tMax.set({l + shift, r + shift}, x);
-                tMin.set({l + shift, r + shift}, x);
+                t.set(l, r, x);
+                tSum->set({l + shift, r + shift}, x);
+                tMax->set({l + shift, r + shift}, x);
+                tMin->set({l + shift, r + shift}, x);
+
             } else if (opt == 1) {
                 // add
-                int x = (rand() % 100) - 50;
-                //for (int i = l; i <= r; ++i) fakeSegtree[i] += x;
-                tSum.add({l + shift, r + shift}, x);
-                tMax.add({l + shift, r + shift}, x);
-                tMin.add({l + shift, r + shift}, x);
+                t.add(l, r, x);
+                tSum->add({l + shift, r + shift}, x);
+                tMax->add({l + shift, r + shift}, x);
+                tMin->add({l + shift, r + shift}, x);
+
             } else if (opt == 2) {
-                // get min
-                assert(*min_element(fakeSegtree + l, fakeSegtree + r + 1) == tMin.query({l + shift, r + shift}));
+                // get sum
+                assert(t.sum(l, r) == tSum->query({l + shift, r + shift}));
+
             } else if (opt == 3) {
-                // get max
-                assert(*max_element(fakeSegtree + l, fakeSegtree + r + 1) == tMax.query({l + shift, r + shift}));
+                // get min
+                assert(t.min(l, r) == tMin->query({l + shift, r + shift}));
+
             } else if (opt == 4) {
+                // get max
+                assert(t.max(l, r) == tMax->query({l + shift, r + shift}));
+
+            } else if (opt == 5) {
                 // get index of min
                 function<bool(MinSegtree<ll>*)> isMin = [&](MinSegtree<ll>* node) {
-                    return node->query() == tMin.query();
+                    return node->query() == tMin->query();
                 };
-                assert(min_element(begin(fakeSegtree), end(fakeSegtree)) - begin(fakeSegtree) == tMin.findFirst(isMin)->l() - shift);
-            } else if (opt == 5) {
+                assert(t.minIndex() == tMin->findFirst(isMin)->l() - shift);
+
+            } else if (opt == 6) {
                 // get index of max
                 function<bool(MaxSegtree<ll>*)> isMax = [&](MaxSegtree<ll>* node) {
-                    return node->query() == tMax.query();
+                    return node->query() == tMax->query();
                 };
-                assert(max_element(begin(fakeSegtree), end(fakeSegtree)) - begin(fakeSegtree) == tMax.findFirst(isMax)->l() - shift);
-            } else if (opt == 6) {
-                int expected = 0;
-                for (int i = l; i <= r; ++i) expected += fakeSegtree[i];
-                assert(expected == tSum.query({l + shift, r + shift}));
+                assert(t.maxIndex() == tMax->findFirst(isMax)->l() - shift);
+
+            } else if (opt == 7 && 2 * t.size() < 5e4) {
+                // extend right
+                t.extendRight(x);
+                tSum = tSum->extendRight(x);
+                tMax = tMax->extendRight(x);
+                tMin = tMin->extendRight(x);
             }
         }
     }

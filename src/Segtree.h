@@ -229,7 +229,7 @@ namespace DS {
         }
 
         Segtree* extendRight(int initVal) {
-            Segtree *root = new Segtree(l(), r() + length(), initVal);
+            Segtree *root = new Segtree(l(), r() + length());
             root->lazy = Null;
             root->lazyMode = CLEAN;
             root->lChild = this;
@@ -239,7 +239,7 @@ namespace DS {
         }
 
         Segtree* extendLeft(int initVal) {
-            Segtree *root = new Segtree(l(), r() + length(), initVal);
+            Segtree *root = new Segtree(l(), r() + length());
             root->lazy = Null;
             root->lazyMode = CLEAN;
             root->lChild = new Segtree(l() + length(), r() + length(), initVal);

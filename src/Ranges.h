@@ -1,7 +1,9 @@
-#include <assert.h>
-#include <limits>
 #include <set>
+#include <map>
+#include <limits>
 #include <vector>
+#include <iostream>
+#include <assert.h>
 #pragma once
 
 namespace DS {
@@ -33,6 +35,10 @@ namespace DS {
          *                 INITIALISATION               *
          ************************************************/
 
+        using std::pair<T, T>::pair;
+        using std::pair<T, T>::first;
+        using std::pair<T, T>::second;
+
         // inclusive inclusive
         Range(T lVal, T rVal): std::pair<T, T>(lVal, rVal) {
             assert(l() <= r());
@@ -58,14 +64,14 @@ namespace DS {
         // @returns
         T l() const {
             // TODO: why cant i just do `return first;`
-            return this->first;
+            return first;
         }
 
         // O(1)
         // @returns
         T r() const {
             // TODO: why cant i just do `return second;`
-            return this->second;
+            return second;
         }
 
                 // O(1)
@@ -93,14 +99,16 @@ namespace DS {
 
         // O(1)
         // @returns
+        bool covers(T i) const {
+            return l() <= i && i <= r();
+        }
+        
+        // O(1)
+        // @returns
         bool covers(const Range<T> &o) const {
             return l() <= o.l() && o.r() <= r();
         }
-        // O(1)
-        // @returns
-        bool covers(T i) {
-            return l() <= i <= r();
-        }
+        
 
         // O(1)
         // @returns
@@ -120,17 +128,20 @@ namespace DS {
             return l() <= o.r() && o.l() <= r();
         }
 
-        // what to do if range is invalid?
-        // O(1)
-        // @returns
-        Range<T> intersect(const Range<T> &o) const {
-            return {max(l(), o.l()), min(r(), o.r())};
+        bool canMerge(const Range<T> &o) const {
+            return l() <= o.r() + 1 && o.l() <= r() + 1;
         }
 
-        // O(1)
+        // what to do if range is invalid?
+        // O(1) intersect
         // @returns
         Range<T> operator&(const Range<T> &o) const {
-            return intersect(o);
+            return { std::max(l(), o.l()), std::min(r(), o.r()) };
+        }
+
+        Range<T> operator|(const Range<T> &o) const {
+            assert(canMerge(o));
+            return { std::min(l(), o.l()), std::max(r(), o.r()) };
         }
 
         // should be defined by comparison on pairs
@@ -191,60 +202,108 @@ namespace DS {
          *                 INITIALISATION               *
          ************************************************/
 
-    private:
-
     public:
         // inherit constructors and all constructor overloads
         using std::set<Range<T>>::set;
+        using std::set<Range<T>>::begin;
+        using std::set<Range<T>>::end;
+        using std::set<Range<T>>::rbegin;
+        using std::set<Range<T>>::rend;
+        using std::set<Range<T>>::lower_bound;
+        using std::set<Range<T>>::upper_bound;
 
-        // NOTE: dont need print because c++ will call print on the underlying set
+        // void _cleanup() {
+        //     // merge ranges when
+        // }
 
-        void _cleanup() {
-            // merge ranges when
+        /************************************************
+         *                  PROPERTIES                  *
+         ************************************************/
+
+        const T length() const {
+            T total = T(0);
+            for (Range<T> r : *this) {
+                total += r.length();
+            }
+            return total;
         }
 
         /************************************************
          *                  OPERATIONS                  *
          ************************************************/
 
-        // should call this covers?
-        bool contains(const Ranges<T> &o) const {
-            return true;
+        // O(log N)
+        // @returns
+        bool covers(int i) const {
+            auto it = lower_bound(Range<T>(i + 1, i + 1));
+            if (it == begin()) return false;
+            it--;
+            return it->covers(i);
         }
 
-        bool overlaps(const Ranges<T> &o) const  {
-            return true;
+        // O(log N)
+        // @returns
+        bool covers(const Range<T> &o) const {
+            auto it = lower_bound(Range<T>(o.l() + 1, o.l() + 1));
+            if (it == begin()) return false;
+            it--;
+            return it->covers(o);
         }
 
-        Ranges<T> getIntersect(const Ranges<T> &o) const {
-            return true;
+        // O(N)
+        // @returns
+        bool coversAll(const Ranges<T> &o) const {
+            return (*this & o) == o;
         }
 
-        Ranges<T> operator*(const Ranges<T> &o) const {
-            return getIntersect(o);
+        // O(N log N)
+        // intersect
+        // @returns
+        Ranges<T> operator&(const Ranges<T> &o) const {
+            Ranges<T> out;
+            auto it2 = o.begin();
+            for (auto it1 = begin(); it1 != end(); ++it1) {
+                while (it2 != o.end() && it2->r() < it1->l()) ++it2;
+                while (it2 != o.end() && it1->overlaps(*it2)) {
+                    out.insert(*it1 & *it2);
+                    ++it2;
+                }
+                --it2;
+            }
+            return out;
         }
 
-        Ranges<T> getUnion(const Ranges<T> &o) const {
-            return true;
+        // O(N log N)
+        // union
+        Ranges<T> operator|(const Ranges<T> &o) {
+            std::vector<Range<T>> out;
+            for (auto it1 = begin(), it2 = o.begin(); it1 != end() || it2 != o.end(); ) {
+                auto it = (it2 == o.end() || (it1 != end() && it1->l() <= it2->l())) ? it1++ : it2++;
+                if (!out.empty() && out.back().canMerge(*it)) {
+                    out.back() = out.back() | *it;
+                } else {
+                    out.push_back(*it);
+                }
+            }
+            return Ranges<T>(out.begin(), out.end());
         }
 
-        Ranges<T> operator+(const Ranges<T> &o) const {
-            return getUnion(o);
-        }
-
-        Ranges<T> getComplement(T rangeStart = std::numeric_limits<T>::min(), T rangeEnd = std::numeric_limits<T>::max()) const {
-
-        }
+        // O(N log N)
         Ranges<T> operator~() const {
-            return getComplement();
+            Ranges<T> out;
+            T prevEnd = std::numeric_limits<T>::min();
+            for (Range<T> r : *this) {
+                if (prevEnd <= r.l() - 1) out.insert({ prevEnd, r.l() - 1 });
+                prevEnd = r.r() + 1;
+            }
+            if (rbegin()->r() + 1 <= std::numeric_limits<T>::max()) {
+                out.insert({ rbegin()->r() + 1, std::numeric_limits<T>::max() });
+            }
+            return out;
         }
 
-        bool isDisjoint() const {
-            return true;
-        }
-
-        Ranges<T> flatten() const {
-
+        bool isDisjoint(const Ranges<T> &o) const {
+            return (*this & o).empty();
         }
 
         /************************************************
@@ -252,19 +311,11 @@ namespace DS {
          ************************************************/
 
         Range<T> split(T val) {
-
+            // TODO
         }
 
         Range<T> splits(std::vector<T> val) {
-
+            // TODO
         }
     };
-
-    /************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	// template<typename T> std::ostream& operator<<(std::ostream& out, const Ranges<T>& val) {
-	// 	val.print(out);
-	// 	return out;
-	// }
 };

@@ -23,7 +23,7 @@ namespace DS {
 		// O(RC)
 		// Initialise Matrix from Grid
 		Matrix(Grid<T> g) : Grid<T>(g) {
-
+			
 		}
 
 		/************************************************

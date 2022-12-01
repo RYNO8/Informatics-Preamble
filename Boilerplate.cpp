@@ -1,10 +1,17 @@
-#include "Constants.h"
-#include "Grid.h"
-#include "Graph.h"
-#include "Tree.h"
-#include "NumTheory.h"
-#include "Segtree.h"
-#include "CHT.h"
+#include "src/BIT.h"
+#include "src/CHT.h"
+#include "src/Constants.h"
+#include "src/Geometry.h"
+#include "src/Graph.h"
+#include "src/Grid.h"
+#include "src/Matrix.h"
+#include "src/ModInt.h"
+#include "src/Polynomial.h"
+#include "src/Ranges.h"
+#include "src/Segtree.h"
+#include "src/SqrtDecomp.h"
+using namespace std;
+using namespace DS;
 
 ll N, M, T, arr[MAXN];
 

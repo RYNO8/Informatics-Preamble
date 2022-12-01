@@ -3,7 +3,7 @@
 
 namespace DS {
     // Representation of an infinite line using intersection gradient form
-    struct Line_ {
+    struct CHTLine {
         ll m, b;
 
         // O(1)
@@ -11,13 +11,13 @@ namespace DS {
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
         void print(std::ostream& out = std::cout, bool newLine = true) const {
-            out << m << " x + " << b;
+            out << "y = " << m << " x + " << b;
             if (newLine) out << '\n';
         }
 
         // O(1)
         // @returns the x value of the intersection
-        double intersect(Line_ a) const {
+        double intersect(CHTLine a) const {
             return (double)(b - a.b) / (a.m - m);
         }
 
@@ -29,68 +29,49 @@ namespace DS {
         }
     };
 
-    std::ostream& operator<<(std::ostream& out, Line_ line) {
+    std::ostream& operator<<(std::ostream& out, CHTLine line) {
         line.print(out);
         return out;
     }
 
     // Convex Hull Trick
     // "infinte" range and domain, but added lines need to have non-decreasing gradient
-    struct CHT {
-        std::vector<Line_> cht;
-
-        // O(1)
-        // Initialisation
-        CHT() {
-            cht.clear();
-        }
-
-        // O(N)
-        // Displays the convex hull, showing the lines in increasing order
-        // @param `out` The string representation of the graph is piped to this output stream
-        // @param `newLine` Indicates whether to end with a trailing `\\n`
-        void print(std::ostream& out = std::cout, bool newLine = true) const {
-            out << cht;
-            if (newLine) out << '\n';
-        }
-
+    class CHT : public std::vector<CHTLine> {
+public:
         // amortised O(1)
         // Include a unique line into the convex hull, where `m` is non-decreasing
-        void addLine(Line_ l) {
-            while (cht.size() >= 2 && cht[cht.size() - 1].intersect(cht[cht.size() - 2]) >= cht[cht.size() - 1].intersect(l)) {
-                cht.pop_back();
+        void addLine(CHTLine l) {
+            while (size() >= 2 && back().intersect(*++rbegin()) >= back().intersect(l)) {
+                pop_back();
             }
-            while (!cht.empty() && cht.back().m == l.m && cht.back().b >= l.b) {
-                cht.pop_back();
+            while (!empty() && back().m == l.m && back().b >= l.b) {
+                pop_back();
             }
-            cht.push_back(l);
+            push_back(l);
         }
 
         // O(log n)
         // @returns Minimum y value when x=`x`
-        ll getLine(ll x) const {
-            if (cht.empty()) return std::numeric_limits<ll>::max();
-            int l = -1, r = cht.size() - 1;
+        ll getMinima(ll x) const {
+            if (empty()) return std::numeric_limits<ll>::max();
+            int l = -1, r = size() - 1;
             while (l + 1 < r) {
                 int m = (l + r) / 2;
-                if (cht[m].intersect(cht[m + 1]) >= x) r = m;
+                if ((*this)[m].intersect((*this)[m + 1]) >= x) r = m;
                 else l = m;
             }
-            return cht[r].eval(x);
+            return (*this)[r].eval(x);
         }
     };
-
-    std::ostream& operator<<(std::ostream& out, CHT cht) {
-        cht.print(out);
-        return out;
-    }
 
     // Li Chao tree
     // Lines can be inserted and queried in any order, but range is limited to `MAXN`
     // Initially contains the line 0x+0
-    struct LiChaoTree {
-        Line_ tree[2 * MAXN];
+    class LiChaoTree {
+private:
+        CHTLine tree[2 * MAXN];
 
+public:
         // O(1)
         // Initialisation
         LiChaoTree() {
@@ -99,7 +80,7 @@ namespace DS {
 
         // O(log MAXN)
         // Inserts a line
-        void addLine(Line_ line) {
+        void addLine(CHTLine line) {
             int node = 1, l = 0, r = MAXN - 1;
             do {
                 int m = (l + r) / 2;
@@ -121,6 +102,7 @@ namespace DS {
         // O(log MAXN)
         // @returns Maximum y value when x=`x`
         ll getLine(int x) {
+            // implemented iteratively
             int node = 1, l = 0, r = MAXN - 1;
             ll ans = LLONG_MIN;
             assert(l <= x && x <= r && "x out of range");

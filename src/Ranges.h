@@ -23,11 +23,9 @@ namespace DS {
     // Compresses coordinates in place
     template<typename T> void coordCompressTransform(T begin, T end, int startI = 0){
         std::map<value_type<T>, value_type<T>> m = coordCompressMap(begin, end, startI);
-        
         for (T i = begin; i != end; i++) *i = m[*i];
     }
 
-    // TODO: this is currently a stub
     // TODO: test
     template<typename T> class Range {
         /************************************************

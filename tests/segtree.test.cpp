@@ -2,7 +2,7 @@
 using namespace std;
 using namespace DS;
 
-void testSegtree() {
+void testSegtree_manual() {
 	ll N;
 	cin >> N;
 
@@ -51,6 +51,40 @@ void testSegtree() {
 	}
 }
 
+
+void testSegtree_auto() {
+	int fakeSegtree[10000] = {};
+	Segtree<int> t(10000);
+
+	for (int rep = 0; rep < 10000; ++rep) {
+		int opt = rand() % 5;
+		int l = rand() % 10000, r = rand() % 10000;
+		if (l > r) swap(l, r);
+
+		if (opt == 0) {
+			// set
+			int x = (rand() % 100) - 50;
+			for (int i = l; i <= r; ++i) fakeSegtree[i] = x;
+			t.set(l, r, x);
+		} else if (opt == 1) {
+			// add
+			int x = (rand() % 100) - 50;
+			for (int i = l; i <= r; ++i) fakeSegtree[i] += x;
+			t.add(l, r, x);
+		} else if (opt == 2) {
+			// get min
+		} else if (opt == 3) {
+			// get max
+		} else {
+			// get sum
+			int expected = 0;
+			for (int i = l; i <= r; ++i) expected += fakeSegtree[i];
+			assert(expected == t.getSum(l, r));
+		}
+	}
+}
 signed main() {
-	testSegtree();
+	srand(time(NULL));
+	//testSegtree_manual();
+	testSegtree_auto();
 }

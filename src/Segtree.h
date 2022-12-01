@@ -86,7 +86,7 @@ namespace DS {
 
         // O(N log N) Initialises segtree from existing segtree, in a the given range from `l` to `r` inclusive
         Segtree(Segtree<T, I, Combine, CombineAgg, Null, Update> t, ll _l, ll _r) : Range(_l, _r) {
-            for (ll i = l(); i <= r(); ++i) set(i, t.getVal(i));
+            for (ll i = l(); i <= r(); ++i) set(i, t.query(i));
         }
 
         // O(1) Initialise segtree given an existing left and right child
@@ -105,7 +105,7 @@ namespace DS {
 
         // O(1) print the first 20 elements
         void print(std::ostream& out = std::cout, bool newLine = false) {
-            for (ll i = l(); i <= std::min(l() + 20, r()); ++i) out << getVal(i) << ' ';
+            for (ll i = l(); i <= std::min(l() + 20, r()); ++i) out << query(i) << ' ';
             if (newLine) out << '\n';
         }
 
@@ -183,21 +183,34 @@ namespace DS {
 
         // O(log N) Range query
         // @returns Combine(T[l], Combine(..., Combine(T[r-1], T[r])...))
-        T query(Range queryRange) {
+        // @returns I if the segtree range has no overlap with the query range
+        T query(Range<ll> queryRange) {
             if (!overlaps(queryRange)) return I;
             else if (coveredBy(queryRange)) return val;
 
             push();
             return Combine()(lChild->query(queryRange), rChild->query(queryRange)); // hoping theres no overflow
         }
-        T query(int i) {
-            return query(Range(i, i));
+        T operator[](Range<ll> queryRange) {
+            return query(queryRange);
         }
+
         // O(1) Range query: sum of all entries
         T query() {
             return query(Range(l(), r()));
             // or
             // return val;
+        }
+        // O(log N) get value at index `i`
+        T query(ll i) {
+            assert(covers(i) && "Invalid index");
+            push();
+            if (l == r) return val;
+            else if (i <= midpoint()) return lChild->query(i);
+            else return rChild->query(i);
+        }
+        T operator[](ll i) {
+            return query(i);
         }
 
         // treewalk down the filtered tree, finding the leftmost lowest node
@@ -212,17 +225,17 @@ namespace DS {
             }
             return node;
         }
-        
-        // O(log N) get value at index `i`
-        T getVal(ll i) {
-            assert(covers(i) && "Invalid index");
-            push();
-            if (l == r) return val;
-            else if (i <= midpoint()) return lChild->getVal(i);
-            else return rChild->getVal(i);
-        }
-        T operator[](ll i) {
-            return getVal(i);
+
+        Segtree* findLast(std::function<bool(Segtree*)> isTarget) {
+            if (!isTarget(this)) return nullptr;
+            Segtree* node = this;
+            while (!node->isLeaf()) {
+                node->push();
+                if (isTarget(node->rChild)) node = node->rChild;
+                else if (isTarget(node->lChild)) node = node->lChild;
+                else return node;
+            }
+            return node;
         }
 
     };

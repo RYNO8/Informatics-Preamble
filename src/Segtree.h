@@ -1,115 +1,103 @@
 #pragma once
 #include "Constants.h"
+#include "Ranges.h"
 
 namespace DS {
     // `T` should preferably be a real number
-    template<typename T> class Segtree {
+    // however i dont want to use "requires std::integral<T> || std::floating_point<T>"
+    // because segtree should support ModInt
+
+    // I should be left and right identity of Combine
+    // Combine should have `T operator()(T, T)` which is associative property
+    // CombineAgg should have `operator()(T x, unsigned ll n)` which is defined as adding x to itself n times (n > 0)
+    // TODO: if not provided use fast exponentiation
+    // Null should be the left (and right?) identity of Update
+    // Update should have `T operator()(T, T)`
+    // TODO: what properties required?
+    template<typename T, T I, class Combine, class CombineAgg, T Null, class Update>
+    class Segtree : public Range<ll> {
         /************************************************
          *                INITIALISATION                *
          ************************************************/
 
     private:
-        ll l, r, m;
-        T minVal, maxVal, sumVal;
-        T lazyVal = T(0);
-        short lazyMode = 0; // needs to hold {0, 1, 2}, is there a better way to do this?
-        Segtree* lChild = nullptr, * rChild = nullptr;
+        enum LazyMode {
+            // no lazy needs to be performed here
+            CLEAN = 0,
+
+            // relative, corresponds to `data := Update(data, v)` operations (i.e. augmenting operations)
+            AUGMENT = 1,
+
+            // absolute (always override), corresponds to `data := v` operations
+            SET = 2
+        };
+
+        T val = I;
+        T lazy = Null;
+        LazyMode lazyMode = CLEAN;
+        Segtree *lChild = nullptr, *rChild = nullptr;
+
+        bool isLeaf() const {
+            return isEmpty();
+        }
 
         // O(1) push lazy values to children, for lazy propagation
         void push() {
-            if (l == r) return;
+            if (isLeaf()) return;
 
-            if (lChild == nullptr) lChild = new Segtree(l, m);
-            if (rChild == nullptr) rChild = new Segtree(m + 1, r);
+            if (lChild == nullptr) lChild = new Segtree(l(), midpoint());
+            if (rChild == nullptr) rChild = new Segtree(midpoint() + 1, r());
 
-            if (lazyMode == 2) { // absolute, always override
-                lChild->minVal = lazyVal;
-                rChild->minVal = lazyVal;
-                lChild->maxVal = lazyVal;
-                rChild->maxVal = lazyVal;
-                lChild->sumVal = lazyVal * T(m - l + 1);
-                rChild->sumVal = lazyVal * T(r - (m + 1) + 1);
+            if (lazyMode == SET) { // absolute, always override
+                lChild->val = CombineAgg()(lazy, (ull)lChild->length());
+                rChild->val = CombineAgg()(lazy, (ull)rChild->length());
 
-                lChild->lazyVal = lazyVal;
-                rChild->lazyVal = lazyVal;
-                lChild->lazyMode = 2;
-                rChild->lazyMode = 2;
+                lChild->lazy = lazy;
+                rChild->lazy = lazy;
+                lChild->lazyMode = SET;
+                rChild->lazyMode = SET;
             }
-            else if (lazyMode == 1) { // relative, add lChild absolute
-                lChild->minVal += lazyVal;
-                rChild->minVal += lazyVal;
-                lChild->maxVal += lazyVal;
-                rChild->maxVal += lazyVal;
-                lChild->sumVal += lazyVal * T(m - l + 1);
-                rChild->sumVal += lazyVal * T(r - (m + 1) + 1);
+            else if (lazyMode == AUGMENT) { // relative, add lChild absolute
+                lChild->val = Update()(lChild->val, CombineAgg()(lazy, (ull)lChild->length()));
+                rChild->val = Update()(rChild->val, CombineAgg()(lazy, (ull)rChild->length()));
 
-                lChild->lazyVal += lazyVal;
-                rChild->lazyVal += lazyVal;
-                if (lChild->lazyMode == 0) lChild->lazyMode = 1;
-                if (rChild->lazyMode == 0) rChild->lazyMode = 1;
+                lChild->lazy = Update()(lChild->lazy, lazy);
+                rChild->lazy = Update()(rChild->lazy, lazy);
+                if (lChild->lazyMode == CLEAN) lChild->lazyMode = AUGMENT;
+                if (rChild->lazyMode == CLEAN) rChild->lazyMode = AUGMENT;
             }
 
-            lazyVal = T(0);
-            lazyMode = 0;
+            lazy = Null;
+            lazyMode = CLEAN;
         }
 
         // O(1) update values from values of children
         void pull() {
-            minVal = std::min(lChild->minVal, rChild->minVal);
-            maxVal = std::max(lChild->maxVal, rChild->maxVal);
-            sumVal = lChild->sumVal + rChild->sumVal;
+            val = Combine()(lChild->val, rChild->val);
         }
 
     public:
-        // O(1) Initialises an empty segtree containing the first `n` elements, which are all 0 
-        Segtree(ll n) : l(0), r(n - 1) {
-            assert(0 <= l && l <= r);
-            m = (l + r) / 2;
-            minVal = maxVal = sumVal = 0;
-        }
-
-        // O(1) Initialises an empty segtree containing elements from `l` to `r` inclusive, which are all 0 
-        Segtree(ll _l, ll _r, T initVal = 0) : l(_l), r(_r) {
-            assert(0 <= l && l <= r);
-            m = (l + r) / 2;
-            minVal = maxVal = sumVal = lazyVal = initVal;
-            lazyMode = 2;
-        }
-
-        // O(1) Initialises segtree from existing segtree
-        Segtree(Segtree<T>& t) {
-            *this = t;
+        // O(1) Initialises an empty segtree containing elements from `l` to `r` inclusive, which are all I
+        Segtree(ll _l, ll _r, T initVal = I) : Range(_l, _r) {
+            val = CombineAgg()(initVal, (ull)length());
+            lazy = initVal;
+            lazyMode = SET;
         }
 
         // O(N log N) Initialises segtree from existing segtree, in a the given range from `l` to `r` inclusive
-        Segtree(Segtree<T> t, ll _l, ll _r) : l(_l), r(_r) {
-            assert(0 <= l && l <= r);
-            m = (l + r) / 2;
-            for (ll i = _l; i <= _r; ++i) set(i, t.getVal(i));
+        Segtree(Segtree<T, I, Combine, CombineAgg, Null, Update> t, ll _l, ll _r) : Range(_l, _r) {
+            for (ll i = l(); i <= r(); ++i) set(i, t.getVal(i));
         }
 
         // O(1) Initialise segtree given an existing left and right child
-        Segtree(Segtree<T> _lChild, Segtree<T> _rChild) : l(_lChild.l), r(_rChild.r), lChild(&_lChild), rChild(&_rChild) {
-            assert(0 <= l && l <= r);
-            assert(lChild->r + 1 == rChild->l);
-            m = (l + r) / 2;
-            minVal = std::min(lChild->minVal, rChild->minVal);
-            maxVal = std::max(lChild->maxVal, rChild->maxVal);
-            sumVal = lChild->sumVal + rChild->sumVal;
-        }
-
-        inline bool covers(ll i) const {
-            return l <= i && i <= r;
-        }
-        inline bool covers(ll tl, ll tr) const {
-            return l <= tl && tl <= tr && tr <= r;
-        }
-        inline bool coveredBy(ll tl, ll tr) const {
-            return tl <= l && r <= tr;
-        }
-        inline bool touching(ll tl, ll tr) const {
-            return tl <= r && l <= tr && tl <= tr;
-        }
+        // Segtree(Segtree<T, I, Combine, CombineAgg, Null, Update> _lChild, Segtree<T, I, Combine, CombineAgg, Null, Update> _rChild) : 
+        //     l(_lChild.l), r(_rChild.r), lChild(&_lChild), rChild(&_rChild)
+        // {
+        //     assert(0 <= l && l <= r);
+        //     assert(lChild->r + 1 == rChild->l);
+        //     midpoint() = (l + r) / 2;
+        //     val = Combine()(lChild->val, rChild->val);
+        // }
 
         /************************************************
          *                    DISPLAY                   *
@@ -117,13 +105,14 @@ namespace DS {
 
         // O(1) print the first 20 elements
         void print(std::ostream& out = std::cout, bool newLine = false) {
-            for (ll i = l; i <= std::min(l + 20, r); ++i) out << getVal(i) << ' ';
+            for (ll i = l(); i <= std::min(l() + 20, r()); ++i) out << getVal(i) << ' ';
             if (newLine) out << '\n';
         }
 
         // O(1)
-        void printDebug(std::ostream& out = std::cout, bool newLine = false) {
-            out << '[' << l << ".." << r << "] std::min=" << minVal << ", std::max=" << maxVal << ", sum=" << sumVal;
+        void printDebug(std::ostream& out = std::cout, bool newLine = false) const {
+            Range::print();
+            out << " = " << val << '\n';
             if (newLine) out << '\n';
         }
 
@@ -132,21 +121,22 @@ namespace DS {
          ************************************************/
 
         // O(log N) Range update: add
-        Segtree* add(ll tl, ll tr, T x, bool persistent = false) {
-            if (tl > r || l > tr) return this;
+        // performs T[l] = Update(T[l], x), ..., T[r] = Update(T[r], x),
+        // @returns the root of the updated segtree
+        Segtree* add(Range<ll> queryRange, T x, bool persistent = false) {
+            if (!overlaps(queryRange)) return this;
 
-            push();
+            
             Segtree* newNode = persistent ? new Segtree(*this) : this;
-            if (coveredBy(tl, tr)) {
-                newNode->minVal += x;
-                newNode->maxVal += x;
-                newNode->sumVal += x * T(r - l + 1);
-                newNode->lazyVal += x;
-                if (newNode->lazyMode == 0) newNode->lazyMode = 1;
+            if (coveredBy(queryRange)) {
+                newNode->val = Update()(newNode->val, CombineAgg()(x , (ull)length()));
+                newNode->lazy = Update()(newNode->lazy, x);
+                if (newNode->lazyMode == CLEAN) newNode->lazyMode = AUGMENT;
             }
-            else if (touching(tl, tr)) {
-                newNode->lChild = lChild->add(tl, tr, x, persistent);
-                newNode->rChild = rChild->add(tl, tr, x, persistent);
+            else {
+                push();
+                newNode->lChild = lChild->add(queryRange, x, persistent);
+                newNode->rChild = rChild->add(queryRange, x, persistent);
                 newNode->pull();
             }
             return newNode;
@@ -156,227 +146,79 @@ namespace DS {
         }
 
         // O(log N) Range update: set
-        Segtree* set(ll tl, ll tr, T x, bool persistent = false) {
-            if (tl > r || l > tr) return this;
+        // performs T[l] = x, ..., T[r] = x
+        // @returns the root of the updated segtree
+        Segtree* set(Range<ll> queryRange, T x, bool persistent = false) {
+            if (!overlaps(queryRange)) return this;
 
-            push();
+            
             Segtree* newNode = persistent ? new Segtree(*this) : this;
-            if (coveredBy(tl, tr)) {
-                newNode->minVal = x;
-                newNode->maxVal = x;
-                newNode->sumVal = x * T(r - l + 1);
-                newNode->lazyVal = x;
-                newNode->lazyMode = 2;
-            }
-            else if (touching(tl, tr)) {
-                newNode->lChild = lChild->set(tl, tr, x, persistent);
-                newNode->rChild = rChild->set(tl, tr, x, persistent);
+            if (coveredBy(queryRange)) {
+                newNode->val = CombineAgg()(x, (ull)length());
+                newNode->lazy = x;
+                newNode->lazyMode = SET;
+            } else {
+                push();
+                newNode->lChild = lChild->set(queryRange, x, persistent);
+                newNode->rChild = rChild->set(queryRange, x, persistent);
                 newNode->pull();
             }
             return newNode;
         }
         Segtree* set(ll i, T x) {
-            return set(i, i, x);
+            return set({i, i}, x, false);
+        }
+        Segtree* set(T x) {
+            return set({l, r}, x, false);
         }
 
-        // O(log N) Range update: set all values to T(0)
+        // O(log N) Range update: set all values to I
         void clear() {
-            set(l, r, T(0));
+            set({l, r}, I);
         }
 
         /************************************************
          *                    QUERIES                   *
          ************************************************/
 
-        // O(log N) Range query: mininum
-        T getMin(ll tl, ll tr) {
-            if (!touching(tl, tr)) return std::numeric_limits<T>::max();
-            if (coveredBy(tl, tr)) return minVal;
+        // O(log N) Range query
+        // @returns Combine(T[l], Combine(..., Combine(T[r-1], T[r])...))
+        T query(Range queryRange) {
+            if (!overlaps(queryRange)) return I;
+            else if (coveredBy(queryRange)) return val;
 
             push();
-            return std::min(lChild->getMin(tl, tr), rChild->getMin(tl, tr));
+            return Combine()(lChild->query(queryRange), rChild->query(queryRange)); // hoping theres no overflow
         }
-        // O(1) Range query: min of all entries
-        T getMin() {
-            return getMin(l, r);
+        T query(int i) {
+            return query(Range(i, i));
         }
-
-        // O(log N) Range query: maximum
-        T getMax(ll tl, ll tr) {
-            if (!touching(tl, tr)) return std::numeric_limits<T>::min();
-            if (coveredBy(tl, tr)) return maxVal;
-
-            push();
-            return std::max(lChild->getMax(tl, tr), rChild->getMax(tl, tr));
-        }
-        // O(1) Range query: max of all entries
-        T getMax() {
-            return getMax(l, r);
-        }
-
-        // O(log N) Range query: sum
-        T getSum(ll tl, ll tr) {
-            if (!touching(tl, tr)) return T(0); // additive identity
-            else if (coveredBy(tl, tr)) return sumVal;
-
-            push();
-            return lChild->getSum(tl, tr) + rChild->getSum(tl, tr); // hoping theres no overflow
-        }
-
         // O(1) Range query: sum of all entries
-        T getSum() {
-            return getSum(l, r);
+        T query() {
+            return query(Range(l(), r()));
+            // or
+            // return val;
+        }
+
+        // treewalk down the filtered tree, finding the leftmost lowest node
+        Segtree* findFirst(std::function<bool(Segtree*)> isTarget) {
+            if (!isTarget(this)) return nullptr;
+            Segtree* node = this;
+            while (!node->isLeaf()) {
+                node->push();
+                if (isTarget(node->lChild)) node = node->lChild;
+                else if (isTarget(node->rChild)) node = node->rChild;
+                else return node;
+            }
+            return node;
         }
         
-
-        ll getMinIndexFirst(ll tl, ll tr, T target) {
-            if (!touching(tl, tr)) return -1;
-            if (coveredBy(tl, tr) && target == minVal) {
-                Segtree* node = this;
-                while (node->l != node->r) {
-                    node->push();
-                    node = node->lChild->minVal == target ? node->lChild : node->rChild;
-                }
-                return node->l;
-            }
-
-            push(); // this is actually unnecessary, since `getMin` has already been called
-            ll lIndex = lChild->getMinIndexFirst(tl, tr);
-            if (lIndex != -1) return lIndex;
-            return rChild->getMinIndexFirst(tl, tr);
-        }
-        // O(log N) Returns the index corresponding to the first minimum value in the range
-        ll getMinIndexFirst(ll tl, ll tr) {
-            T target = getMin(tl, tr);
-            return getMinIndexFirst(tl, tr, target);
-        }
-        // O(log N) Returns the index corresponding to the first global minimum value
-        ll getMinIndexFirst() {
-            return getMinIndexFirst(l, r);
-        }
-
-
-        ll getMinIndexLast(ll tl, ll tr, T target) {
-            if (!touching(tl, tr)) return -1;
-            if (coveredBy(tl, tr) && target == minVal) {
-                Segtree* node = this;
-                while (node->l != node->r) {
-                    node->push();
-                    node = node->rChild->minVal == target ? node->rChild : node->lChild;
-                }
-                return node->l;
-            }
-
-            push(); // this is actually unnecessary, since `getMin` has already been called
-            ll rIndex = rChild->getMinIndexLast(tl, tr);
-            if (rIndex != -1) return rIndex;
-            return lChild->getMinIndexLast(tl, tr);
-        }
-        // O(log N) Returns the index corresponding to the last minimum value in the range
-        ll getMinIndexLast(ll tl, ll tr) {
-            T target = getMin(tl, tr);
-            return getMinIndexLast(tl, tr, target);
-        }
-        // O(log N) Returns the index corresponding to the last global minimum value
-        ll getMinIndexLast() {
-            return getMinIndexLast(l, r);
-        }
-
-
-        ll getMaxIndexFirst(ll tl, ll tr, T target) {
-            if (!touching(tl, tr)) return -1;
-            if (coveredBy(tl, tr) && target == maxVal) {
-                Segtree* node = this;
-                while (node->l != node->r) {
-                    node->push();
-                    node = node->lChild->maxVal == target ? node->lChild : node->rChild;
-                }
-                return node->l;
-            }
-
-            push(); // this is actually unnecessary, since `getMin` has already been called
-            ll lIndex = lChild->getMaxIndexFirst(tl, tr);
-            if (lIndex != -1) return lIndex;
-            return rChild->getMaxIndexFirst(tl, tr);
-        }
-        // O(log N) Returns the index corresponding to the first maximum value in the range
-        ll getMaxIndexFirst(ll tl, ll tr) {
-            T target = getMax(tl, tr);
-            return getMaxIndexFirst(tl, tr, target);
-        }
-        // O(log N) Returns the index corresponding to the first global maximum value
-        ll getMaxIndexFirst() {
-            return getMaxIndexFirst(l, r);
-        }
-
-
-        ll getMaxIndexLast(ll tl, ll tr, T target) {
-            if (!touching(tl, tr)) return -1;
-            if (coveredBy(tl, tr) && target == maxVal) {
-                Segtree* node = this;
-                while (node->l != node->r) {
-                    node->push();
-                    node = node->rChild->maxVal == target ? node->rChild : node->lChild;
-                }
-                return node->l;
-            }
-
-            push(); // this is actually unnecessary, since `getMin` has already been called
-            ll rIndex = rChild->getMaxIndexLast(tl, tr);
-            if (rIndex != -1) return rIndex;
-            return lChild->getMaxIndexLast(tl, tr);
-        }
-        // O(log N) Returns the index corresponding to the first maximum value in the range
-        ll getMaxIndexLast(ll tl, ll tr) {
-            T target = getMax(tl, tr);
-            return getMaxIndexLast(tl, tr, target);
-        }
-        // O(log N) Returns the index corresponding to the first global maximum value
-        ll getMaxIndexLast() {
-            return getMaxIndexLast(l, r);
-        }
-
-        // O(N log N) get the indexes of all elements with a minimum value
-        std::vector<ll> getMinIndexes() {
-            std::vector<ll> output;
-            getMinIndexes(output);
-            return output;
-        }
-        std::vector<ll> getMinIndexes(std::vector<ll>& output) {
-            if (l == r) output.push_back(l);
-            else {
-                push();
-                if (lChild->minVal == minVal) lChild->getMinIndexes(output);
-                if (rChild->minVal == minVal) rChild->getMinIndexes(output);
-            }
-            return output;
-        }
-
-        // O(N log N) get the indexes of all elements with a maximum value
-        std::vector<ll> getMaxIndexes() {
-            std::vector<ll> output;
-            getMaxIndexes(output);
-            return output;
-        }
-        std::vector<ll> getMaxIndexes(std::vector<ll>& output) {
-            if (l == r) output.push_back(l);
-            else {
-                push();
-                if (lChild->maxVal == maxVal) lChild->getMaxIndexes(output);
-                if (rChild->maxVal == maxVal) rChild->getMaxIndexes(output);
-            }
-            return output;
-        }
-
         // O(log N) get value at index `i`
         T getVal(ll i) {
             assert(covers(i) && "Invalid index");
             push();
-            if (l == r) {
-                assert(minVal == maxVal && maxVal == sumVal && "AHH implementation broken");
-                return minVal;
-            }
-            else if (i <= m) return lChild->getVal(i);
+            if (l == r) return val;
+            else if (i <= midpoint()) return lChild->getVal(i);
             else return rChild->getVal(i);
         }
         T operator[](ll i) {
@@ -385,11 +227,41 @@ namespace DS {
 
     };
 
+    template<typename T> class MaxOp {
+public:
+        constexpr T operator()(const T &lhs, const T &rhs) const {
+            return std::max(lhs, rhs);
+        }
+    };
+
+    template<typename T> class MinOp {
+public:
+        constexpr T operator()(const T &lhs, const T &rhs) const {
+            return std::min(lhs, rhs);
+        }
+    };
+
+    template<typename T> class FirstOp {
+public:
+        constexpr T operator()(const T &lhs, const ll &rhs) const {
+            return lhs;
+        }
+    };
+
+    template<typename T>
+    using SumSegtree = Segtree<T, 0, std::plus<T>, std::multiplies<T>, 0, std::plus<T>>;
+
+    template<typename T>
+    using MaxSegtree = Segtree<T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>>;
+
+    template<typename T>
+    using MinSegtree = Segtree<T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>>;
 
     /************************************************
      *                    DISPLAY                   *
      ************************************************/
-    template<typename T> std::ostream& operator<<(std::ostream& out, Segtree<T> tree) {
+    template<typename T, T I, class Combine, class CombineAgg, T Null, class Update>
+    std::ostream& operator<<(std::ostream& out, Segtree<T, I, Combine, CombineAgg, Null, Update> tree) {
         tree.print(out);
         return out;
     }

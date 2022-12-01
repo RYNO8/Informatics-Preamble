@@ -36,6 +36,7 @@ namespace DS {
 
     // Convex Hull Trick
     // "infinte" range and domain, but added lines need to have non-decreasing gradient
+    // ahhh i know i shouldn't be inheriting from std types, but i dont want to implement my own iterator stuff ;-;
     class CHT : public std::vector<CHTLine> {
 public:
         // amortised O(1)

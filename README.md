@@ -17,16 +17,22 @@ Functionalities include
 
 # todo list (no particular order)
 [] implement coordinate geometry (eww)
-[] implement ranges
 [] vector .find .erase
 [] wrapper for sqrt decomp
-[] dynamic tree for Tree.h, how??
+[] dynamic tree for Tree.h (look at references)
 [] fast factorisation, fast isPrime, how?? Pollard rho was dodgy
-[] check through everything for consistency
 [] change arguments to references if possible
 [] write + fix tests
-*/
+[] docstrings for ranges
+[] segtree iterator
+[] use `requires std::integral<T> || std::floating_point<T>` where possible
 
 # Notes
  - It is probably not the fastest or most memory efficient, because I have prioritised verbosity over constant factor optimisations.
  - I hope that once its completed, its size would still be less than the maximum file size allowed
+
+# C++pack.py
+For such a large preamble, its helpful to `#include` it rather than copy pasting it at the
+top of your code. `C++pack.py` helps to bubdle all code into a single file, which is
+helpful when you want to submit (or reduce the submission file size). Some slightly hacky
+lexical analysis stuff.

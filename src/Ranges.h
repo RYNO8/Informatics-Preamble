@@ -28,7 +28,6 @@ namespace DS {
         for (T i = begin; i != end; i++) *i = m[*i];
     }
 
-    // TODO: test
     // ahhh its probably bad to inherit from std types, but i really want the comparison operators ;-;
     template<typename T> struct Range : public std::pair<T, T> {
         /************************************************
@@ -63,19 +62,17 @@ namespace DS {
         // O(1)
         // @returns
         T l() const {
-            // TODO: why cant i just do `return first;`
             return first;
         }
 
         // O(1)
         // @returns
         T r() const {
-            // TODO: why cant i just do `return second;`
             return second;
         }
 
-                // O(1)
-                // @returns
+        // O(1)
+        // @returns
         constexpr T midpoint() const {
             // NOTE: using the implementation so it still rounds down when
             return l() + (r() - l()) / 2;
@@ -195,8 +192,6 @@ namespace DS {
 		return out;
 	}
 
-    // TODO: this is currently a stub
-    // TODO: test
     template<typename T> class Ranges: public std::set<Range<T>> {
         /************************************************
          *                 INITIALISATION               *

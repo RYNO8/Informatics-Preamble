@@ -9,7 +9,7 @@ def doInline(filepath, seen=set()):
     if filepath in seen:
         return "", seen
     seen.add(filepath)
-
+    
     outcode = f"// BEGIN PACKED FROM {filepath}\n"
 
     for line in open(filepath, "r").readlines():
@@ -18,9 +18,17 @@ def doInline(filepath, seen=set()):
             filebase, _ = os.path.split(filepath)
             librarypath = os.path.join(filebase, libraryname)
             currcode, seen = doInline(librarypath, seen)
+            if "\ufeff" in currcode:
+                print(currcode)
+                roeis
             outcode += currcode
+
         elif not line.startswith("#pragma once"):
             outcode += line
+            if "\ufeff" in line:
+                print(line)
+                dfsjl
+        
 
     outcode += "\n"
     outcode += f"// END PACKED FROM {filepath}\n"
@@ -79,8 +87,11 @@ def remWhitespace(code):
                 pass
             else:
                 line += curr
-        out += lexeme[0] + line + lexeme[-1] + "\n"
-    return out
+        if lexeme[0] == "#":
+            out += "\n" + lexeme[0] + line + lexeme[-1] + "\n"
+        else:
+            out += lexeme[0] + line + lexeme[-1]
+    return out.replace("\n\n", "\n")
 
 
 if __name__ == "__main__":
@@ -110,11 +121,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     filepath = os.path.join(os.getcwd(), args.filename)
-    code = doInline(filepath)[0]
-    if args.no_whitespace:
-        code = remWhitespace(code)
+    code, libraries = doInline(filepath)
+    #print(libraries)
     if args.no_comments:
         code = remComments(code)
-
+    if args.no_whitespace:
+        code = remWhitespace(code)
+        
     assert args.output != args.filename
     open(args.output, "w").write(code)

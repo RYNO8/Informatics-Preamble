@@ -196,9 +196,9 @@ namespace DS {
         // O(log N) get value at index `i`
         T query(ll i) {
             assert(covers(i) && "Invalid index");
+            if (l() == r()) return val;
             push();
-            if (l == r) return val;
-            else if (i <= midpoint()) return lChild->query(i);
+            if (i <= midpoint()) return lChild->query(i);
             else return rChild->query(i);
         }
         T operator[](ll i) {

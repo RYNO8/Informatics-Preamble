@@ -31,6 +31,12 @@ namespace DS {
             assert((largest * largest) / largest == largest); // mod^2 does not overflow
         }
 
+        // O(1)
+        // if not given an initialiser value, initalise to 0
+        ModInt() {
+            num = 0;
+        }
+
         /************************************************
          *                    DISPLAY                   *
          ************************************************/
@@ -178,7 +184,7 @@ public:
             std::vector<ModInt<mod>> ans;
             if ((intmax_t)this->num % d == 0ll) {
                 ModInt<mod> x0 = u * ((intmax_t)this->num / (intmax_t)d);
-                for (intmax_t i = 0; i < d; i++) {
+                for (uintmax_t i = 0; i < d; i++) {
                     ans.push_back(x0 + ModInt<mod>(i * (mod / d)));
                 }
             }

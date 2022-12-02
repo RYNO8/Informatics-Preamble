@@ -1,19 +1,42 @@
-﻿#include "../src/Segtree.h"
+#include "../src/Segtree.h"
 #include "../src/Constants.h"
 #include "../src/Ranges.h"
 using namespace std;
 using namespace DS;
 
+// solution to Lazy Update
+// https://orac2.info/problem/datalazyupdate/
+/*
+
+SAMPLE INPUT
+3 8
+A 0 1 3
+T 0 2
+S 1 2 4
+T 0 2
+M 0 0
+M 0 1
+A 1 1 1
+T 0 2
+
+SAMPLE OUTPUT
+6
+11
+3
+4
+12
+
+*/
 void testSegtree_manual() {
-    ll N;
-    cin >> N;
+    ll N, Q;
+    cin >> N >> Q;
 
     SumSegtree<ll> *tSum = new SumSegtree<ll>(0, N - 1, 0);
     MaxSegtree<ll> *tMax = new MaxSegtree<ll>(0, N - 1, 0);
     MinSegtree<ll> *tMin = new MinSegtree<ll>(0, N - 1, 0);
-    cout << "Enter operation: set (S), add (A), min (m), max (M), total (T), quit (Q)\n\n";
+    //cout << "Enter operation: set (S), add (A), min (m), max (M), total (T), quit (Q)\n\n";
 
-    while (true) {
+    for (int q = 0; q < Q; ++q) {
         char op;
         cin >> op;
 
@@ -43,25 +66,23 @@ void testSegtree_manual() {
             cin >> tl >> tr;
             cout << tSum->query({tl, tr}) << '\n';
             break;
-        case 'Q':
-            return;
         }
 
-        cout << tSum << '\n';
+        // cout << *tSum << '\n';
 
 
-        function<bool(MinSegtree<ll>*)> isMin = [&](MinSegtree<ll>* node) {
-            return node->query() == tMin->query();
-        };
-        function<bool(MaxSegtree<ll>*)> isMax = [&](MaxSegtree<ll>* node) {
-            return node->query() == tMax->query();
-        };
+        // function<bool(MinSegtree<ll>*)> isMin = [&](MinSegtree<ll>* node) {
+        //     return node->query() == tMin->query();
+        // };
+        // function<bool(MaxSegtree<ll>*)> isMax = [&](MaxSegtree<ll>* node) {
+        //     return node->query() == tMax->query();
+        // };
         
-        ll iMin = tMin->findFirst(isMin)->l();
-        cout << string(int(iMin) * 2, ' ') << "^ min\n";
+        // ll iMin = tMin->findFirst(isMin)->l();
+        // cout << string(int(iMin) * 2, ' ') << "^ min\n";
 
-        ll iMax = tMax->findFirst(isMax)->l();
-        cout << string(int(iMax) * 2, ' ') << "^ max\n";
+        // ll iMax = tMax->findFirst(isMax)->l();
+        // cout << string(int(iMax) * 2, ' ') << "^ max\n";
     }
 }
 
@@ -113,6 +134,7 @@ struct fakeSegtree {
 };
 
 void testSegtree_auto() {
+    srand(time(NULL));
     for (int tI = 0; tI < 20; ++tI) {
         cout << "REP: " << tI << "\n";
 
@@ -183,7 +205,6 @@ void testSegtree_auto() {
 }
 
 signed main() {
-    srand(time(NULL));
-    //testSegtree_manual();
-    testSegtree_auto();
+    testSegtree_manual();
+    //testSegtree_auto();
 }

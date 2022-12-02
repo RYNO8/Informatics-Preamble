@@ -200,6 +200,23 @@ namespace DS {
         return (a / gcd(a, b)) * b;
     }
 
+    // O(log N)
+    // extended euclidean algorithm
+    // @returns gcd(a, b)
+    // sets x and y such that a*x + b*y = gcd(a, b)
+    template<typename U, typename S> static U extendedEuclidean(U a, U b, S &x, S &y) {
+        if (b == 0) {
+            x = 1;
+            y = 0;
+            return a;
+        }
+        S x1, y1;
+        U d = extendedEuclidean(b, a % b, x1, y1);
+        x = y1;
+        y = x1 - y1 * (a / b);
+        return d;
+    }
+
     // O(12)
     // @returns the number of set bits in the binary represetnation of `x`
     uint popcount(uint x) {

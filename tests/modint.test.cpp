@@ -9,26 +9,20 @@ void testModInt() {
     for (int rep = 0; rep < 1000000; ++rep) {
         auto a = ModInt<MOD>(ull_dis(rng));
         assert(a * a.inv() == 1LL);
+        assert(a.pow(1000000006) == 1LL);
+        assert(a.inv() == a.pow(-1));
     }
 
     for (int rep = 0; rep < 1000000; ++rep) {
         auto n = ModInt<1000000007>(ull_dis(rng));
         auto d = ModInt<1000000007>(ull_dis(rng));
         vector<ModInt<1000000007>> ans = n.allCongreunt(d);
-        assert(ans.size() == gcd((uintmax_t)1000000007, (uintmax_t)d));
+        assert(ans.size() == gcd((uintmax_t)1000000007, d.num()));
         for (auto val : ans) {
             assert(val * d == n);
         }
     }
-
     assert(ModInt<18>(9).allCongreunt(ModInt<18>(15)) == vector<ModInt<18>>({15, 3, 9}));
-    
-    for (int rep = 0; rep < 1000000; ++rep) {
-        auto a = ModInt<1000000007>(ull_dis(rng));
-        assert(a.pow(1000000006) == 1LL);
-    }
-
-    assert(ModInt<6>(5) % 3 == 2);
 
     assert(repr(ModInt<4206969>(69)) == "69 ( mod 4206969 )");
 }
@@ -65,12 +59,13 @@ void testModInt_atcoder() {
     ModInt<11> b(3);
 
     // equal
-    // assert(a == 21);
-    // assert(a == -1);
-    // assert(-1 == a);
+    assert(a == 21);
+    assert(a == -1);
+    assert(-1 == a);
 
     // negative
     assert(-b == 8);
+    assert(0 - b == 8);
 
     // plus
     assert(a + b == 2);  // (10 + 3) mod 11
@@ -112,4 +107,5 @@ signed main() {
 
     testModInt();
     testModInt_bounds();
+    testModInt_atcoder();
 }

@@ -30,6 +30,7 @@ Functionalities include
 # Notes
  - It is probably not the fastest or most memory efficient, because I have prioritised verbosity over constant factor optimisations.
  - I hope that once its completed, its size would still be less than the maximum file size allowed
+ - Only tested on gcc C++14 and gcc C++17
 
 # C++pack.py
 For such a large preamble, its helpful to `#include` it rather than copy pasting it at the

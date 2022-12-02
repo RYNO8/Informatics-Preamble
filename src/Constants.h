@@ -75,4 +75,22 @@ namespace DS {
     std::uniform_int_distribution<ull> ull_dis(0, std::numeric_limits<ull>::max());
     std::uniform_real_distribution<ld> prob_dist(0, 1);
 
+    template <typename T> using is_signed_int = typename std::conditional_t<
+        std::is_integral<T>::value && std::is_signed<T>::value,
+        std::true_type,
+        std::false_type
+    >;
+    template <typename T> using is_signed_int_t = std::enable_if_t<is_signed_int<T>::value, bool>;
+    template <typename T> using is_unsigned_int = typename std::conditional_t<
+        std::is_integral<T>::value && std::is_unsigned<T>::value,
+        std::true_type,
+        std::false_type
+    >;
+    template <typename T> using is_unsigned_int_t = std::enable_if_t<is_unsigned_int<T>::value, bool>;
+    template <typename T> using to_unsigned = typename std::conditional_t<
+        is_signed_int<T>,
+        std::make_unsigned<T>,
+        std::common_type<T>
+    >;
+    template <typename T> using to_unsigned_t = typename to_unsigned<T>::type;
 };

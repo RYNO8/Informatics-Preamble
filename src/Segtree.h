@@ -6,7 +6,6 @@
 
 namespace DS {
     // `T` should preferably be a real number
-    // however i dont want to use "requires std::integral<T> || std::floating_point<T>"
     // because segtree should support ModInt
 
     // I should be left and right identity of Combine
@@ -16,7 +15,15 @@ namespace DS {
     // Null should be the left (and right?) identity of Update
     // Update should have `T operator()(T, T)`
     // TODO: what properties required?
-    template<typename T, T I, class Combine, class CombineAgg, T Null, class Update>
+    template<
+        typename T,
+        T I,
+        class Combine,
+        class CombineAgg,
+        T Null,
+        class Update,
+        std::enable_if_t<is_my_integral_v<T>, bool> = true
+    >
     class Segtree : public Range<ll> {
         /************************************************
          *                INITIALISATION                *

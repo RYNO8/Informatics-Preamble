@@ -3,7 +3,8 @@
 #include "Grid.h"
 
 namespace DS {
-    template<typename T> class Matrix : public Grid<T> {
+    template<typename T, std::enable_if_t<is_my_integral_v<T>, bool> = true>
+    class Matrix : public Grid<T> {
         /************************************************
          *                INITIALISATION                *
          ************************************************/

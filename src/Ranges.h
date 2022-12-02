@@ -13,7 +13,8 @@ namespace DS {
     using value_type = typename std::iterator_traits<Iterator>::value_type;
 
     // @returns A mapping between original coordinates and compressed coordinates
-    template<typename T> std::map<value_type<T>, value_type<T>> coordCompressMap(T begin, T end, int startI = 0) {
+    template<typename T, std::enable_if_t<std::is_integral_v<value_type<T>>, bool> = true>
+    std::map<value_type<T>, value_type<T>> coordCompressMap(T begin, T end, int startI = 0) {
         std::map<value_type<T>, value_type<T>> compressed;
 
         int i = startI;
@@ -23,13 +24,15 @@ namespace DS {
         return compressed;
     }
     // Compresses coordinates in place
-    template<typename T> void coordCompressTransform(T begin, T end, int startI = 0){
+    template<typename T, std::enable_if_t<std::is_integral_v<value_type<T>>, bool> = true>
+    void coordCompressTransform(T begin, T end, int startI = 0){
         std::map<value_type<T>, value_type<T>> m = coordCompressMap(begin, end, startI);
         for (T i = begin; i != end; i++) *i = m[*i];
     }
 
     // ahhh its probably bad to inherit from std types, but i really want the comparison operators ;-;
-    template<typename T> struct Range : public std::pair<T, T> {
+    template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
+    struct Range : public std::pair<T, T> {
         /************************************************
          *                 INITIALISATION               *
          ************************************************/
@@ -183,7 +186,8 @@ namespace DS {
         }
     };
 
-    template<typename T> class Ranges: public std::set<Range<T>> {
+    template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
+    class Ranges: public std::set<Range<T>> {
         /************************************************
          *                 INITIALISATION               *
          ************************************************/

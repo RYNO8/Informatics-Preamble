@@ -1,5 +1,6 @@
-﻿#include "../src/Constants.h"
-#include "../src/Polynomial.h"
+﻿#include "../src/Polynomial.h"
+#include "../src/Constants.h"
+using namespace DS;
 using namespace std;
 
 void testPolynomial() {

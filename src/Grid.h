@@ -2,7 +2,8 @@
 #include "Constants.h"
 
 namespace DS {
-    template<typename T> class Grid {
+    template<typename T, std::enable_if_t<is_my_integral_v<T>, bool> = true>
+    class Grid {
         /************************************************
          *                INITIALISATION                *
          ************************************************/

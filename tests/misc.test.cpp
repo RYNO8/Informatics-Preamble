@@ -16,8 +16,8 @@ using namespace std;
 using namespace DS;
 
 void testFib() {
-    constexpr uint mod = 1e9;
-    Matrix<ModInt<mod>> fib1 = Grid<ModInt<mod>>(vector<vector<ModInt<mod>>>{
+    using M = ModInt<(ll)1e9>;
+    Matrix<M> fib1 = Grid<M>(vector<vector<M>>{
         { 1, 1 },
         { 1, 0 }
     });

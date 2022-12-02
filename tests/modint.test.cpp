@@ -100,6 +100,8 @@ void testModInt_atcoder() {
 }
 
 signed main() {
+    assert(is_my_integral<ModInt<10>>::value);
+
     intmax_t largest = MOD - 1;
     assert((largest * largest) / largest == largest);
 

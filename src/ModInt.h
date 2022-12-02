@@ -3,8 +3,17 @@
 #include "Util.h"
 
 namespace DS {
+    class ModIntIndicator : MyIntegralIndicator {};
+
+    template<typename T> using is_modint = typename std::conditional_t<
+        std::is_base_of<ModIntIndicator, T>::value,
+        std::true_type,
+        std::false_type
+    >;
+    template<typename T> inline constexpr bool is_modint_v = is_modint<T>::value;
+
     // TODO: Montgomery
-    template<uintmax_t N> class ModInt {
+    template<uintmax_t N> class ModInt : ModIntIndicator {
         /************************************************
          *                INITIALISATION                *
          ************************************************/
@@ -19,7 +28,7 @@ namespace DS {
         
         // O(1)
         // Initialises a ModInt from a signed integer type
-        template<typename T, is_signed_int_t<T> = true>
+        template<typename T, std::enable_if_t<is_signed_int_v<T>, bool> = true>
         ModInt(T _num) {
             val = ((intmax_t)_num % (intmax_t)N) + N;
             val %= N;
@@ -27,7 +36,7 @@ namespace DS {
 
         // O(1)
         // Initialises a ModInt from an unsigned integer type
-        template<typename T, is_unsigned_int_t<T> = true>
+        template<typename T, std::enable_if_t<is_unsigned_int_v<T>, bool> = true>
         ModInt(T _num) : val(_num % N) {}
 
         /************************************************
@@ -222,5 +231,6 @@ public:
         }
     };
 
-
+    using ModInt998244353 = ModInt<998244353>;
+    using ModInt1000000007 = ModInt<1000000007>;
 };

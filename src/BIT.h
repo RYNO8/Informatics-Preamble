@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <iostream>
 #include <vector>
+#include "Constants.h"
 
 namespace DS {
     // TODO: initialisation from vector, array
@@ -13,10 +14,13 @@ namespace DS {
         POINT_QUERY_RANGE_UPDATE = 1
     };
 
+    // T() is left and right identity
+    // T operator+(T, T) is associative
+    // T operator-(T, T) is inverse
     template <class T, BIT_mode mode, int ...Ns>
     class BIT {
 private:
-        T val = T(0);
+        T val = T();
 
 public:
         size_t size() const {

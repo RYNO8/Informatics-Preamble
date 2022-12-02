@@ -1,16 +1,17 @@
 #pragma once
+#include <type_traits>
 
 namespace DS {
     // TODO: test all
-    template<typename T> class Point : public std::complex<T> {
+    template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
+    class Point : public std::complex<T> {
         /************************************************
          *                INITIALISATION                *
          ************************************************/
 
     public:
         // O(1) Initialises a Point
-        Point(T x, T y) : std::complex<T>(x, y) {
-        }
+        Point(T x, T y) : std::complex<T>(x, y) {}
 
         /************************************************
          *                    DISPLAY                   *
@@ -141,7 +142,8 @@ namespace DS {
     };
 
 
-    template<typename T> class Line {
+    template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
+    class Line {
         /************************************************
          *                INITIALISATION                *
          ************************************************/
@@ -213,7 +215,8 @@ namespace DS {
         }
     };
 
-    template<typename T> class Polygon {
+    template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
+    class Polygon {
         /************************************************
          *                INITIALISATION                *
          ************************************************/

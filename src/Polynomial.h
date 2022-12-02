@@ -1,8 +1,11 @@
 #pragma once
 #include "Util.h"
+#include "Constants.h"
+#include "ModInt.h"
 
 namespace DS {
-    template<typename T> class Polynomial {
+    template<typename T, std::enable_if_t<is_my_integral_v<T>, bool> = true>
+    class Polynomial {
         /************************************************
          *                INITIALISATION                *
          ************************************************/
@@ -180,12 +183,13 @@ namespace DS {
 
         }
 
-        std::vector<T> FT(int n, bool inv = false) const {
-            /// TODO: check the type of T
-            // if T in [int, int, ModInt]
+        template<typename T_ = T, std::enable_if_t<is_modint_v<T_>, bool> = true>
+        std::vector<T_> FT(int n, bool inv = false) const {
             return NTT(n, inv);
-            // else
-            // return FFT(n, inv);
+        }
+        template<typename T_ = T, std::enable_if_t<std::is_integral_v<T_>, bool> = true>
+        std::vector<T_> FT(int n, bool inv = false) const {
+            return FFT(n, inv);
         }
 
         // O(n)

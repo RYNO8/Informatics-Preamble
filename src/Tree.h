@@ -120,11 +120,10 @@ namespace DS {
 	public:
 		// O(N) Displays the graph, showing the parent of each node
 		// @param `out` The string representation of the graph is piped to this output stream
-		// @param `newLine` Indicates whether to end with a trailing `\\n`
-		void print(std::ostream& out = std::cout, bool newLine = true) const {
-			for (int i = 1; i <= N; ++i) out << parent[0][i].first << ' ';
+		friend std::ostream& operator<<(std::ostream& out, const Tree<T> tree) {
+			for (int i = 1; i <= tree.N; ++i) out << tree.parent[0][i].first << ' ';
 			out << '\n';
-			if (newLine) out << '\n';
+			return out;
 		}
 
 		// O(N) Displays the graph to `out` with fancy indenting for depth, showing the parent of each node
@@ -416,12 +415,4 @@ namespace DS {
 			return _multiOrder(traversal, true, true, root);
 		}
 	};
-
-	/************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	template<typename T> std::ostream& operator<<(std::ostream& out, Tree<T> tree) {
-		tree.print(out);
-		return out;
-	}
 };

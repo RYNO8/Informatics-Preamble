@@ -102,23 +102,21 @@ namespace DS {
 		// O(RC)
 		// Displays the grid
 		// @param `out` The string representation of the graph is piped to this output stream
-		// @param `newLine` Indicates whether to end with a trailing `\\n`
-		void print(std::ostream& out = std::cout, bool newLine = true) const {
-			for (int r = 0; r < R; ++r) {
-				for (int c = 0; c < C; ++c) {
-					out << grid[r][c] << ' ';
+		friend std::ostream& operator<<(std::ostream& out, const Grid<T> grid) {
+			for (int r = 0; r < grid.R; ++r) {
+				for (int c = 0; c < grid.C; ++c) {
+					out << grid.grid[r][c] << ' ';
 				}
 				out << '\n';
 			}
-			if (newLine) out << '\n';
+			return out;
 		}
 
 		// O(RC)
 		// Displays the grid with pretty borders
 		// @param `out` The string representation of the graph is piped to this output stream
-		// @param `newLine` Indicates whether to end with a trailing `\\n`
 		// @param `spacing` Indicates how large each cell is (use spacing = -1 for automatic spacing)
-		void pprint(std::ostream& out = std::cout, bool newLine = true, int spacing = -1) {
+		void pprint(std::ostream& out = std::cout, int spacing = -1) {
 			if (spacing == -1) {
 				// find max repr length of grid values
 				for (int r = 0; r < R; ++r) {
@@ -151,8 +149,6 @@ namespace DS {
 				for (int rep = 0; rep < spacing; ++rep) out << space;
 			}
 			out << sep;
-
-			if (newLine) out << '\n';
 		}
 
 		/************************************************
@@ -675,12 +671,4 @@ namespace DS {
 			return shortestPath(coord1.first, coord1.second, coord2.first, coord2.second, isValid, dirs);
 		}
 	};
-
-	/************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	template<typename T> std::ostream& operator<<(std::ostream& out, const Grid<T> grid) {
-		grid.print(out);
-		return out;
-	}
 };

@@ -95,17 +95,16 @@ namespace DS {
          *                    DISPLAY                   *
          ************************************************/
 
-        // O(1) print the first 20 elements
-        void print(std::ostream& out = std::cout, bool newLine = false) {
-            for (ll i = l(); i <= std::min(l() + 20, r()); ++i) out << query(i) << ' ';
-            if (newLine) out << '\n';
+        // O(N)
+        // note: not const segtree because queries do pushes
+        friend std::ostream& operator<<(std::ostream& out, Segtree<T, I, Combine, CombineAgg, Null, Update> segtree) {
+            for (ll i = segtree.l(); i <= segtree.r(); ++i) out << segtree.query(i) << ' ';
+            return out;
         }
 
         // O(1)
-        void printDebug(std::ostream& out = std::cout, bool newLine = false) const {
-            Range::print();
-            out << " = " << val << '\n';
-            if (newLine) out << '\n';
+        void printDebug(std::ostream& out = std::cout) const {
+            out << Range<ll>(*this) << " = " << val << '\n';
         }
 
         /************************************************
@@ -251,6 +250,18 @@ namespace DS {
         }
     };
 
+
+    
+    /************************************************
+     *                   ITERATOR                   *
+     ************************************************/
+
+    
+
+    /************************************************
+     *                CUSTOM SEGTREES               *
+     ************************************************/
+
     template<typename T> class MaxOp {
 public:
         constexpr T operator()(const T &lhs, const T &rhs) const {
@@ -280,13 +291,4 @@ public:
 
     template<typename T>
     using MinSegtree = Segtree<T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>>;
-
-    /************************************************
-     *                    DISPLAY                   *
-     ************************************************/
-    template<typename T, T I, class Combine, class CombineAgg, T Null, class Update>
-    std::ostream& operator<<(std::ostream& out, Segtree<T, I, Combine, CombineAgg, Null, Update> tree) {
-        tree.print(out);
-        return out;
-    }
 };

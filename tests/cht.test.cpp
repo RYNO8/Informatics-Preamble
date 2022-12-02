@@ -11,6 +11,7 @@ SAMPLE OUTPUT
 */
 
 #include "../src/CHT.h"
+#include "../src/Util.h"
 using namespace std;
 using namespace DS;
 
@@ -37,4 +38,7 @@ int main() {
         cht.addLine(l);
     }
     cout << dp[N] << "\n";
+#ifdef DEBUG
+    cout << cht;
+#endif
 }

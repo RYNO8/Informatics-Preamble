@@ -22,22 +22,17 @@ namespace DS {
 		 *                    DISPLAY                   *
 		 ************************************************/
 
-		// O(n)
-		// Displays the coefficients of the polynomial
-		// @param `out` The string representation of the graph is piped to this output stream
-		// @param `newLine` Indicates whether to end with a trailing `\\n`
-		void print(std::ostream& out = std::cout, bool newLine = false) const {
-			out << coeff;
-			if (newLine) out << '\n';
-		}
 
 		// O(n)
 		// Displays the natural maths representation of the polynomial
 		// @param `out` The string representation of the graph is piped to this output stream
 		// @param `newLine` Indicates whether to end with a trailing `\\n`
-		void pprint(std::ostream& out = std::cout, bool newLine = false) const {
-			for (int d = deg(); d >= 0; --d) std::cout << coeff[d] << " x^" << d << ' ';
-			if (newLine) out << '\n';
+		friend std::ostream& operator<<(std::ostream& out, const Polynomial poly) {
+			for (int d = poly.deg(); d >= 0; --d) {
+				out << poly.coeff[d] << " x^" << d;
+				if (d != 0) out << ' ';
+			}
+			return out;
 		}
 
 		/************************************************
@@ -326,12 +321,4 @@ namespace DS {
 			return fastEval_(v);
 		}
 	};
-
-	/************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	template<typename T> std::ostream& operator<<(std::ostream& out, const Polynomial<T>& val) {
-		val.print(out);
-		return out;
-	}
 };

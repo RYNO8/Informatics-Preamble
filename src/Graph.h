@@ -93,20 +93,19 @@ namespace DS {
 		// O(V + E)
 		// Displays the graph, showing the outwards edge connections of each edge in lexographic order
 		// @param `out` The string representation of the graph is piped to this output stream
-		// @param `newLine` Indicates whether to end with a trailing `\\n`
-		void print(std::ostream& out = std::cout, bool newLine = true) const {
-			for (int u = 1; u <= V; ++u) {
+		friend std::ostream& operator<<(std::ostream& out, const Graph<T> graph) {
+			for (int u = 1; u <= graph.V; ++u) {
 				out << u << ":\n";
-				for (std::pair<int, T> edge : outEdges[u]) {
+				for (std::pair<int, T> &edge : graph.outEdges[u]) {
 					// on an undirected graph, don't print edges twice
-					if (!isDirected && u > edge.first) continue;
+					if (!graph.isDirected && u > edge.first) continue;
 
 					out << ' ' << edge.first;
-					if (isWeighted) out << " (w = " << edge.second << ')';
+					if (graph.isWeighted) out << " (w = " << edge.second << ')';
 					out << '\n';
 				}
 			}
-			if (newLine) out << '\n';
+			return out;
 		}
 
 		/************************************************
@@ -1058,12 +1057,4 @@ namespace DS {
 		// TODO: optimal colouring
 		// TODO: planar embedding?
 	};
-
-	/************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	template<typename T> std::ostream& operator<<(std::ostream& out, Graph<T> graph) {
-		graph.print(out);
-		return out;
-	}
 };

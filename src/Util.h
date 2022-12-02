@@ -27,7 +27,7 @@ namespace DS {
     // [ T, T, ..., T ]
     template<typename T> std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
         out << "[ ";
-        for (int i = 0; i < (int)v.size(); ++i) {
+        for (size_t i = 0; i < v.size(); ++i) {
             out << v[i];
             if (i != v.size() - 1) out << ", ";
         }
@@ -45,7 +45,7 @@ namespace DS {
     // < T, T, ..., T >
     template<typename T> std::ostream& operator<<(std::ostream& out, const std::queue<T>& q) {
         out << "< ";
-        for (int i = 0; i < (int)q.size(); ++i) {
+        for (size_t i = 0; i < q.size(); ++i) {
             out << q.front();
             q.push(q.front());
             q.pop();
@@ -59,7 +59,7 @@ namespace DS {
     // < T, T, ..., T >
     template<typename T> std::ostream& operator<<(std::ostream& out, const std::stack<T>& s) {
         out << "< ";
-        for (int i = 0; i < (int)s.size(); ++i) {
+        for (size_t i = 0; i < s.size(); ++i) {
             out << s.top();
             s.push(s.top());
             s.pop();
@@ -73,7 +73,7 @@ namespace DS {
     // < T, T, ..., T >
     template<typename T> std::ostream& operator<<(std::ostream& out, const std::deque<T>& q) {
         out << "< ";
-        for (int i = 0; i < (int)q.size(); ++i) {
+        for (size_t i = 0; i < q.size(); ++i) {
             out << q.front();
             q.push_back(q.front());
             q.pop_front();

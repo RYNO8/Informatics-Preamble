@@ -19,9 +19,9 @@ namespace DS {
 		// O(1)
 		// @param `out` The string representation of the graph is piped to this output stream
 		// @param `newLine` Indicates whether to end with a trailing `\\n`
-		void print(std::ostream& out = std::cout, bool newLine = false) {
-			out << '(' << this->real() << ", " << this->imag() << ')';
-			if (newLine) out << '\n';
+		friend std::ostream& operator<<(std::ostream& out, const Point point) {
+			out << '(' << point.real() << ", " << point.imag() << ')';
+			return out;
 		}
 
 		/************************************************
@@ -140,13 +140,6 @@ namespace DS {
 		}
 	};
 
-	/************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	template<typename T> std::ostream& operator<<(std::ostream& out, Point<T> val) {
-		val.print(out);
-		return out;
-	}
 
 	template<typename T> class Line {
 		/************************************************
@@ -167,9 +160,9 @@ namespace DS {
 		// O(1)
 		// @param `out` The string representation of the graph is piped to this output stream
 		// @param `newLine` Indicates whether to end with a trailing `\\n`
-		void print(std::ostream& out = std::cout, bool newLine = false) {
-			out << a << " -- " << b;
-			if (newLine) out << '\n';
+		friend std::ostream& operator<<(std::ostream& out, const Line line) {
+			out << line.a << " -- " << line.b;
+			return out;
 		}
 
 		/************************************************
@@ -220,14 +213,6 @@ namespace DS {
 		}
 	};
 
-	/************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	template<typename T> std::ostream& operator<<(std::ostream& out, Line<T> val) {
-		val.print(out);
-		return out;
-	}
-
 	template<typename T> class Polygon {
 		/************************************************
 		 *                INITIALISATION                *
@@ -249,9 +234,9 @@ namespace DS {
 		// O(1)
 		// @param `out` The string representation of the graph is piped to this output stream
 		// @param `newLine` Indicates whether to end with a trailing `\\n`
-		void print(std::ostream& out = std::cout, bool newLine = false) {
-			out << points;
-			if (newLine) out << '\n';
+		friend std::ostream& operator<<(std::ostream& out, const Polygon polygon) {
+			out << polygon.points;
+			return out;
 		}
 
 		/************************************************
@@ -310,12 +295,4 @@ namespace DS {
 			return true;
 		}
 	};
-
-	/************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	template<typename T> std::ostream& operator<<(std::ostream& out, Polygon<T> val) {
-		val.print(out);
-		return out;
-	}
 };

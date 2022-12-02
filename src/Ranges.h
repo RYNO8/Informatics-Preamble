@@ -47,11 +47,10 @@ namespace DS {
          *                    DISPLAY                   *
          ************************************************/
 
-        std::ostream& print(std::ostream &out = std::cout, bool newLine=false) const {
+        friend std::ostream& operator<<(std::ostream& out, const Range range) {
             out << '[';
-            out << l() << ".." << r();
+            out << range.l() << ".." << range.r();
             out << ']';
-            if (newLine) out << '\n';
             return out;
         }
 
@@ -183,14 +182,6 @@ namespace DS {
 
         }
     };
-    
-    /************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	template<typename T> std::ostream& operator<<(std::ostream& out, const Range<T>& val) {
-		val.print(out);
-		return out;
-	}
 
     template<typename T> class Ranges: public std::set<Range<T>> {
         /************************************************

@@ -44,9 +44,9 @@ namespace DS {
         // O(1)
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
-        void print(std::ostream& out = std::cout, bool newLine = false) const {
-            out << num << " ( mod " << mod << " )";
-            if (newLine) out << '\n';
+        friend std::ostream& operator<<(std::ostream& out, const ModInt modInt) {
+            out << modInt.num << " ( mod " << modInt.mod << " )";
+            return out;
         }
 
         /************************************************
@@ -191,12 +191,4 @@ public:
             return ans;
         }
     };
-
-    /************************************************
-     *                    DISPLAY                   *
-     ************************************************/
-    template<uintmax_t mod> std::ostream& operator<<(std::ostream& out, const ModInt<mod> val) {
-        val.print(out);
-        return out;
-    }
 };

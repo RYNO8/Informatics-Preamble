@@ -4,7 +4,7 @@ using namespace DS;
 using namespace std;
 
 void testPopcount() {
-    for (ll i = 0; i < 1e5; ++i) {
+    for (ll i = 0; i < 1e4; ++i) {
         uint32_t x = uint_dis(rng);
         assert(popcount(x) == __builtin_popcount(x));
         uint64_t y = ull_dis(rng);

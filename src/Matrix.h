@@ -32,17 +32,15 @@ namespace DS {
 
 		// Displays the matrx
 		// @param `out` The string representation of the graph is piped to this output stream
-		// @param `newLine` Indicates whether to end with a trailing `\\n`
-		void print(std::ostream& out = std::cout, bool newLine = true) const {
+		friend std::ostream& operator<<(std::ostream& out, const Matrix<T> matrix) {
 			out << "[\n";
-			for (int r = 0; r < this->getR(); ++r) {
+			for (int r = 0; r < matrix.getR(); ++r) {
 				out << ' ';
-				for (int c = 0; c < this->getC(); ++c) out << this->getVal(r, c) << ' ';
+				for (int c = 0; c < matrix.getC(); ++c) out << matrix.getVal(r, c) << ' ';
 				out << '\n';
 			}
-			std::cout << "]\n";
-
-			if (newLine) std::cout << '\n';
+			out << "]\n";
+			return out;
 		}
 
 		/************************************************
@@ -163,12 +161,4 @@ namespace DS {
 		// TODO: eigenvectors and eigenvalues
 		// TODO: decompositions
 	};
-
-	/************************************************
-	 *                    DISPLAY                   *
-	 ************************************************/
-	template<typename T> std::ostream& operator<<(std::ostream& out, const Matrix<T> mat) {
-		mat.print(out);
-		return out;
-	}
 };

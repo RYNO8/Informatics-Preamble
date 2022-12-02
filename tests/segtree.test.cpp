@@ -205,6 +205,6 @@ void testSegtree_auto() {
 }
 
 signed main() {
-    testSegtree_manual();
-    //testSegtree_auto();
+    //testSegtree_manual();
+    testSegtree_auto();
 }

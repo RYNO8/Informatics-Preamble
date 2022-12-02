@@ -4,37 +4,37 @@
 
 namespace DS {
     // TODO: Montgomery
-    template<uintmax_t mod> class ModInt {
+    template<uintmax_t N> class ModInt {
         /************************************************
          *                INITIALISATION                *
          ************************************************/
 
     private:
-        uintmax_t num;
+        uintmax_t val;
 
     public:
         // O(1)
         // Initialises a ModInt
         template<typename T> ModInt(T _num) {
             if (std::is_signed<T>::value) {
-                intmax_t unsigned_num = ((intmax_t)_num % (intmax_t)mod) + mod;
+                intmax_t unsigned_num = ((intmax_t)_num % (intmax_t)N) + N;
                 assert(unsigned_num >= 0);
-                num = unsigned_num;
-                num %= mod;
+                val = unsigned_num;
+                val %= N;
             } else {
-                num = _num % mod;
+                val = _num % N;
             }
-            // invariant: num is bounded
-            // implicitly also checks that mod is positive
-            assert(0 <= num && num < mod);
-            uintmax_t largest = mod - 1;
-            assert((largest * largest) / largest == largest); // mod^2 does not overflow
+            // invariant: val is bounded
+            // implicitly also checks that N is positive
+            assert(0 <= val && val < N);
+            uintmax_t largest = N - 1;
+            assert((largest * largest) / largest == largest); // N^2 does not overflow
         }
 
         // O(1)
         // if not given an initialiser value, initalise to 0
         ModInt() {
-            num = 0;
+            val = 0;
         }
 
         /************************************************
@@ -45,7 +45,7 @@ namespace DS {
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
         friend std::ostream& operator<<(std::ostream& out, const ModInt modInt) {
-            out << modInt.num << " ( mod " << modInt.mod << " )";
+            out << modInt.num() << " ( mod " << modInt.mod() << " )";
             return out;
         }
 
@@ -54,13 +54,21 @@ namespace DS {
          ************************************************/
 
         // O(1) 
-        // @returns num
-        const uintmax_t getNum() const {
-            return num;
+        // @returns val
+        const uintmax_t num() const {
+            return val;
         }
 
+        // O(1) 
+        // @returns val
         operator auto() const {
-            return (uintmax_t)num;
+            return (uintmax_t)val;
+        }
+
+        // O(1)
+        // @returns N
+        static constexpr uintmax_t mod() {
+            return N;
         }
 
         /************************************************
@@ -69,78 +77,82 @@ namespace DS {
 
         // O(1)
         // Standard modular addition
-        ModInt<mod> operator+(ModInt<mod> o) const {
-            return ModInt<mod>(num + o.num);
+        ModInt<N> operator+(ModInt<N> o) const {
+            return ModInt<N>(val + o.val);
         }
 
         // O(1)
         // Addition assignment
-        ModInt<mod> operator+=(ModInt<mod> o) {
+        ModInt<N> operator+=(ModInt<N> o) {
             *this = *this + o;
             return *this;
         }
 
         // O(1) Prefix increment
-        ModInt<mod> operator++() {
+        ModInt<N> operator++() {
             *this = *this + 1;
             return *this;
         }
 
         // O(1) Postfix increment
-        ModInt<mod> operator++(int) {
-            ModInt<mod> tmp = *this;
+        ModInt<N> operator++(int) {
+            ModInt<N> tmp = *this;
             *this = *this + 1;
             return tmp;
         }
 
         // O(1)
         // Standard modular subtraction
-        ModInt<mod> operator-(ModInt<mod> o) const {
-            return ModInt<mod>(num - o.num);
+        ModInt<N> operator-(ModInt<N> o) const {
+            return ModInt<N>(val - o.val);
         }
 
         // O(1)
         // Subtraction assignment
-        ModInt<mod> operator-=(ModInt<mod> o) {
+        ModInt<N> operator-=(ModInt<N> o) {
             *this = *this - o;
             return *this;
         }
 
         // O(1) Prefix decrement
-        ModInt<mod> operator--() {
+        ModInt<N> operator--() {
             *this = *this - 1;
             return *this;
         }
 
         // O(1) Postfix decrement
-        ModInt<mod> operator--(int) {
-            ModInt<mod> tmp = *this;
+        ModInt<N> operator--(int) {
+            ModInt<N> tmp = *this;
             *this = *this - 1;
             return tmp;
         }
 
         // O(1) Standard modular multiplication
-        ModInt<mod> operator*(ModInt<mod> o) const {
-            return ModInt<mod>(num * o.num);
+        ModInt<N> operator*(ModInt<N> o) const {
+            return ModInt<N>(val * o.val);
         }
 
         // O(1)
         // Multiplcation assignment
-        void operator*=(ModInt<mod> o) {
+        void operator*=(ModInt<N> o) {
             *this = *this * o;
         }
 
         // O(1) Standard modulo
         template<uintmax_t newMod> ModInt<newMod> operator%(uintmax_t &o) const {
-            return ModInt<gcd((uintmax_t)mod, o)>(num);
+            return ModInt<gcd((uintmax_t)N, o)>(val);
         }
 
         // O(log x)
         // @returns Fast exponentiation of `this` to the power of `x`
-        ModInt<mod> pow(uintmax_t x) const {
-            assert(x >= 0);
-            ModInt<mod> output(1);
-            for (ModInt<mod> curr(num); x; x /= 2) {
+        ModInt<N> pow(intmax_t x) const {
+            ModInt<N> output(1);
+            ModInt<N> curr = *this;
+            if (x < 0) {
+                curr = curr.inv();
+                x = -x;
+            }
+            for (; x; x /= 2) {
                 if (x & 1) output *= curr;
                 curr *= curr;
             }
@@ -148,7 +160,7 @@ namespace DS {
         }
 
 private:
-        // O(log mod)
+        // O(log N)
         // extended euclidean algorithm
         // @returns gcd(a, b)
         // sets x and y such that a*x + b*y = gcd(a, b)
@@ -166,26 +178,34 @@ private:
         }
 
 public:
-        // O(log mod)
-        // @returns Inverse of this number modulo `mod`
-        ModInt<mod> modInv() const {
+        // O(log N)
+        // @returns Inverse of this number modulo `N`
+        ModInt<N> inv() const {
             intmax_t x, y;
-            uintmax_t g = extendedEuclidean(num, mod, x, y);
+            uintmax_t g = extendedEuclidean(val, N, x, y);
             assert(g == 1 && "No solution!");
-            return ModInt<mod>(x);
+            return ModInt<N>(x);
         }
 
-        // O(log mod + gcd(denom, mod))
-        // solve linear congruence
-        // @returns the gcd(denom, mod) modints, which are solutions to num*(denom)^-1
-        std::vector<ModInt<mod>> operator/(ModInt<mod> denom) {
+        // O(log N)
+        // @returns any solution to val*(denom)^-1
+         ModInt<N> operator/(ModInt<N> denom) const {
             intmax_t u, v;
-            uintmax_t d = extendedEuclidean(denom, mod, u, v);
-            std::vector<ModInt<mod>> ans;
-            if ((intmax_t)this->num % d == 0ll) {
-                ModInt<mod> x0 = u * ((intmax_t)this->num / (intmax_t)d);
+            uintmax_t d = extendedEuclidean(denom, N, u, v);
+            assert((intmax_t)this->val % d == 0ll);
+            return ModInt<N>(u * ((intmax_t)this->val / (intmax_t)d));
+        }
+
+        // O(log N + gcd(denom, N))
+        // solve linear congruence
+        // @returns the gcd(denom, N) modints, which are solutions to val*(denom)^-1
+        std::vector<ModInt<N>> allCongreunt(ModInt<N> denom) {
+            uintmax_t d = gcd((uintmax_t)denom, N);
+            std::vector<ModInt<N>> ans;
+            if ((intmax_t)this->val % d == 0ll) {
+                ModInt<N> x0 = *this / denom;
                 for (uintmax_t i = 0; i < d; i++) {
-                    ans.push_back(x0 + ModInt<mod>(i * (mod / d)));
+                    ans.push_back(x0 + ModInt<N>(i * (N / d)));
                 }
             }
             return ans;

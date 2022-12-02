@@ -120,7 +120,7 @@ namespace DS {
             if (spacing == -1) {
                 // find max repr length of grid values
                 for (int r = 0; r < R; ++r) {
-                    for (int c = 0; c < C; ++c) spacing = std::max(spacing, (reprLen(grid[r][c])+3) / 4);
+                    for (int c = 0; c < C; ++c) spacing = std::max(spacing, (repr(grid[r][c]).size()+3) / 4);
                 }
             }
 
@@ -139,8 +139,8 @@ namespace DS {
 
                 out << '|';
                 for (int c = 0; c < C; ++c) {
-                    int paddingL = std::max(0, 2 * spacing - reprLen(grid[r][c]) / 2);
-                    int paddingR = std::max(0, 2 * spacing - (reprLen(grid[r][c]) - 1) / 2);
+                    int paddingL = std::max(0, 2 * spacing - repr(grid[r][c]).size() / 2);
+                    int paddingR = std::max(0, 2 * spacing - (repr(grid[r][c]) - 1).size() / 2);
 
                     out << std::string(paddingL, ' ') << grid[r][c] << std::string(paddingR, ' ') << '|';
                 }

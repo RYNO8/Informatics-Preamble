@@ -245,17 +245,16 @@ namespace DS {
         if (b > a) a = b;
     }
 
-    // O(N)
-    // @returns The number of characters of the printed representation of `obj`
-    template<typename T> int reprLen(T obj) {
-        std::stringstream s;
-        s << obj;
-        return s.str().size();
-    }
-
     /************************************************
      *                OTHER UTILITIES               *
      ************************************************/
+
+    // @returns The number of characters of the printed representation of `obj`
+    template<typename T> std::string repr(T obj) {
+        std::stringstream s;
+        s << obj;
+        return s.str();
+    }
 
     double timeNow() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(

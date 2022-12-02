@@ -8,20 +8,20 @@ using namespace std;
 void testModInt() {
     for (int rep = 0; rep < 1000000; ++rep) {
         auto a = ModInt<MOD>(ull_dis(rng));
-        assert(a * a.modInv() == 1LL);
+        assert(a * a.inv() == 1LL);
     }
 
     for (int rep = 0; rep < 1000000; ++rep) {
         auto n = ModInt<1000000007>(ull_dis(rng));
         auto d = ModInt<1000000007>(ull_dis(rng));
-        vector<ModInt<1000000007>> ans = n/d;
+        vector<ModInt<1000000007>> ans = n.allCongreunt(d);
         assert(ans.size() == gcd((uintmax_t)1000000007, (uintmax_t)d));
         for (auto val : ans) {
             assert(val * d == n);
         }
     }
 
-    assert(ModInt<18>(9)/ModInt<18>(15) == vector<ModInt<18>>({15, 3, 9}));
+    assert(ModInt<18>(9).allCongreunt(ModInt<18>(15)) == vector<ModInt<18>>({15, 3, 9}));
     
     for (int rep = 0; rep < 1000000; ++rep) {
         auto a = ModInt<1000000007>(ull_dis(rng));
@@ -29,6 +29,8 @@ void testModInt() {
     }
 
     assert(ModInt<6>(5) % 3 == 2);
+
+    assert(repr(ModInt<4206969>(69)) == "69 ( mod 4206969 )");
 }
 
 void testModInt_bounds() {
@@ -56,6 +58,50 @@ void testModInt_bounds() {
 
     assert(ModInt<4294967294U>(numeric_limits<uint>::max()) == 1LL);
     assert(ModInt<4294967294U>(numeric_limits<ull>::max()) == 3LL);
+}
+
+void testModInt_atcoder() {
+    ModInt<11> a = 10;
+    ModInt<11> b(3);
+
+    // equal
+    // assert(a == 21);
+    // assert(a == -1);
+    // assert(-1 == a);
+
+    // negative
+    assert(-b == 8);
+
+    // plus
+    assert(a + b == 2);  // (10 + 3) mod 11
+    assert(1 + a == 0);
+
+    // minus
+    assert(a - b == 7);  // (10 - 3) mod 11
+    assert(b - a == 4);
+
+    // mul
+    assert(a * b == 8);  // (10 * 3) mod 11
+
+    // inv
+    assert(b.inv() == 4);  // (3 * 4) mod 11 == 1
+
+    // div
+    assert(a / b == 7);  // (10 * 4) mod 11
+
+    // +=, -=, *=
+    a += b;
+    assert(a == 2 && b == 3);
+    a -= b;
+    assert(a == 10 && b == 3);
+    a *= b;
+    assert(a == 8 && b == 3);
+
+    // pow
+    assert(ModInt<11>(2).pow(4) == 5);  // 16 mod 11
+
+    // get mod
+    assert(ModInt<11>::mod() == 11 && a.mod() == 11);
 }
 
 signed main() {

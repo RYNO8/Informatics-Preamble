@@ -25,3 +25,4 @@ YES");
 g++ bit.test.cpp -O3 -Wall -o temp && ./temp;
 g++ ranges.test.cpp -O3 -Wall -o temp && ./temp;
 g++ segtree.test.cpp -O3 -Wall -o temp && ./temp;
+g++ modint.test.cpp -O3 -Wall -o temp && ./temp;

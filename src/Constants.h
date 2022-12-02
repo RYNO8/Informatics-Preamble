@@ -42,7 +42,7 @@
  ************************************************/
 
 namespace DS {
-    typedef unsigned int uint;
+    typedef uint32_t uint;
     
     typedef long double ld;
     constexpr ld PI =    3.1415926535897932384626433832795;
@@ -50,7 +50,7 @@ namespace DS {
     constexpr ld PHI =   1.6180339887498948482045868343656;
     constexpr ld GAMMA = 0.5772156649015328606065120900824;
 
-    typedef long long ll;
+    typedef int64_t ll;
     constexpr ll SIXTYNINE = 69;
     constexpr ll MAXR = 1000;
     constexpr ll MAXC = 1000;
@@ -60,7 +60,7 @@ namespace DS {
     constexpr ll MOD = 1000000007;
     constexpr ll MOD_POW = 1; // highest value such that MOD-1 is divisible by 2^MOD_POW
 
-    typedef unsigned long long ull;
+    typedef uint64_t ull;
 
     std::pair<int, int> DIRS_RECTILINEAR[4] = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
     std::pair<int, int> DIRS_DIAG[4] = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
@@ -74,4 +74,5 @@ namespace DS {
     std::uniform_int_distribution<ll> ll_dis(0, std::numeric_limits<ll>::max());
     std::uniform_int_distribution<ull> ull_dis(0, std::numeric_limits<ull>::max());
     std::uniform_real_distribution<ld> prob_dist(0, 1);
+
 };

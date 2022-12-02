@@ -9,6 +9,7 @@
 #include <set>
 #include <unordered_set>
 #include <sstream>
+#include "Constants.h"
 
 namespace DS {
     /************************************************
@@ -183,14 +184,8 @@ namespace DS {
      ************************************************/
 
     // O(log a + log b)
-    // @note `a` and `b` should be non-negative
-    template<typename T> T gcd(T a, T b) {
-        if (b == T(0)) return a;
-        else return gcd(b, a % b);
-    }
-
-    // O(log a + log b)
-    template<typename T> T gcdSlow(T x, T y) {
+    // @note `a` and `b` should be non-negative?
+    template<typename T> T gcd(T x, T y) {
         while (y != 0) {
             T temp = y;
             y = x % temp;
@@ -199,20 +194,35 @@ namespace DS {
         return x;
     }
 
-
     // O(log a + log b)
-    // @note May overflow integer
+    // @note May overflow T
     template<typename T> T lcm(T a, T b) {
         return (a / gcd(a, b)) * b;
     }
 
     // O(12)
     // @returns the number of set bits in the binary represetnation of `x`
-    template<typename T> T popcount(T x) {
+    uint popcount(uint x) {
+        // note: faster than builtin __builtin_popcount
+        x -= (x >> 1) & 0x55555555;
+        x = (x & 0x33333333) + ((x >> 2) & 0x333333333);
+        x = (x + (x >> 4)) & 0xf0f0f0f;
+        return (x * 0x1010101) >> 24;
+    }
+    int popcount(int x) {
+        assert(x >= 0);
+        return popcount((uint)x);
+    }
+    ull popcount(ull x) {
+        // note: faster than builtin __builtin_popcountll
         x -= (x >> 1) & 0x5555555555555555;
         x = (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333);
         x = (x + (x >> 4)) & 0x0f0f0f0f0f0f0f0f;
         return (x * 0x0101010101010101) >> 56;
+    }
+    ll popcount(ll x) {
+        assert(x >= 0);
+        return popcount((ull)x);
     }
 
     // O(1)
@@ -244,12 +254,12 @@ namespace DS {
     }
 
     /************************************************
-     *            ITERATOR TYPE UTILITIES           *
+     *                OTHER UTILITIES               *
      ************************************************/
-    // vector<int>::iterator vector<int>::find() {
 
-    // }
-    // int int::find() {
-    //     return 2;
-    // }
+    double timeNow() {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        ).count() / 1000.;
+    }
 };

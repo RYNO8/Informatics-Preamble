@@ -11,8 +11,17 @@ void testModInt() {
         assert(a * a.modInv() == 1LL);
     }
 
-    vector<ModInt<18>> ans = ModInt<18>(9)/ModInt<18>(15);
-    assert(ans == vector<ModInt<18>>({15, 3, 9}));
+    for (int rep = 0; rep < 1000000; ++rep) {
+        auto n = ModInt<1000000007>(ull_dis(rng));
+        auto d = ModInt<1000000007>(ull_dis(rng));
+        vector<ModInt<1000000007>> ans = n/d;
+        assert(ans.size() == gcd((uintmax_t)1000000007, (uintmax_t)d));
+        for (auto val : ans) {
+            assert(val * d == n);
+        }
+    }
+
+    assert(ModInt<18>(9)/ModInt<18>(15) == vector<ModInt<18>>({15, 3, 9}));
     
     for (int rep = 0; rep < 1000000; ++rep) {
         auto a = ModInt<1000000007>(ull_dis(rng));

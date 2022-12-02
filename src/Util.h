@@ -199,6 +199,7 @@ namespace DS {
         return x;
     }
 
+
     // O(log a + log b)
     // @note May overflow integer
     template<typename T> T lcm(T a, T b) {

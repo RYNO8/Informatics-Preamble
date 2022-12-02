@@ -16,15 +16,15 @@ using namespace std;
 using namespace DS;
 
 void testFib() {
-	constexpr uint mod = 1e9;
-	Matrix<ModInt<mod>> fib1 = Grid<ModInt<mod>>(vector<vector<ModInt<mod>>>{
-		{ 1, 1 },
-		{ 1, 0 }
-	});
-	assert(fib1.pow(100000).getVal(1, 0) == 428746875);
+    constexpr uint mod = 1e9;
+    Matrix<ModInt<mod>> fib1 = Grid<ModInt<mod>>(vector<vector<ModInt<mod>>>{
+        { 1, 1 },
+        { 1, 0 }
+    });
+    assert(fib1.pow(100000).getVal(1, 0) == 428746875);
 }
 
 
 int main() {
-	testFib();
+    testFib();
 }

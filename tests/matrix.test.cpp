@@ -4,9 +4,9 @@
 using namespace std;
 
 void testMatrix() {
-	
+    
 }
 
 signed main() {
-	testMatrix();
+    testMatrix();
 }

@@ -24,7 +24,14 @@ void testFib() {
     assert(fib1.pow(100000).getVal(1, 0) == 428746875);
 }
 
+void testPrint() {
+    ll a[] = {1, 2, 3, 4, 5};
+    assert(repr(capture<ll*>{begin(a), end(a)}) == "[ 1 2 3 4 5 ]");
+    vector<ll> v = vector<ll>({1, 2, 3, 4, 5});
+    assert(repr(v) == "[ 1 2 3 4 5 ]");
+}
 
 int main() {
     testFib();
+    testPrint();
 }

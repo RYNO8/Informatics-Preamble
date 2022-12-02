@@ -26,6 +26,7 @@ Functionalities include
 [] docstrings for ranges
 [] segtree iterator
 [] use `requires std::integral<T> || std::floating_point<T>` where possible
+[] cyclic array?
 
 # Notes
  - It is probably not the fastest or most memory efficient, because I have prioritised verbosity over constant factor optimisations.

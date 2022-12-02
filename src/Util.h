@@ -23,23 +23,36 @@ namespace DS {
         return out;
     }
 
-    // Displays a vector:
-    // [ T, T, ..., T ]
-    template<typename T> std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
+    // Displays an array:
+    // [ T T T ... T ]
+    // #define printArr0(a, N) std::cout << "[ "; for (int i = 0; i < N; ++i, std::cout << (i < N ? ", " : "")) std::cout << a[i]; std::cout << " ]";
+    // #define printArr1(a, N) std::cout << "[ "; for (int i = 1; i <= N; ++i, std::cout << (i < N ? ", " : "")) std::cout << a[i]; std::cout << " ]";
+    // #define printArr(a, N) printArr0(a, N)
+
+    template<typename T> struct capture {
+        T begin, end;
+    };
+    template<typename T> std::ostream& operator<<(std::ostream& out, const capture<T> range) {
         out << "[ ";
-        for (size_t i = 0; i < v.size(); ++i) {
-            out << v[i];
-            if (i != v.size() - 1) out << ", ";
+        for (T it = range.begin; it != range.end; ) {
+            out << *it;
+            if (++it != range.end) out << " ";
         }
         out << " ]";
         return out;
     }
 
-    // Displays an array:
-    // T T T ... T
-    #define printArr0(a, N) for (int i = 0; i < N; ++i) std::cout << a[i] << " ";
-    #define printArr1(a, N) for (int i = 1; i <= N; ++i) std::cout << a[i] << " ";
-    #define printArr(a, N) printArr0(a, N);
+    // Displays a vector:
+    // [ T T ... T ]
+    template<typename T> std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
+        out << "[ ";
+        for (size_t i = 0; i < v.size(); ++i) {
+            out << v[i];
+            if (i != v.size() - 1) out << " ";
+        }
+        out << " ]";
+        return out;
+    }
 
     // Displays a queue:
     // < T, T, ..., T >

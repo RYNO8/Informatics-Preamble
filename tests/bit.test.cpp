@@ -1,4 +1,5 @@
 #include "../src/BIT.h"
+#include "../src/Util.h"
 #include <assert.h>
 #include <vector>
 #include <random>
@@ -7,16 +8,36 @@ using namespace std;
 using namespace DS;
 
 void testBIT_metadata() {
-    BIT<int, RANGE_QUERY_POINT_UPDATE, 10, 11> b;
-    assert(b.size() == 110);
+    BIT_RQPU<int, 2, 3> b;
+    b.addIndex(0, 0, 0);
+    b.addIndex(1, 0, 1);
+    b.addIndex(2, 0, 2);
+    b.addIndex(3, 1, 0);
+    b.addIndex(4, 1, 1);
+    b.addIndex(5, 1, 2);
+    assert(b.size() == 6);
     assert(b.dimensions() == 2);
-    assert(b.shape() == vector<size_t>({10, 11}));
+    assert(b.shape() == vector<size_t>({2, 3}));
+    assert(b.index() == vector<vector<size_t>>({
+        {0, 0},
+        {0, 1},
+        {0, 2},
+        {1, 0},
+        {1, 1},
+        {1, 2},
+    }));
+    assert(b.data() == vector<int>({0, 1, 2, 3, 4, 5}));
+
+    BIT_PQRU<int, 2> c;
+    c.addIndex(0, 0);
+    c.addIndex(1, 1);
+    assert(c.data() == vector<int>({0, 1}));
 }
 
 void testBIT_rqpu() {
     // if it works in 2 dimensions, it probably works for 
     // all other dimensions
-    BIT<int, RANGE_QUERY_POINT_UPDATE, 10, 11> b;
+    BIT_RQPU<int, 10, 11> b;
     int fakeBit[10][11] = {};
 
     for (int rep = 0; rep < 100000; ++rep) {
@@ -27,7 +48,7 @@ void testBIT_rqpu() {
             int i2 = rand() % 11;
             int v = rand() % 69;
             fakeBit[i1][i2] += v;
-            b.addIndex(i1, i2, v);
+            b.addIndex(v, i1, i2);
         } else if (opt == 1) {
             // query range
             int l1 = rand() % 10, r1 = rand() % 10;
@@ -53,7 +74,7 @@ void testBIT_rqpu() {
 void testBIT_pqru() {
     // if it works in 2 dimensions, it probably works for 
     // all other dimensions
-    BIT<int, POINT_QUERY_RANGE_UPDATE, 10, 11> b;
+    BIT_PQRU<int, 10, 11> b;
     int fakeBit[10][11] = {};
 
     for (int rep = 0; rep < 100000; ++rep) {
@@ -76,16 +97,23 @@ void testBIT_pqru() {
                     fakeBit[i1][i2] += v;
                 }
             }
-            b.addRange(l1, r1, l2, r2, v);
+            b.addRange(v, l1, r1, l2, r2);
         } else if (opt == 2) {
             // update point
             int i1 = rand() % 10;
             int i2 = rand() % 11;
             int v = rand() % 69;
             fakeBit[i1][i2] += v;
-            b.addIndex(i1, i2, v);
+            b.addIndex(v, i1, i2);
         }
     }
+}
+
+
+void testBIT_display() {
+    BIT_PQRU<int, 2, 2> b;
+    b.addIndex(69, 0, 1);
+    assert(repr(b) == "[ [ 0 69 ] [ 0 0 ] ]");
 }
 
 int main() {
@@ -93,4 +121,5 @@ int main() {
     testBIT_metadata();
     testBIT_rqpu();
     testBIT_pqru();
+    testBIT_display();
 }

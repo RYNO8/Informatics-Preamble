@@ -291,4 +291,49 @@ namespace DS {
             std::chrono::system_clock::now().time_since_epoch()
         ).count() / 1000.;
     }
+
+    /************************************************
+     *                VEC UTILITIES               *
+     ************************************************/
+
+    template<typename T> std::vector<T> operator+(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        std::vector<T> out(a.size());
+        for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] + b[i];
+        return out;
+    }
+    
+    template<typename T> std::vector<T> operator-(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        std::vector<T> out(a.size());
+        for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] - b[i];
+        return out;
+    }
+
+    template<typename T> std::vector<T> operator+=(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        for (size_t i = 0; i < a.size(); ++i) a[i] += b[i];
+        return a;
+    }
+    
+    template<typename T> std::vector<T> operator-=(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        for (size_t i = 0; i < a.size(); ++i) a[i] += b[i];
+        return a;
+    }
+
+    // fast exit?
+    template<typename T> bool operator==(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        bool good = true;
+        for (size_t i = 0; i < a.size(); ++i) good &= a[i] == b[i];
+        return good;
+    }
+
+    template<typename T> bool operator!=(std::vector<T> &a, std::vector<T> &b) {
+        return !(a == b);
+    }
+
+    // TODO
+    // comparison, dot product, scalar product
 };

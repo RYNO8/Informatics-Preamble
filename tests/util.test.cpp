@@ -45,7 +45,17 @@ void testGCD_speed() {
     cout << ans << "\n";
 }
 
+void testVec() {
+    vector<int> a = {1,2, 3};
+    vector<int> b = {4, 6, 1};
+    a += b;
+    assert(a == vector<int>({5, 8, 4}));
+    assert(a - b == vector<int>({1, 2, 3}));
+    assert(a != b);
+}
+
 int main() {
     testPopcount();
     //testGCD_speed();
+    testVec();
 }

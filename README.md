@@ -17,16 +17,14 @@ Functionalities include
 
 # todo list (no particular order)
 [] implement coordinate geometry (eww)
-[] vector .find .erase
 [] wrapper for sqrt decomp
 [] dynamic tree for Tree.h (look at references)
 [] fast factorisation, fast isPrime, how?? Pollard rho was dodgy
 [] change arguments to references if possible
 [] write + fix tests
 [] docstrings for ranges
-[] segtree iterator
-[] use `requires std::integral<T> || std::floating_point<T>` where possible
 [] cyclic array?
+[] https://github.com/francoisvogel/cp/blob/main/Templates/starter.cpp
 
 # Notes
  - It is probably not the fastest or most memory efficient, because I have prioritised verbosity over constant factor optimisations.

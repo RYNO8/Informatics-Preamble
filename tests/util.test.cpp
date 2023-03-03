@@ -46,8 +46,9 @@ void testGCD_speed() {
 }
 
 void testVec() {
-    vector<int> a = {1,2, 3};
+    vector<int> a = {1, 2, 3};
     vector<int> b = {4, 6, 1};
+    assert(a <= b);
     a += b;
     assert(a == vector<int>({5, 8, 4}));
     assert(a - b == vector<int>({1, 2, 3}));

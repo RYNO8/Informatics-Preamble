@@ -293,47 +293,147 @@ namespace DS {
     }
 
     /************************************************
-     *                VEC UTILITIES               *
+     *               VECTOR LINALG OPS              *
      ************************************************/
 
+    // O(n)
     template<typename T> std::vector<T> operator+(std::vector<T> &a, std::vector<T> &b) {
         assert(a.size() == b.size());
         std::vector<T> out(a.size());
         for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] + b[i];
         return out;
     }
-    
+    // O(n)
+    template<typename T> std::vector<T> operator+=(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        for (size_t i = 0; i < a.size(); ++i) a[i] += b[i];
+        return a;
+    }
+    // O(n)
+    template<typename T> std::vector<T> operator+(std::vector<T> &b, T lambda) {
+        std::vector<T> out(b.size());
+        for (size_t i = 0; i < b.size(); ++i) out[i] = lambda + b[i];
+        return out;
+    }
+    // O(n)
+    template<typename T> std::vector<T> operator+=(std::vector<T> &b, T lambda) {
+        for (size_t i = 0; i < b.size(); ++i) b[i] += lambda;
+        return b;
+    }
+
+    // O(n)
     template<typename T> std::vector<T> operator-(std::vector<T> &a, std::vector<T> &b) {
         assert(a.size() == b.size());
         std::vector<T> out(a.size());
         for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] - b[i];
         return out;
     }
-
-    template<typename T> std::vector<T> operator+=(std::vector<T> &a, std::vector<T> &b) {
-        assert(a.size() == b.size());
-        for (size_t i = 0; i < a.size(); ++i) a[i] += b[i];
-        return a;
-    }
-    
+    // O(n)
     template<typename T> std::vector<T> operator-=(std::vector<T> &a, std::vector<T> &b) {
         assert(a.size() == b.size());
-        for (size_t i = 0; i < a.size(); ++i) a[i] += b[i];
+        for (size_t i = 0; i < a.size(); ++i) a[i] -= b[i];
         return a;
     }
+    // O(n)
+    template<typename T> std::vector<T> operator-(std::vector<T> &b, T lambda) {
+        std::vector<T> out(b.size());
+        for (size_t i = 0; i < b.size(); ++i) out[i] = lambda - b[i];
+        return out;
+    }
+    // O(n)
+    template<typename T> std::vector<T> operator-=(std::vector<T> &b, T lambda) {
+        for (size_t i = 0; i < b.size(); ++i) b[i] -= lambda;
+        return b;
+    }
 
-    // fast exit?
+    // O(n)
+    template<typename T> std::vector<T> operator*(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        std::vector<T> out(a.size());
+        for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] * b[i];
+        return out;
+    }
+    // O(n)
+    template<typename T> std::vector<T> operator*=(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        for (size_t i = 0; i < a.size(); ++i) a[i] *= b[i];
+        return a;
+    }
+    // O(n)
+    template<typename T> std::vector<T> operator*(std::vector<T> &b, T lambda) {
+        std::vector<T> out(b.size());
+        for (size_t i = 0; i < b.size(); ++i) out[i] = lambda * b[i];
+        return out;
+    }
+    // O(n)
+    template<typename T> std::vector<T> operator*=(std::vector<T> &b, T lambda) {
+        for (size_t i = 0; i < b.size(); ++i) b[i] *= lambda;
+        return b;
+    }
+
+    /************************************************
+     *           VECTOR BOOLEAN COMPARISON          *
+     ************************************************/
+
+    // O(n)
     template<typename T> bool operator==(std::vector<T> &a, std::vector<T> &b) {
         assert(a.size() == b.size());
-        bool good = true;
-        for (size_t i = 0; i < a.size(); ++i) good &= a[i] == b[i];
-        return good;
+        for (size_t i = 0; i < a.size(); ++i) {
+            if (a[i] != b[i]) return false;
+        }
+        return true;
     }
 
+    // O(n)
     template<typename T> bool operator!=(std::vector<T> &a, std::vector<T> &b) {
-        return !(a == b);
+        assert(a.size() == b.size());
+        for (size_t i = 0; i < a.size(); ++i) {
+            if (a[i] != b[i]) return true;
+        }
+        return false;
     }
 
-    // TODO
-    // comparison, dot product, scalar product
+    /************************************************
+     *           SEQUENCE LEXIGRAPHIC ORDER         *
+     ************************************************/
+
+    // O(n)
+    template<typename T> bool operator<=(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        for (size_t i = 0; i < a.size(); ++i) {
+            if (a[i] < b[i]) return true;
+            else if (a[i] > b[i]) return false;
+        }
+        return true;
+    }
+
+    // O(n)
+    template<typename T> bool operator<(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        for (size_t i = 0; i < a.size(); ++i) {
+            if (a[i] < b[i]) return true;
+            else if (a[i] > b[i]) return false;
+        }
+        return false;
+    }
+
+    // O(n)
+    template<typename T> bool operator>=(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        for (size_t i = 0; i < a.size(); ++i) {
+            if (a[i] > b[i]) return true;
+            else if (a[i] < b[i]) return false;
+        }
+        return true;
+    }
+
+    // O(n)
+    template<typename T> bool operator>(std::vector<T> &a, std::vector<T> &b) {
+        assert(a.size() == b.size());
+        for (size_t i = 0; i < a.size(); ++i) {
+            if (a[i] > b[i]) return true;
+            else if (a[i] < b[i]) return false;
+        }
+        return false;
+    }
 };

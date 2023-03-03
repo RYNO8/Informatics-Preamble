@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
 
 /************************************************
  *                    IMPORTS                   *
@@ -36,12 +37,20 @@
 #    define __builtin_popcount __popcnt
 #    define __builtin_popcountll __popcntll
 #endif
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
 
 /************************************************
  *                   CONSTANTS                  *
  ************************************************/
 
 namespace DS {
+    template<
+        class T,
+        class Compare = std::less<T>
+    >
+    using ordered_set = __gnu_pbds::tree<T, __gnu_pbds::null_type, Compare, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
     typedef uint32_t uint;
     
     typedef long double ld;
@@ -99,3 +108,5 @@ namespace DS {
     template<typename T> constexpr bool is_unsigned_int_v = is_unsigned_int<T>::value;
 
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SEGTREE_H
+#define SEGTREE_H
 #include "Constants.h"
 #include "Ranges.h"
 #include <functional>
@@ -121,7 +122,7 @@ namespace DS {
 
         // O(N)
         // note: not const segtree because queries do pushes
-        friend std::ostream& operator<<(std::ostream &out, const Segtree &segtree) {
+        friend std::ostream& operator<<(std::ostream &out, Segtree segtree) {
             out << "[ ";
             for (ll i = segtree.l(); i <= segtree.r(); ++i) {
                 out << segtree.query(i);
@@ -503,3 +504,5 @@ public:
     template<typename T>
     using MinSegtree = Segtree<T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>>;
 };
+
+#endif

@@ -1,5 +1,9 @@
-#pragma once
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
 #include <type_traits>
+#include <complex>
+#include <vector>
+#include "Constants.h"
 
 namespace DS {
     // TODO: test all
@@ -299,3 +303,5 @@ namespace DS {
         }
     };
 };
+
+#endif

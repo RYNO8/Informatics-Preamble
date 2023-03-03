@@ -1,4 +1,5 @@
-#pragma once
+#ifndef POLYNOMIAL_H
+#define POLYNOMIAL_H
 #include "Util.h"
 #include "Constants.h"
 #include "ModInt.h"
@@ -326,3 +327,5 @@ namespace DS {
         }
     };
 };
+
+#endif

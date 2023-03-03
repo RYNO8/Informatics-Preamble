@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRID_H
+#define GRID_H
 #include "Constants.h"
 
 namespace DS {
@@ -673,3 +674,5 @@ namespace DS {
         }
     };
 };
+
+#endif

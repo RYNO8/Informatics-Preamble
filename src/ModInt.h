@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MODINT_H
+#define MODINT_H
 #include "Constants.h"
 #include "Util.h"
 
@@ -234,3 +235,5 @@ public:
     using ModInt998244353 = ModInt<998244353>;
     using ModInt1000000007 = ModInt<1000000007>;
 };
+
+#endif

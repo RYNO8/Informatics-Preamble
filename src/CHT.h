@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CHT_H
+#define CHT_H
 #include "Constants.h"
 
 namespace DS {
@@ -119,3 +120,5 @@ public:
         }
     };
 };
+
+#endif

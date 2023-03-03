@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRAPH_H
+#define GRAPH_H
 #include <vector>
 #include <unordered_set>
 #include <set>
@@ -1058,3 +1059,5 @@ namespace DS {
         // TODO: planar embedding?
     };
 };
+
+#endif

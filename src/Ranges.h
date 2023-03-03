@@ -1,10 +1,11 @@
+#ifndef RANGES_H
+#define RANGES_H
 #include <set>
 #include <map>
 #include <limits>
 #include <vector>
 #include <iostream>
 #include <assert.h>
-#pragma once
 
 namespace DS {
     // retrieve the underlying value given an iterator
@@ -309,3 +310,5 @@ namespace DS {
         }
     };
 };
+
+#endif

@@ -1,9 +1,11 @@
-#pragma once
+#ifndef SQRTDECOMP_H
+#define SQRTDECOMP_H
+#include "Constants.h"
 
 namespace DS {
     // O(Q + N log N), where Q is the size of `queries_` and N is the total size of the interval to be considered
     // Mo's algorithm
-    bool sqrtCmp(std::pair<std::pair<int, int>, int> a, std::pair<std::pair<int, int>, int> b) {
+    bool sqrtCmp_(std::pair<std::pair<int, int>, int> a, std::pair<std::pair<int, int>, int> b) {
         return std::make_pair(a.first.first / SQRT_MAXN, a.first.second) < std::make_pair(b.first.first / SQRT_MAXN, b.first.second);
     }
 
@@ -18,7 +20,7 @@ namespace DS {
         std::vector<std::pair<std::pair<IndexType, IndexType>, int>> queries;
         int Q = 0;
         for (auto val = begin; val != end; ++val, ++Q) queries.push_back({ *val, Q });
-        sort(queries.begin(), queries.end(), sqrtCmp);
+        sort(queries.begin(), queries.end(), sqrtCmp_);
 
         std::vector<AnsType> ans(Q);
         IndexType l = 1, r = 1;
@@ -35,3 +37,5 @@ namespace DS {
         return ans;
     }
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MATRIX_H
+#define MATRIX_H
 #include "Constants.h"
 #include "Grid.h"
 
@@ -163,3 +164,5 @@ namespace DS {
         // TODO: decompositions
     };
 };
+
+#endif

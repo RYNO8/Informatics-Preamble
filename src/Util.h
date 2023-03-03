@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UTIL_H
+#define UTIL_H
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -198,7 +199,8 @@ namespace DS {
 
     // O(log a + log b)
     // @note `a` and `b` should be non-negative?
-    template<typename T> T gcd(T x, T y) {
+    template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
+    T gcd(T x, T y) {
         while (y != 0) {
             T temp = y;
             y = x % temp;
@@ -209,7 +211,8 @@ namespace DS {
 
     // O(log a + log b)
     // @note May overflow T
-    template<typename T> T lcm(T a, T b) {
+    template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
+    T lcm(T a, T b) {
         return (a / gcd(a, b)) * b;
     }
 
@@ -217,10 +220,14 @@ namespace DS {
     // extended euclidean algorithm
     // @returns gcd(a, b)
     // sets x and y such that a*x + b*y = gcd(a, b)
-    template<typename U, typename S> static U extendedEuclidean(U a, U b, S &x, S &y) {
+    template<
+        typename U, std::enable_if_t<std::is_integral<U>::value, bool> = true,
+        typename S, std::enable_if_t<std::is_integral<S>::value, bool> = true
+    >
+    U extendedEuclidean(U a, U b, S &x, S &y) {
         if (b == 0) {
-            x = 1;
-            y = 0;
+            x = S(1);
+            y = S(0);
             return a;
         }
         S x1, y1;
@@ -257,21 +264,23 @@ namespace DS {
 
     // O(1)
     // @returns Whether the number is negative (-1), zero (0) or positive (+1)
-    template<typename T> T sgn(T x) {
-        return T(x > 0) - T(x < 0);
+    template<typename T, std::enable_if_t<std::is_integral<T>::value || std::is_floating_point<T>::value, bool> = true>
+    int sgn(T x) {
+        return (x > T(0)) - (x < T(0));
     }
 
     // O(1)
     // Sets `a` to the minimum of `a` and `b`
     // @note `a` is provided by reference
-    template<typename T> void pMin(T &a, T b) {
+    template<typename T, std::enable_if_t<std::is_integral<T>::value || std::is_floating_point<T>::value, bool> = true>void pMin(T &a, T b) {
         if (b < a) a = b;
     }
 
     // O(1)
     // Sets `a` to the maximum of `a` and `b`
     // @note `a` is provided by reference
-    template<typename T> void pMax(T &a, T b) {
+    template<typename T, std::enable_if_t<std::is_integral<T>::value || std::is_floating_point<T>::value, bool> = true>
+    void pMax(T &a, T b) {
         if (b > a) a = b;
     }
 
@@ -286,6 +295,7 @@ namespace DS {
         return s.str();
     }
 
+    // whats the units?
     double timeNow() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()
@@ -437,3 +447,5 @@ namespace DS {
         return false;
     }
 };
+
+#endif

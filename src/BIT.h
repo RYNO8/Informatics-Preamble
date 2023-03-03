@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BIT_H
+#define BIT_H
 #include <assert.h>
 #include <iostream>
 #include <vector>
@@ -254,3 +255,5 @@ public:
         }
     };
 };
+
+#endif

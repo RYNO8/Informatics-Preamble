@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "Constants.h"
+#include "Util.h"
 
 namespace DS {
     // TODO: conversion between Grid / Matrix
@@ -11,7 +12,7 @@ namespace DS {
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse
     template <class T, size_t... Ns>
-    class BIT {
+    class BIT_ {
 private:
         T val = T();
 
@@ -20,7 +21,7 @@ public:
             out << values[pos];
         }
 
-        friend std::ostream& operator<<(std::ostream& out, const BIT<T, Ns...> b) {
+        friend std::ostream& operator<<(std::ostream& out, const BIT_<T, Ns...> &b) {
             b.print_helper(out, b.data(), 0);
             return out;
         }
@@ -64,9 +65,9 @@ public:
     };
 
     template<class T, size_t N, size_t... Ns>
-    class BIT<T, N, Ns...> {
+    class BIT_<T, N, Ns...> {
 private:
-        BIT<T, Ns...> bit[N + 1];
+        BIT_<T, Ns...> bit[N + 1];
 
 public:
         void print_helper(std::ostream& out, std::vector<T> values, size_t pos) const {
@@ -118,15 +119,15 @@ public:
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse
     template <class T, size_t... Ns>
-    class BIT_RQPU: public BIT<T, Ns...> {};
+    class BIT_RQPU: public BIT_<T, Ns...> {};
 
     template<class T, size_t N, size_t... Ns>
-    class BIT_RQPU<T, N, Ns...>: public BIT<T, N, Ns...> {
+    class BIT_RQPU<T, N, Ns...>: public BIT_<T, N, Ns...> {
 private:
         BIT_RQPU<T, Ns...> bit[N + 1];
 
 public:
-        friend std::ostream& operator<<(std::ostream& out, const BIT_RQPU<T, N, Ns...> b) {
+        friend std::ostream& operator<<(std::ostream& out, const BIT_RQPU<T, N, Ns...> &b) {
             b.print_helper(out, b.data(), 0);
             return out;
         }
@@ -135,17 +136,9 @@ public:
         std::vector<T> data() const {
             std::vector<T> output;
             for (size_t pos = 0; pos < N; ++pos) {
-                std::vector<T> res(bit[0].size());
-                for (size_t x = pos + 1; x; x -= x & -x) {
-                    std::vector<T> toAdd = bit[x].data();
-                    assert(res.size() == toAdd.size());
-                    for (size_t i = 0; i < res.size(); ++i) res[i] += toAdd[i];
-                }
-                for (size_t x = pos + 0; x; x -= x & -x) {
-                    std::vector<T> toSub = bit[x].data();
-                    assert(res.size() == toSub.size());
-                    for (size_t i = 0; i < res.size(); ++i) res[i] -= toSub[i];
-                }
+                std::vector<T> res(bit[0].size(), T());
+                for (size_t x = pos + 1; x; x -= x & -x) res += bit[x].data();
+                for (size_t x = pos + 0; x; x -= x & -x) res -= bit[x].data();
                 output.insert(output.end(), res.begin(), res.end());
             }
             return output;
@@ -160,7 +153,7 @@ public:
         // O((2 log N)^D)
         template<typename... Args> T queryIndex(size_t pos, Args... args) const {
             assert(0 <= pos && pos < N && "index out of range");
-            T res = T();;
+            T res = T();
             for (size_t x = pos + 1; x; x -= x & -x) res += bit[x].queryIndex(args...);
             for (size_t x = pos + 0; x; x -= x & -x) res -= bit[x].queryIndex(args...);
             return res;
@@ -169,7 +162,7 @@ public:
         // O((2 log N)^D)
         template<typename... Args> T querySum(size_t l, size_t r, Args... args) const {
             assert(0 <= l && l <= r && r < N && "index out of range");
-            T res = T();;
+            T res = T();
             for (size_t x = r + 1; x; x -= x & -x) res += bit[x].querySum(args...);
             for (size_t x = l + 0; x; x -= x & -x) res -= bit[x].querySum(args...);
             return res;
@@ -180,15 +173,15 @@ public:
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse
     template <class T, size_t... Ns>
-    class BIT_PQRU: public BIT<T, Ns...> {};
+    class BIT_PQRU: public BIT_<T, Ns...> {};
 
     template<class T, size_t N, size_t... Ns>
-    class BIT_PQRU<T, N, Ns...>: public BIT<T, N, Ns...> {
+    class BIT_PQRU<T, N, Ns...>: public BIT_<T, N, Ns...> {
 private:
         BIT_PQRU<T, Ns...> bit[N + 1];
 
 public:
-        friend std::ostream& operator<<(std::ostream& out, const BIT_PQRU<T, N, Ns...> b) {
+        friend std::ostream& operator<<(std::ostream& out, const BIT_PQRU<T, N, Ns...> &b) {
             b.print_helper(out, b.data(), 0);
             return out;
         }
@@ -197,11 +190,9 @@ public:
         std::vector<T> data() const {
             std::vector<T> output;
             for (size_t pos = 0; pos < N; ++pos) {
-                std::vector<T> res(bit[0].size());
+                std::vector<T> res(bit[0].size(), T());
                 for (size_t x = pos + 1; x <= N; x += x & -x) {
-                    std::vector<T> toAdd = bit[x].data();
-                    assert(res.size() == toAdd.size());
-                    for (size_t i = 0; i < res.size(); ++i) res[i] += toAdd[i];
+                    res += bit[x].data();
                 }
                 output.insert(output.end(), res.begin(), res.end());
             }
@@ -218,7 +209,7 @@ public:
         // O((log N)^D)
         template<typename... Args> T queryIndex(size_t pos, Args... args) const {
             assert(0 <= pos && pos < N && "index out of range");
-            T res = T();;
+            T res = T();
             for (size_t x = pos + 1; x <= N; x += x & -x) res += bit[x].queryIndex(args...);
             return res;
         }

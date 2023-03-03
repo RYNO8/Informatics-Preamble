@@ -304,69 +304,69 @@ namespace DS {
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator+=(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T> std::vector<T> operator+=(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) a[i] += b[i];
         return a;
     }
     // O(n)
-    template<typename T> std::vector<T> operator+(std::vector<T> &b, T lambda) {
+    template<typename T> std::vector<T> operator+(std::vector<T> &b, const T &lambda) {
         std::vector<T> out(b.size());
         for (size_t i = 0; i < b.size(); ++i) out[i] = lambda + b[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator+=(std::vector<T> &b, T lambda) {
+    template<typename T> std::vector<T> operator+=(std::vector<T> &b, const T &lambda) {
         for (size_t i = 0; i < b.size(); ++i) b[i] += lambda;
         return b;
     }
 
     // O(n)
-    template<typename T> std::vector<T> operator-(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T> std::vector<T> operator-(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         std::vector<T> out(a.size());
         for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] - b[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator-=(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T> std::vector<T> operator-=(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) a[i] -= b[i];
         return a;
     }
     // O(n)
-    template<typename T> std::vector<T> operator-(std::vector<T> &b, T lambda) {
+    template<typename T> std::vector<T> operator-(std::vector<T> &b, const T &lambda) {
         std::vector<T> out(b.size());
         for (size_t i = 0; i < b.size(); ++i) out[i] = lambda - b[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator-=(std::vector<T> &b, T lambda) {
+    template<typename T> std::vector<T> operator-=(std::vector<T> &b, T &lambda) {
         for (size_t i = 0; i < b.size(); ++i) b[i] -= lambda;
         return b;
     }
 
     // O(n)
-    template<typename T> std::vector<T> operator*(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T> std::vector<T> operator*(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         std::vector<T> out(a.size());
         for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] * b[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator*=(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T> std::vector<T> operator*=(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) a[i] *= b[i];
         return a;
     }
     // O(n)
-    template<typename T> std::vector<T> operator*(std::vector<T> &b, T lambda) {
+    template<typename T> std::vector<T> operator*(std::vector<T> &b, const T &lambda) {
         std::vector<T> out(b.size());
         for (size_t i = 0; i < b.size(); ++i) out[i] = lambda * b[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator*=(std::vector<T> &b, T lambda) {
+    template<typename T> std::vector<T> operator*=(std::vector<T> &b, const T &lambda) {
         for (size_t i = 0; i < b.size(); ++i) b[i] *= lambda;
         return b;
     }
@@ -398,7 +398,7 @@ namespace DS {
      ************************************************/
 
     // O(n)
-    template<typename T> bool operator<=(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T> bool operator<=(const std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] < b[i]) return true;
@@ -408,7 +408,7 @@ namespace DS {
     }
 
     // O(n)
-    template<typename T> bool operator<(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T> bool operator<(const std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] < b[i]) return true;
@@ -418,7 +418,7 @@ namespace DS {
     }
 
     // O(n)
-    template<typename T> bool operator>=(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T> bool operator>=(const std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] > b[i]) return true;
@@ -428,7 +428,7 @@ namespace DS {
     }
 
     // O(n)
-    template<typename T> bool operator>(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T> bool operator>(const std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] > b[i]) return true;

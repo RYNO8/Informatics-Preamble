@@ -21,11 +21,6 @@ public:
             out << values[pos];
         }
 
-        friend std::ostream& operator<<(std::ostream& out, const BIT_<T, Ns...> &b) {
-            b.print_helper(out, b.data(), 0);
-            return out;
-        }
-
         std::vector<T> data() const {
             return {val};
         }
@@ -70,6 +65,10 @@ private:
         BIT_<T, Ns...> bit[N + 1];
 
 public:
+        /************************************************
+         *                    DISPLAY                   *
+         ************************************************/
+
         void print_helper(std::ostream& out, std::vector<T> values, size_t pos) const {
             out << "[ ";
             for (size_t i = 0; i < N; ++i) {
@@ -78,6 +77,10 @@ public:
             }
             out << ']';
         }
+
+        /************************************************
+         *                  PROPERTIES                  *
+         ************************************************/
 
         std::vector<T> data() const;
 
@@ -111,6 +114,10 @@ public:
             return output;
         }
 
+        /************************************************
+         *               QUREIES & UPDATES              *
+         ************************************************/
+
         template<typename... Args> void addIndex(T v, size_t pos, Args... args);
         template<typename... Args> T queryIndex(size_t pos, Args... args) const;
     };
@@ -127,10 +134,18 @@ private:
         BIT_RQPU<T, Ns...> bit[N + 1];
 
 public:
+        /************************************************
+         *                    DISPLAY                   *
+         ************************************************/
+
         friend std::ostream& operator<<(std::ostream& out, const BIT_RQPU<T, N, Ns...> &b) {
             b.print_helper(out, b.data(), 0);
             return out;
         }
+
+        /************************************************
+         *                  PROPERTIES                  *
+         ************************************************/
 
         // O((2 N log N)^D)
         std::vector<T> data() const {
@@ -143,6 +158,10 @@ public:
             }
             return output;
         }
+
+        /************************************************
+         *               QUREIES & UPDATES              *
+         ************************************************/
 
         // O((log N)^D)
         template<typename... Args> void addIndex(T v, size_t pos, Args... args) {
@@ -181,10 +200,19 @@ private:
         BIT_PQRU<T, Ns...> bit[N + 1];
 
 public:
+
+        /************************************************
+         *                    DISPLAY                   *
+         ************************************************/
+
         friend std::ostream& operator<<(std::ostream& out, const BIT_PQRU<T, N, Ns...> &b) {
             b.print_helper(out, b.data(), 0);
             return out;
         }
+
+        /************************************************
+         *                  PROPERTIES                  *
+         ************************************************/
 
         // O((N log N)^D)
         std::vector<T> data() const {
@@ -198,6 +226,10 @@ public:
             }
             return output;
         }
+
+        /************************************************
+         *               QUREIES & UPDATES              *
+         ************************************************/
 
         // O((log N)^D)
         template<typename... Args> void addIndex(T v, size_t pos, Args... args) {

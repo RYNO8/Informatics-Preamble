@@ -121,7 +121,7 @@ namespace DS {
 
         // O(N)
         // note: not const segtree because queries do pushes
-        friend std::ostream& operator<<(std::ostream& out, Segtree segtree) {
+        friend std::ostream& operator<<(std::ostream &out, const Segtree &segtree) {
             out << "[ ";
             for (ll i = segtree.l(); i <= segtree.r(); ++i) {
                 out << segtree.query(i);
@@ -132,7 +132,7 @@ namespace DS {
         }
 
         // O(1)
-        friend std::ostream& operator<<(std::ostream& out, const Segtree* segtree) {
+        friend std::ostream& operator<<(std::ostream &out, const Segtree* segtree) {
             out << Range<ll>(segtree) << " = " << segtree.val << '\n';
             return out;
         }

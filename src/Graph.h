@@ -93,7 +93,7 @@ namespace DS {
         // O(V + E)
         // Displays the graph, showing the outwards edge connections of each edge in lexographic order
         // @param `out` The string representation of the graph is piped to this output stream
-        friend std::ostream& operator<<(std::ostream& out, const Graph<T> graph) {
+        friend std::ostream& operator<<(std::ostream &out, const Graph<T> &graph) {
             for (int u = 1; u <= graph.V; ++u) {
                 out << u << ":\n";
                 for (std::pair<int, T> &edge : graph.outEdges[u]) {

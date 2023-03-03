@@ -46,7 +46,7 @@ namespace DS {
         // O(1)
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
-        friend std::ostream& operator<<(std::ostream& out, const ModInt<N> modInt) {
+        friend std::ostream& operator<<(std::ostream &out, const ModInt<N> &modInt) {
             out << modInt.num() << " ( mod " << modInt.mod() << " )";
             return out;
         }

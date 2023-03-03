@@ -51,7 +51,7 @@ namespace DS {
 
         // O(RC)
         // Initialises grid from cin, assuming 0 indexed
-        Grid(int _R, int _C, std::istream& in) {
+        Grid(int _R, int _C, std::istream &in) {
             init(_R, _C);
             for (int r = 0; r < R; ++r) {
                 for (int c = 0; c < C; ++c) {
@@ -103,7 +103,7 @@ namespace DS {
         // O(RC)
         // Displays the grid
         // @param `out` The string representation of the graph is piped to this output stream
-        friend std::ostream& operator<<(std::ostream& out, const Grid<T> grid) {
+        friend std::ostream& operator<<(std::ostream &out, const Grid<T> &grid) {
             for (int r = 0; r < grid.R; ++r) {
                 for (int c = 0; c < grid.C; ++c) {
                     out << grid.grid[r][c] << ' ';

@@ -30,7 +30,7 @@ namespace DS {
         // Displays the natural maths representation of the polynomial
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
-        friend std::ostream& operator<<(std::ostream& out, const Polynomial poly) {
+        friend std::ostream& operator<<(std::ostream &out, const Polynomial &poly) {
             for (int d = poly.deg(); d >= 0; --d) {
                 out << poly.coeff[d] << " x^" << d;
                 if (d != 0) out << ' ';

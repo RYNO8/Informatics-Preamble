@@ -18,7 +18,7 @@ namespace DS {
     
     // Displays a pair:
     // (A, B)
-    template<typename A, typename B> std::ostream& operator<<(std::ostream& out, const std::pair<A, B>& c) {
+    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::pair<A, B> &c) {
         out << '(' << c.first << ", " << c.second << ')';
         return out;
     }
@@ -32,7 +32,7 @@ namespace DS {
     template<typename T> struct capture {
         T begin, end;
     };
-    template<typename T> std::ostream& operator<<(std::ostream& out, const capture<T> range) {
+    template<typename T> std::ostream& operator<<(std::ostream &out, const capture<T> &range) {
         out << "[ ";
         for (T it = range.begin; it != range.end; ) {
             out << *it;
@@ -44,7 +44,7 @@ namespace DS {
 
     // Displays a vector:
     // [ T T ... T ]
-    template<typename T> std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
+    template<typename T> std::ostream& operator<<(std::ostream &out, const std::vector<T> &v) {
         out << "[ ";
         for (size_t i = 0; i < v.size(); ++i) {
             out << v[i];
@@ -56,7 +56,7 @@ namespace DS {
 
     // Displays a queue:
     // < T, T, ..., T >
-    template<typename T> std::ostream& operator<<(std::ostream& out, const std::queue<T>& q) {
+    template<typename T> std::ostream& operator<<(std::ostream &out, const std::queue<T> &q) {
         out << "< ";
         for (size_t i = 0; i < q.size(); ++i) {
             out << q.front();
@@ -70,7 +70,7 @@ namespace DS {
 
     // Displays a stack:
     // < T, T, ..., T >
-    template<typename T> std::ostream& operator<<(std::ostream& out, const std::stack<T>& s) {
+    template<typename T> std::ostream& operator<<(std::ostream &out, const std::stack<T>& s) {
         out << "< ";
         for (size_t i = 0; i < s.size(); ++i) {
             out << s.top();
@@ -84,7 +84,7 @@ namespace DS {
 
     // Displays a deque:
     // < T, T, ..., T >
-    template<typename T> std::ostream& operator<<(std::ostream& out, const std::deque<T>& q) {
+    template<typename T> std::ostream& operator<<(std::ostream &out, const std::deque<T>& q) {
         out << "< ";
         for (size_t i = 0; i < q.size(); ++i) {
             out << q.front();
@@ -98,7 +98,7 @@ namespace DS {
 
     // Displays a map:
     // { A:B, A:B, ..., A:B }
-    template<typename A, typename B> std::ostream& operator<<(std::ostream& out, const std::map<A, B> &m) {
+    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::map<A, B> &m) {
         out << "{ ";
         for (auto it = m.begin(); it != m.end(); ) {
             out << it->first << ':' << it->second;
@@ -110,7 +110,7 @@ namespace DS {
 
     // Displays an unordered map:
     // { A:B, A:B, ..., A:B }
-    template<typename A, typename B> std::ostream& operator<<(std::ostream& out, const std::unordered_map<A, B>& m) {
+    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::unordered_map<A, B>& m) {
         out << "{ ";
         for (auto it = m.begin(); it != m.end(); ) {
             out << it->first << ':' << it->second;
@@ -122,7 +122,7 @@ namespace DS {
 
     // Displays a multimap:
     // { A:B, A:B, ..., A:B }
-    template<typename A, typename B> std::ostream& operator<<(std::ostream& out, const std::multimap<A, B> &m) {
+    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::multimap<A, B> &m) {
         out << "{ ";
         for (auto it = m.begin(); it != m.end(); ) {
             out << it->first << ':' << it->second;
@@ -134,7 +134,7 @@ namespace DS {
 
     // Displays an unordered multimap:
     // { A:B, A:B, ..., A:B }
-    template<typename A, typename B> std::ostream& operator<<(std::ostream& out, const std::unordered_multimap<A, B>& m) {
+    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::unordered_multimap<A, B>& m) {
         out << "{ ";
         for (auto it = m.begin(); it != m.end(); ) {
             out << it->first << ':' << it->second;
@@ -146,7 +146,7 @@ namespace DS {
 
     // Displays a set:
     // { T, T, ..., T }
-    template<typename T> std::ostream& operator<<(std::ostream& out, const std::set<T>& m) {
+    template<typename T> std::ostream& operator<<(std::ostream &out, const std::set<T>& m) {
         out << "{ ";
         for (auto it = m.begin(); it != m.end(); ) {
             out << *it;
@@ -264,14 +264,14 @@ namespace DS {
     // O(1)
     // Sets `a` to the minimum of `a` and `b`
     // @note `a` is provided by reference
-    template<typename T> void pMin(T& a, T b) {
+    template<typename T> void pMin(T &a, T b) {
         if (b < a) a = b;
     }
 
     // O(1)
     // Sets `a` to the maximum of `a` and `b`
     // @note `a` is provided by reference
-    template<typename T> void pMax(T& a, T b) {
+    template<typename T> void pMax(T &a, T b) {
         if (b > a) a = b;
     }
 

@@ -50,7 +50,7 @@ namespace DS {
          *                    DISPLAY                   *
          ************************************************/
 
-        friend std::ostream& operator<<(std::ostream& out, const Range range) {
+        friend std::ostream& operator<<(std::ostream &out, const Range &range) {
             out << '[';
             out << range.l() << ".." << range.r();
             out << ']';

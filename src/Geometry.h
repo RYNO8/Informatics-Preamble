@@ -20,7 +20,7 @@ namespace DS {
         // O(1)
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
-        friend std::ostream& operator<<(std::ostream& out, const Point point) {
+        friend std::ostream& operator<<(std::ostream& out, const Point &point) {
             out << '(' << point.real() << ", " << point.imag() << ')';
             return out;
         }
@@ -162,7 +162,7 @@ namespace DS {
         // O(1)
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
-        friend std::ostream& operator<<(std::ostream& out, const Line line) {
+        friend std::ostream& operator<<(std::ostream& out, const Line &line) {
             out << line.a << " -- " << line.b;
             return out;
         }
@@ -237,7 +237,7 @@ namespace DS {
         // O(1)
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
-        friend std::ostream& operator<<(std::ostream& out, const Polygon polygon) {
+        friend std::ostream& operator<<(std::ostream &out, const Polygon &polygon) {
             out << polygon.points;
             return out;
         }

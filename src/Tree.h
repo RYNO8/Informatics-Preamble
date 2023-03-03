@@ -120,7 +120,7 @@ namespace DS {
     public:
         // O(N) Displays the graph, showing the parent of each node
         // @param `out` The string representation of the graph is piped to this output stream
-        friend std::ostream& operator<<(std::ostream& out, const Tree<T> tree) {
+        friend std::ostream& operator<<(std::ostream &out, const Tree<T> &tree) {
             for (int i = 1; i <= tree.N; ++i) out << tree.parent[0][i].first << ' ';
             out << '\n';
             return out;
@@ -130,7 +130,7 @@ namespace DS {
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
         // @param `showWeight` Whether to indent each node according to their edge weights
-        void pprint(std::ostream& out = std::cout, bool newLine = true, bool showWeight = true, int node = 1, std::string prefix = "", bool isLast = true) const {
+        void pprint(std::ostream &out = std::cout, bool newLine = true, bool showWeight = true, int node = 1, std::string prefix = "", bool isLast = true) const {
             out << prefix << "|\n" << prefix << (isLast ? "`" : "|");
             if (showWeight) {
                 out << std::string(parent[0][node].second, '-');

@@ -33,7 +33,7 @@ namespace DS {
 
         // Displays the matrx
         // @param `out` The string representation of the graph is piped to this output stream
-        friend std::ostream& operator<<(std::ostream& out, const Matrix<T> matrix) {
+        friend std::ostream& operator<<(std::ostream &out, const Matrix<T> &matrix) {
             out << "[\n";
             for (int r = 0; r < matrix.getR(); ++r) {
                 out << ' ';

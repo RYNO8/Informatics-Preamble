@@ -26,9 +26,9 @@ namespace DS {
 
     // Displays an array:
     // [ T T T ... T ]
-    // #define printArr0(a, N) std::cout << "[ "; for (int i = 0; i < N; ++i, std::cout << (i < N ? ", " : "")) std::cout << a[i]; std::cout << " ]";
-    // #define printArr1(a, N) std::cout << "[ "; for (int i = 1; i <= N; ++i, std::cout << (i < N ? ", " : "")) std::cout << a[i]; std::cout << " ]";
-    // #define printArr(a, N) printArr0(a, N)
+    #define printArr0(a, N) std::cout << "[ "; for (int i = 0; i < N; ++i, std::cout << (i < N ? ", " : "")) std::cout << a[i]; std::cout << " ]";
+    #define printArr1(a, N) std::cout << "[ "; for (int i = 1; i <= N; ++i, std::cout << (i < N ? ", " : "")) std::cout << a[i]; std::cout << " ]";
+    #define printArr(a, N) printArr0(a, N)
 
     template<typename T> struct capture {
         T begin, end;
@@ -300,6 +300,43 @@ namespace DS {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()
         ).count() / 1000.;
+    }
+
+    /************************************************
+     *               ARRAY USEFUL IMPL              *
+     ************************************************/
+
+    // O(n)
+    template<typename It>
+    typename std::iterator_traits<It>::value_type sum(const It &begin, const It &end) {
+        return accumulate(
+            begin,
+            end,
+            typename std::iterator_traits<It>::value_type(0)
+        );
+    }
+
+    // O(n)
+    template<typename It1, typename It2>
+    void make_prefix(const It1 &begin, const It1 &end, It2 out) {
+        typename std::iterator_traits<It1>::value_type total = typename std::iterator_traits<It1>::value_type(0);
+        for (It1 it = begin; it != end; it++, out++) {
+            total += *it;
+            *out = total;
+        }
+    }
+
+    // O(n)
+    // *(out+i) = *(begin+i) - *(begin+i-1) when i, i-1 is valid
+    // NOTE: *out is left untouched
+    template<typename It1, typename It2>
+    void make_suffix(const It1 &begin, const It1 &end, It2 out) {
+        for (It1 it = begin; it != end; ) {
+            out++;
+            It1 old = it;
+            it++;
+            *out = *it - *old;
+        }
     }
 
     /************************************************

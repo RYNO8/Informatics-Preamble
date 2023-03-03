@@ -23,8 +23,7 @@ Functionalities include
 [] change arguments to references if possible
 [] write + fix tests
 [] docstrings for ranges
-[] cyclic array?
-[] https://github.com/francoisvogel/cp/blob/main/Templates/starter.cpp
+[] Graph with self edges and multiple edges? (This is so rare though, I feel like support isn't worth it)
 
 # Notes
  - It is probably not the fastest or most memory efficient, because I have prioritised verbosity over constant factor optimisations.

@@ -382,15 +382,15 @@ namespace DS {
         return a;
     }
     // O(n)
-    template<typename T> std::vector<T> operator-(std::vector<T> &b, const T &lambda) {
-        std::vector<T> out(b.size());
-        for (size_t i = 0; i < b.size(); ++i) out[i] = lambda - b[i];
+    template<typename T> std::vector<T> operator-(std::vector<T> &v, const T &lambda) {
+        std::vector<T> out(v.size());
+        for (size_t i = 0; i < v.size(); ++i) out[i] = lambda - v[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator-=(std::vector<T> &b, T &lambda) {
-        for (size_t i = 0; i < b.size(); ++i) b[i] -= lambda;
-        return b;
+    template<typename T> std::vector<T> operator-=(std::vector<T> &v, T &lambda) {
+        for (size_t i = 0; i < v.size(); ++i) v[i] -= lambda;
+        return v;
     }
 
     // O(n)
@@ -407,15 +407,15 @@ namespace DS {
         return a;
     }
     // O(n)
-    template<typename T> std::vector<T> operator*(std::vector<T> &b, const T &lambda) {
-        std::vector<T> out(b.size());
-        for (size_t i = 0; i < b.size(); ++i) out[i] = lambda * b[i];
+    template<typename T> std::vector<T> operator*(std::vector<T> &v, const T &lambda) {
+        std::vector<T> out(v.size());
+        for (size_t i = 0; i < v.size(); ++i) out[i] = lambda * v[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator*=(std::vector<T> &b, const T &lambda) {
-        for (size_t i = 0; i < b.size(); ++i) b[i] *= lambda;
-        return b;
+    template<typename T> std::vector<T> operator*=(std::vector<T> &v, const T &lambda) {
+        for (size_t i = 0; i < v.size(); ++i) v[i] *= lambda;
+        return v;
     }
 
     /************************************************
@@ -438,6 +438,15 @@ namespace DS {
             if (a[i] != b[i]) return true;
         }
         return false;
+    }
+
+    /************************************************
+     *                 VECTOR READ                  *
+     ************************************************/
+
+    template<typename T> std::istream& operator>>(std::istream &in, std::vector<T> &v) {
+        for (T &val : v) in >> val;
+        return in;
     }
 
     /************************************************

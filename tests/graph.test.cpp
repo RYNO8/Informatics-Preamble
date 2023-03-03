@@ -24,7 +24,7 @@ void testDigraph() {
     size_t N1, M1;
     s1 >> N1 >> M1;
     vector<DiGraph::Edge> e(M1);
-    for (size_t i = 0; i < M1; ++i) s1 >> e[i];
+    s1 >> e;
     DiGraph G1(N1, e);
 
 
@@ -107,7 +107,7 @@ void testGraph() {
     size_t N2, M2;
     s2 >> N2 >> M2;
     vector<MyGraph::Edge> e(M2);
-    for (size_t i = 0; i < M2; ++i) s2 >> e[i];
+    s2 >> e;
     MyGraph G2(N2, e);
 
     assert(repr(G2) == "1: 6 7 8\n2: 3 4 5 8\n3: 4\n4:\n5: 8\n6: 7\n7:\n8:\n9: 9\n10: 9\n");

@@ -53,6 +53,12 @@ void testVec() {
     assert(a == vector<int>({5, 8, 4}));
     assert(a - b == vector<int>({1, 2, 3}));
     assert(a != b);
+
+    stringstream ss;
+    ss << "3 5 0";
+    vector<int> c(3);
+    ss >> c;
+    assert(c + 1 == b);
 }
 
 int main() {

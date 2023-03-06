@@ -3,6 +3,50 @@
 using namespace DS;
 using namespace std;
 
+void testDisplay() {
+    assert(repr(vector<int>({})) == "[ ]");
+    assert(repr(vector<int>({ 1, 2 })) == "[ 1 2 ]");
+
+    assert(repr(array<int, 0>()) == "[ ]");
+    assert(repr(array<int, 2>({ 1, 2 })) == "[ 1 2 ]");
+
+    queue<int> q;
+    assert(repr(q) == "< >");
+    q.push(1);
+    q.push(2);
+    assert(repr(q) == "< 1, 2 >");
+
+    stack<int> s;
+    assert(repr(s) == "< >");
+    s.push(2);
+    s.push(1);
+    assert(repr(s) == "< 1, 2 >");
+
+    deque<int> dq;
+    assert(repr(dq) == "< >");
+    dq.push_back(1);
+    dq.push_back(2);
+    assert(repr(dq) == "< 1, 2 >");
+
+    assert(repr(map<int, int>({})) == "{ }");
+    assert(repr(map<int, int>({ {1, 2 }})) == "{ 1: 2 }");
+    assert(repr(unordered_map<int, int>({})) == "{ }");
+    assert(repr(unordered_map<int, int>({ {1, 2 }})) == "{ 1: 2 }");
+    assert(repr(multimap<int, int>({})) == "{ }");
+    assert(repr(multimap<int, int>({ {1, 2 }})) == "{ 1: 2 }");
+    assert(repr(unordered_multimap<int, int>({})) == "{ }");
+    assert(repr(unordered_multimap<int, int>({ {1, 2 }})) == "{ 1: 2 }");
+
+    assert(repr(set<int>()) == "{ }");
+    assert(repr(set<int>({1, 2})) == "{ 1, 2 }");
+    assert(repr(unordered_set<int>()) == "{ }");
+    assert(repr(unordered_set<int>({1, 2})) == "{ 1, 2 }" || repr(unordered_set<int>({1, 2})) == "{ 2, 1 }");
+    assert(repr(multiset<int>()) == "{ }");
+    assert(repr(multiset<int>({1, 2})) == "{ 1, 2 }");
+    assert(repr(unordered_multiset<int>()) == "{ }");
+    assert(repr(unordered_multiset<int>({1, 2})) == "{ 1, 2 }" || repr(unordered_multiset<int>({1, 2})) == "{ 2, 1 }");
+}
+
 void testPopcount() {
     for (ll i = 0; i < 1e4; ++i) {
         uint32_t x = uint_dis(rng);
@@ -62,6 +106,7 @@ void testVec() {
 }
 
 int main() {
+    testDisplay();
     testPopcount();
     //testGCD_speed();
     testVec();

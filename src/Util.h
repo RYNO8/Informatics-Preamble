@@ -1,5 +1,6 @@
 #ifndef UTIL_H
 #define UTIL_H
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -19,7 +20,8 @@ namespace DS {
     
     // Displays a pair:
     // (A, B)
-    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::pair<A, B> &c) {
+    template<typename A, typename B>
+    std::ostream& operator<<(std::ostream &out, const std::pair<A, B> &c) {
         out << '(' << c.first << ", " << c.second << ')';
         return out;
     }
@@ -33,7 +35,8 @@ namespace DS {
     template<typename T> struct capture {
         T begin, end;
     };
-    template<typename T> std::ostream& operator<<(std::ostream &out, const capture<T> &range) {
+    template<typename T>
+    std::ostream& operator<<(std::ostream &out, const capture<T> &range) {
         out << "[ ";
         for (T it = range.begin; it != range.end; ) {
             out << *it;
@@ -45,39 +48,49 @@ namespace DS {
 
     // Displays a vector:
     // [ T T ... T ]
-    template<typename T> std::ostream& operator<<(std::ostream &out, const std::vector<T> &v) {
+    template<typename T>
+    std::ostream& operator<<(std::ostream &out, const std::vector<T> &v) {
         out << "[ ";
-        for (size_t i = 0; i < v.size(); ++i) {
-            out << v[i];
-            if (i != v.size() - 1) out << " ";
-        }
-        out << " ]";
+        copy(v.cbegin(), v.cend(), std::ostream_iterator<T>(out, " "));
+        out << ']';
+        return out;
+    }
+
+    // Displays a std::array
+    // [ T, T, ..., T ]
+    template<typename T, std::size_t N>
+    std::ostream& operator<<(std::ostream& out, const std::array<T, N> &arr){
+        out << "[ ";
+        copy(arr.cbegin(), arr.cend(), std::ostream_iterator<T>(out, " "));
+        out << ']';
         return out;
     }
 
     // Displays a queue:
-    // < T, T, ..., T >
-    template<typename T> std::ostream& operator<<(std::ostream &out, const std::queue<T> &q) {
-        out << "< ";
-        for (size_t i = 0; i < q.size(); ++i) {
-            out << q.front();
-            q.push(q.front());
+    // < T, T, ..., T > (In the order they would be popped)
+    // @note takes copy of queue
+    template<typename T>
+    std::ostream& operator<<(std::ostream &out, std::queue<T> q) {
+        out << "<";
+        while (!q.empty()) {
+            out << ' ' << q.front();
             q.pop();
-            if (i != q.size() - 1) out << ", ";
+            if (!q.empty()) out << ',';
         }
         out << " >";
         return out;
     }
 
     // Displays a stack:
-    // < T, T, ..., T >
-    template<typename T> std::ostream& operator<<(std::ostream &out, const std::stack<T>& s) {
-        out << "< ";
-        for (size_t i = 0; i < s.size(); ++i) {
-            out << s.top();
-            s.push(s.top());
+    // < T, T, ..., T > (In the order they would be popped)
+    // @note takes copy of stack
+    template<typename T>
+    std::ostream& operator<<(std::ostream &out, std::stack<T> s) {
+        out << '<';
+        while (!s.empty()) {
+            out << ' ' << s.top();
             s.pop();
-            if (i != s.size() - 1) out << ", ";
+            if (!s.empty()) out << ',';
         }
         out << " >";
         return out;
@@ -85,61 +98,64 @@ namespace DS {
 
     // Displays a deque:
     // < T, T, ..., T >
-    template<typename T> std::ostream& operator<<(std::ostream &out, const std::deque<T>& q) {
-        out << "< ";
-        for (size_t i = 0; i < q.size(); ++i) {
-            out << q.front();
-            q.push_back(q.front());
-            q.pop_front();
-            if (i != q.size() - 1) out << ", ";
+    template<typename T>
+    std::ostream& operator<<(std::ostream &out, const std::deque<T>& dq) {
+        out << '<';
+        for (auto it = dq.begin(); it != dq.end(); ) {
+            out << ' ' << *it;
+            if (++it != dq.end()) out << ',';
         }
         out << " >";
         return out;
     }
 
     // Displays a map:
-    // { A:B, A:B, ..., A:B }
-    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::map<A, B> &m) {
-        out << "{ ";
+    // { A: B, A: B, ..., A: B }
+    template<typename A, typename B>
+    std::ostream& operator<<(std::ostream &out, const std::map<A, B> &m) {
+        out << '{';
         for (auto it = m.begin(); it != m.end(); ) {
-            out << it->first << ':' << it->second;
-            if (++it != m.end()) out << ", ";
+            out << ' ' << it->first << ": " << it->second;
+            if (++it != m.end()) out << ',';
         }
         out << " }";
         return out;
     }
 
     // Displays an unordered map:
-    // { A:B, A:B, ..., A:B }
-    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::unordered_map<A, B>& m) {
-        out << "{ ";
+    // { A: B, A: B, ..., A: B }
+    template<typename A, typename B>
+    std::ostream& operator<<(std::ostream &out, const std::unordered_map<A, B>& m) {
+        out << '{';
         for (auto it = m.begin(); it != m.end(); ) {
-            out << it->first << ':' << it->second;
-            if (++it != m.end()) out << ", ";
+            out << ' ' << it->first << ": " << it->second;
+            if (++it != m.end()) out << ',';
         }
         out << " }";
         return out;
     }
 
     // Displays a multimap:
-    // { A:B, A:B, ..., A:B }
-    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::multimap<A, B> &m) {
-        out << "{ ";
+    // { A: B, A: B, ..., A: B }
+    template<typename A, typename B>
+    std::ostream& operator<<(std::ostream &out, const std::multimap<A, B> &m) {
+        out << '{';
         for (auto it = m.begin(); it != m.end(); ) {
-            out << it->first << ':' << it->second;
-            if (++it != m.end()) out << ", ";
+            out << ' ' << it->first << ": " << it->second;
+            if (++it != m.end()) out << ',';
         }
         out << " }";
         return out;
     }
 
     // Displays an unordered multimap:
-    // { A:B, A:B, ..., A:B }
-    template<typename A, typename B> std::ostream& operator<<(std::ostream &out, const std::unordered_multimap<A, B>& m) {
-        out << "{ ";
+    // { A: B, A: B, ..., A: B }
+    template<typename A, typename B>
+    std::ostream& operator<<(std::ostream &out, const std::unordered_multimap<A, B>& m) {
+        out << '{';
         for (auto it = m.begin(); it != m.end(); ) {
-            out << it->first << ':' << it->second;
-            if (++it != m.end()) out << ", ";
+            out << ' ' << it->first << ": " << it->second;
+            if (++it != m.end()) out << ',';
         }
         out << " }";
         return out;
@@ -147,11 +163,12 @@ namespace DS {
 
     // Displays a set:
     // { T, T, ..., T }
-    template<typename T> std::ostream& operator<<(std::ostream &out, const std::set<T>& m) {
-        out << "{ ";
+    template<typename T>
+    std::ostream& operator<<(std::ostream &out, const std::set<T>& m) {
+        out << '{';
         for (auto it = m.begin(); it != m.end(); ) {
-            out << *it;
-            if (++it != m.end()) out << ", ";
+            out << ' ' << *it;
+            if (++it != m.end()) out << ',';
         }
         out << " }";
         return out;
@@ -159,11 +176,12 @@ namespace DS {
 
     // Displays an unordered set:
     // { T, T, ..., T }
-    template<typename T> std::ostream & operator<<(std::ostream & out, const std::unordered_set<T> & m) {
-        out << "{ ";
+    template<typename T>
+    std::ostream& operator<<(std::ostream &out, const std::unordered_set<T> &m) {
+        out << '{';
         for (auto it = m.begin(); it != m.end(); ) {
-            out << *it;
-            if (++it != m.end()) out << ", ";
+            out << ' ' << *it;
+            if (++it != m.end()) out << ',';
         }
         out << " }";
         return out;
@@ -171,11 +189,12 @@ namespace DS {
 
     // Displays a multiset:
     // { T, T, ..., T }
-    template<typename T> std::ostream & operator<<(std::ostream & out, const std::multiset<T> & m) {
-        out << "{ ";
+    template<typename T>
+    std::ostream& operator<<(std::ostream &out, const std::multiset<T> &m) {
+        out << '{';
         for (auto it = m.begin(); it != m.end(); ) {
-            out << *it;
-            if (++it != m.end()) out << ", ";
+            out << ' ' << *it;
+            if (++it != m.end()) out << ',';
         }
         out << " }";
         return out;
@@ -183,15 +202,17 @@ namespace DS {
 
     // Displays an unordered multiset:
     // { T, T, ..., T }
-    template<typename T> std::ostream & operator<<(std::ostream & out, const std::unordered_multiset<T> & m) {
-        out << "{ ";
+    template<typename T>
+    std::ostream& operator<<(std::ostream &out, const std::unordered_multiset<T> &m) {
+        out << '{';
         for (auto it = m.begin(); it != m.end(); ) {
-            out << *it;
-            if (++it != m.end()) out << ", ";
+            out << ' ' << *it;
+            if (++it != m.end()) out << ',';
         }
         out << " }";
         return out;
     }
+
 
     /************************************************
      *           NUMERICAL TYPE UTILITIES           *
@@ -289,7 +310,7 @@ namespace DS {
      ************************************************/
 
     // @returns The number of characters of the printed representation of `obj`
-    template<typename T> std::string repr(T obj) {
+    template<typename T> std::string repr(const T &obj) {
         std::stringstream s;
         s << obj;
         return s.str();
@@ -344,76 +365,88 @@ namespace DS {
      ************************************************/
 
     // O(n)
-    template<typename T> std::vector<T> operator+(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T>
+    std::vector<T> operator+(std::vector<T> &a, std::vector<T> &b) {
         assert(a.size() == b.size());
         std::vector<T> out(a.size());
         for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] + b[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator+=(std::vector<T> &a, const std::vector<T> &b) {
+    template<typename T>
+    std::vector<T> operator+=(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) a[i] += b[i];
         return a;
     }
     // O(n)
-    template<typename T> std::vector<T> operator+(std::vector<T> &b, const T &lambda) {
+    template<typename T>
+    std::vector<T> operator+(std::vector<T> &b, const T &lambda) {
         std::vector<T> out(b.size());
         for (size_t i = 0; i < b.size(); ++i) out[i] = lambda + b[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator+=(std::vector<T> &b, const T &lambda) {
+    template<typename T>
+    std::vector<T> operator+=(std::vector<T> &b, const T &lambda) {
         for (size_t i = 0; i < b.size(); ++i) b[i] += lambda;
         return b;
     }
 
     // O(n)
-    template<typename T> std::vector<T> operator-(std::vector<T> &a, const std::vector<T> &b) {
+    template<typename T>
+    std::vector<T> operator-(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         std::vector<T> out(a.size());
         for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] - b[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator-=(std::vector<T> &a, const std::vector<T> &b) {
+    template<typename T>
+    std::vector<T> operator-=(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) a[i] -= b[i];
         return a;
     }
     // O(n)
-    template<typename T> std::vector<T> operator-(std::vector<T> &v, const T &lambda) {
+    template<typename T>
+    std::vector<T> operator-(std::vector<T> &v, const T &lambda) {
         std::vector<T> out(v.size());
         for (size_t i = 0; i < v.size(); ++i) out[i] = lambda - v[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator-=(std::vector<T> &v, T &lambda) {
+    template<typename T>
+    std::vector<T> operator-=(std::vector<T> &v, T &lambda) {
         for (size_t i = 0; i < v.size(); ++i) v[i] -= lambda;
         return v;
     }
 
     // O(n)
-    template<typename T> std::vector<T> operator*(std::vector<T> &a, const std::vector<T> &b) {
+    template<typename T>
+    std::vector<T> operator*(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         std::vector<T> out(a.size());
         for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] * b[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator*=(std::vector<T> &a, const std::vector<T> &b) {
+    template<typename T>
+    std::vector<T> operator*=(std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) a[i] *= b[i];
         return a;
     }
     // O(n)
-    template<typename T> std::vector<T> operator*(std::vector<T> &v, const T &lambda) {
+    template<typename T>
+    std::vector<T> operator*(std::vector<T> &v, const T &lambda) {
         std::vector<T> out(v.size());
         for (size_t i = 0; i < v.size(); ++i) out[i] = lambda * v[i];
         return out;
     }
     // O(n)
-    template<typename T> std::vector<T> operator*=(std::vector<T> &v, const T &lambda) {
+    template<typename T>
+    std::vector<T> operator*=(std::vector<T> &v, const T &lambda) {
         for (size_t i = 0; i < v.size(); ++i) v[i] *= lambda;
         return v;
     }
@@ -423,7 +456,8 @@ namespace DS {
      ************************************************/
 
     // O(n)
-    template<typename T> bool operator==(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T>
+    bool operator==(std::vector<T> &a, std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] != b[i]) return false;
@@ -432,7 +466,8 @@ namespace DS {
     }
 
     // O(n)
-    template<typename T> bool operator!=(std::vector<T> &a, std::vector<T> &b) {
+    template<typename T>
+    bool operator!=(std::vector<T> &a, std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] != b[i]) return true;
@@ -444,8 +479,10 @@ namespace DS {
      *                 VECTOR READ                  *
      ************************************************/
 
-    template<typename T> std::istream& operator>>(std::istream &in, std::vector<T> &v) {
-        for (T &val : v) in >> val;
+    template<typename T>
+    std::istream& operator>>(std::istream &in, std::vector<T> &v) {
+        std::copy_n(std::istream_iterator<T>(in), v.size(), v.begin());
+        // for (T &val : v) in >> val;
         return in;
     }
 
@@ -454,7 +491,8 @@ namespace DS {
      ************************************************/
 
     // O(n)
-    template<typename T> bool operator<=(const std::vector<T> &a, const std::vector<T> &b) {
+    template<typename T>
+    bool operator<=(const std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] < b[i]) return true;
@@ -464,7 +502,8 @@ namespace DS {
     }
 
     // O(n)
-    template<typename T> bool operator<(const std::vector<T> &a, const std::vector<T> &b) {
+    template<typename T>
+    bool operator<(const std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] < b[i]) return true;
@@ -474,7 +513,8 @@ namespace DS {
     }
 
     // O(n)
-    template<typename T> bool operator>=(const std::vector<T> &a, const std::vector<T> &b) {
+    template<typename T>
+    bool operator>=(const std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] > b[i]) return true;
@@ -484,7 +524,8 @@ namespace DS {
     }
 
     // O(n)
-    template<typename T> bool operator>(const std::vector<T> &a, const std::vector<T> &b) {
+    template<typename T>
+    bool operator>(const std::vector<T> &a, const std::vector<T> &b) {
         assert(a.size() == b.size());
         for (size_t i = 0; i < a.size(); ++i) {
             if (a[i] > b[i]) return true;

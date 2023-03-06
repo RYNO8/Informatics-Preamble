@@ -6,9 +6,9 @@
 using namespace std;
 using namespace DS;
 
-using DiGraph = Graph<20, UnitWeight, true>;
-using MyGraph = Graph<20, UnitWeight, false>;
-using WeightedGraph = Graph<20, int, false>;
+using DiGraph = Graph<10, UnitEdgeWeight, PathWeight<int>, true>;
+using MyGraph = Graph<20, UnitEdgeWeight, PathWeight<int>, false>;
+using WeightedGraph = Graph<20, int, PathWeight<int>, false>;
 
 void testDigraph() {
     stringstream s1;
@@ -44,7 +44,7 @@ void testDigraph() {
     assert(G1.containsEdge(DiGraph::Edge(1, 2)));
     assert(G1.containsEdge(DiGraph::Edge(2, 1)));
     assert(!G1.containsEdge(DiGraph::Edge(3, 4)));
-    assert(G1.containsEdge(DiGraph::Edge(2, 1, UnitWeight())));
+    assert(G1.containsEdge(DiGraph::Edge(2, 1, UnitEdgeWeight())));
     assert(G1.degreeIn(4) == 1);
 
     G1.eraseEdge(DiGraph::Edge(1, 2));
@@ -72,18 +72,23 @@ void testDigraph() {
     }));
     
     assert(G1 + induced == G1);
-    assert(G1 + DiGraph(2, vector<DiGraph::Edge>({ DiGraph::Edge(1, 2) })) == G1);
-    assert(G1 + DiGraph(2, vector<DiGraph::Edge>({ DiGraph::Edge(1, 4) })) != G1);
-    assert(repr(G1.flip()) == "1: 2 3\n2:\n3: 1 2\n4: 2\n");
+    assert(G1 + DiGraph(3, vector<DiGraph::Edge>({ DiGraph::Edge(1, 2) })) == G1);
+    assert(G1 + DiGraph(5, vector<DiGraph::Edge>({ DiGraph::Edge(1, 4) })) != G1);
+    assert(repr(G1.flip()) == "1: 2 3\n2: 1\n3: 1 2\n4: 2\n");
 
-    // G1.addEdge(1, 2);
-    // assert(G1.numEdges(1, 2) == 2);
-    // assert(G1.numEdges(2, 1) == 1);
-    // assert(G1.numEdges(1, 4) == 0);
-    // G1.removeEdge(1, 2);
-    // assert(G1.getEdgesOut(1) == multiset<size_t>({2, 3}));
-    // vector<int> a = G1.greedyColouring();
-    // assert(a == vector<int>({-1, 0, 1, 2, 0}));
+    auto a = std::array<PathWeight<int>, 10>({
+        2147483647, 
+        0, 
+        1, 
+        1, 
+        2, 
+        2147483647, 
+        2147483647, 
+        2147483647, 
+        2147483647, 
+    });
+    assert(G1.SSSP(1) == a);
+
     G1.clear();
     assert(G1.V() == 0 && G1.E() == 0);
 }
@@ -136,7 +141,7 @@ void testWeightedGraph() {
 }
 
 int main() {
-    // testDigraph();
+    testDigraph();
     testGraph();
     testWeightedGraph();
 }

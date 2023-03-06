@@ -14,41 +14,71 @@
 #include <numeric>
 
 namespace DS {
-    struct UnitWeight {
-        int w = 1;
-        UnitWeight(): w(1) {}
-        UnitWeight(int _w): w(_w) {}
-        friend UnitWeight operator+(const UnitWeight &w1, const UnitWeight &w2) {
-            return UnitWeight(w1.w + w2.w);
+    template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
+    struct PathWeight {
+        T w;
+        PathWeight(int _w): w(_w) {}
+        PathWeight(): w(std::numeric_limits<T>::max()) {}
+        friend PathWeight<T> operator+(const PathWeight<T> &w1, const T &w2) {
+            return PathWeight(w1.w + w2);
         }
-        friend bool operator<(const UnitWeight &a, const UnitWeight &b) {
-            return a.w < b.w;
-        }
-        friend bool operator==(const UnitWeight &a, const UnitWeight &b) {
+        friend bool operator==(const PathWeight &a, const PathWeight &b) {
             return a.w == b.w;
         }
-        // lol
-        friend std::istream& operator>>(std::istream &in, const UnitWeight &w) {
-            return in;
+        friend bool operator<(const PathWeight &a, const PathWeight &b) {
+            return a.w < b.w;
         }
-        friend std::ostream& operator<<(std::ostream &out, const UnitWeight &w) {
+        friend std::ostream& operator<<(std::ostream &out, const PathWeight &w) {
             out << w.w;
             return out;
         }
     };
+    
+    struct UnitEdgeWeight {
+        UnitEdgeWeight() {}
+        template<typename T>
+        friend PathWeight<T> operator+(const PathWeight<T> &w1, const UnitEdgeWeight &w2) {
+            return w1 + T(1);
+        }
+        // lol
+        friend bool operator==(const UnitEdgeWeight &a, const UnitEdgeWeight &b) {
+            return true;
+        }
+        friend bool operator<(const UnitEdgeWeight &a, int b) {
+            assert(b == 0);
+            return false;
+        }
+        // lol
+        friend std::istream& operator>>(std::istream &in, const UnitEdgeWeight &w) {
+            return in;
+        }
+        friend std::ostream& operator<<(std::ostream &out, const UnitEdgeWeight &w) {
+            out << 1;
+            return out;
+        }
+    };
 
-    // TODO: define restrictions for weight for each algorithm
-    // Weight needs a default constructor `Weight()`, which can initialise to anything
-    // Weight needs the following methods, which need to behave properly
-    //  - `Weight::operator==`
-    //  - `Weight::operator<`
-    //  - `Weight::operator+`
+
+    // TODO: doomed when maxV == 0?
+
+    // EdgeWeight needs a default constructor `EdgeWeight()`, which is the default weight of an edge
+    // `EdgeWeight(0)` should do as expected
+    // EdgeWeight needs the following methods, which need to behave properly
+    //  - `EdgeWeight::operator==`
+    //  - `EdgeWeight::operator+`
+    //  - `EdgeWeight::operator<` against `0` to check sign
     //  - read from istream, display to ostream
-    // A insufficiently defined Weight might still produce correct results sometimes
+
+    // PathWeight needs the following methods, which need to behave properly
+    //  - `PathWeight::operator<` is a total ordering
+
+    // A insufficiently defined EdgeWeight might still produce correct results sometimes
     template<
         size_t maxV,
         // weight data held for each edge
-        typename Weight,
+        typename EdgeWeight,
+        // accumulation of weight data over many edges
+        typename PathWeight,
         // Whether edges are directed or bidirectional
         bool isDirected = false
     >
@@ -60,18 +90,19 @@ public:
 
         // id of node is an unsigned integer
         using Node = size_t;
-        using isWeighted = std::negation<std::is_same<Weight, UnitWeight>>;
+        using isWeighted = std::negation<std::is_same<EdgeWeight, UnitEdgeWeight>>;
+        using MyGraph = Graph<maxV, EdgeWeight, PathWeight, isDirected>;
 
         struct Edge {
             using Node = size_t;
             Node u, v;
-            Weight w;
+            EdgeWeight w;
 
             Edge() {
                 
             }
 
-            Edge(Node u_, Node v_, Weight w_) : u(u_), v(v_), w(w_) {
+            Edge(Node u_, Node v_, EdgeWeight w_) : u(u_), v(v_), w(w_) {
                 assert(u != v && "Self cycles not supported yet");
                 assert(u < maxV && v < maxV && "Node index out of range");
                 if (!isDirected && u > v) std::swap(u, v);
@@ -80,7 +111,7 @@ public:
             // #if __cplusplus >= 202002L
             // template<std::enable_if_t<isWeighted::value, bool> = false>
             // #endif
-            Edge(Node u_, Node v_) : u(u_), v(v_), w(Weight()) {
+            Edge(Node u_, Node v_) : u(u_), v(v_), w(EdgeWeight()) {
                 assert(u_ != v_ && "Self cycles not supported yet");
                 assert(u < maxV && v < maxV && "Node index out of range");
                 if (!isDirected && u > v) std::swap(u, v);
@@ -91,14 +122,24 @@ public:
                 return Edge(v, u, w);
             }
 
-            friend bool operator<(const Edge &a, const Edge &b) {
-                if (a.u != b.u) return a.u < b.u;
-                else if (a.v != b.v) return a.v < b.v;
-                else return a.w < b.w;
+            Node otherSide(Node node) {
+                if (node == u) return v;
+                else if (node == v) return u;
+                else assert(false && "Must provide an endpoint of this edge");
             }
+
+            // friend bool operator<(const Edge &a, const Edge &b) {
+            //     if (a.u != b.u) return a.u < b.u;
+            //     else if (a.v != b.v) return a.v < b.v;
+            //     else return a.w < b.w;
+            // }
 
             friend bool operator==(const Edge &a, const Edge &b) {
                 return a.u == b.u && a.v == b.v && a.w == b.w;
+            }
+
+            friend bool operator!=(const Edge &a, const Edge &b) {
+                return !(a == b);
             }
 
             friend std::istream& operator>>(std::istream &in, Edge &e) {
@@ -148,7 +189,7 @@ public:
         // O(V + |nodes| log E)
         // Initialise this graph as the graph induced from `g` by `nodes`
         // @note `V` does not change, so there may be disconnected nodes
-        Graph(const Graph<maxV, Weight, isDirected> &g, const std::vector<Node> &nodes) {
+        Graph(const MyGraph &g, const std::vector<Node> &nodes) {
             for (Node node : nodes) assert(g.containsNode(node) && "Node index out of range");
             for (Node node : nodes) {
                 for (Edge incident : g.getEdges(node)) {
@@ -178,7 +219,7 @@ public:
         // O(V + E)
         // Displays the graph, showing the outwards edge connections of each edge in lexographic order
         // @param `out` The string representation of the graph is piped to this output stream
-        friend std::ostream& operator<<(std::ostream &out, const Graph<maxV, Weight, isDirected> &graph) {
+        friend std::ostream& operator<<(std::ostream &out, const MyGraph &graph) {
             for (Node u : graph.nodes) {
                 out << u << ':';
                 for (Edge edge: graph.outEdges[u]) {
@@ -243,7 +284,7 @@ public:
         const std::vector<Edge> getEdges(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             std::vector<Edge> out(inEdges[node].size() + outEdges[node].size());
-            auto it = std::set_union(inEdges[node].begin(), inEdges[node].end(), outEdges[node].begin(), outEdges[node].end(), out.begin());
+            auto it = std::set_union(inEdges[node].begin(), inEdges[node].end(), outEdges[node].begin(), outEdges[node].end(), out.begin(), EdgeComp());
             out.resize(it - out.begin());
             return out;
         }
@@ -298,7 +339,7 @@ public:
         // Adds a new node with no edges
         // @returns The index of this node
         // TODO: should I have a variation where silently passes when node exists?
-        inline size_t pushNode(Node node) {
+        size_t pushNode(Node node) {
             assert(/*0 <= node &&*/ node < maxV + 1 && "Node index out of range");
             assert(!containsNode(node) && "node already exists");
             nodes.push_back(node);
@@ -435,8 +476,8 @@ public:
         // O(V + E log E)
         // @returns The union of 2 graphs
         // @note Does not cause edge doubling
-        friend Graph<maxV, Weight, isDirected> operator+(const Graph<maxV, Weight, isDirected> &a, const Graph<maxV, Weight, isDirected> &b) {
-            Graph<maxV, Weight, isDirected> out = a; // make a copy
+        friend MyGraph operator+(const MyGraph &a, const MyGraph &b) {
+            MyGraph out = a; // make a copy
             for (Edge edge: b.getEdges()) {
                 if (!out.containsNode(edge.u)) out.pushNode(edge.u);
                 if (!out.containsNode(edge.v)) out.pushNode(edge.v);
@@ -448,7 +489,7 @@ public:
         // O(V + E)
         // @returns whether the 2 graphs are identical in edge (including weights!) and vertex sets
         // @note has short circuiting
-        friend bool operator==(const Graph<maxV, Weight, isDirected> &a, const Graph<maxV, Weight, isDirected> &b) {
+        friend bool operator==(const MyGraph &a, const MyGraph &b) {
             if (a.E() != b.E()) return false;
             if (a.V() != b.V()) return false;
             for (Node node = 1; node <= maxV; ++node) {
@@ -457,14 +498,14 @@ public:
             return true;
         }
 
-        friend bool operator!=(const Graph<maxV, Weight, isDirected> &a, const Graph<maxV, Weight, isDirected> &b) {
+        friend bool operator!=(const MyGraph &a, const MyGraph &b) {
             return !(a == b);
         }
 
         // O(V + E log E)
-        Graph<maxV, Weight, isDirected> flip() const {
+        MyGraph flip() const {
             assert(isDirected && "cannot flip undirected graph");
-            Graph<maxV, Weight, isDirected> out;
+            MyGraph out;
             for (Node node: getNodes()) out.pushNode(node);
             for (Edge edge: getEdges()) out.insertEdge(edge.flip());
             return out;
@@ -482,63 +523,96 @@ public:
         }
 
     // private:
-    //     // O(V + E log V), or O(VE) if negative edge weights
-    //     // Standard Dijkstra algorithm - shortest path from `node` to all other nodes for non-negative edge weights
-    //     // @param `backwards` Indicates whether to consider `inEdges` or `outEdges`
-    //     // @note If the graph is undirected, this becomes equivalent to a bfs (but slightly slower)
-    //     // @note If negative edge weights encountered, switches to `BellmanFord()`
-    //     void Dijkstra(Node node, std::vector<Node>& prevNode, std::vector<T>& dist, bool backwards = false) const {
-    //         dist[node] = T(0);
-    //         prevNode[node] = node;
-    //         std::priority_queue<std::pair<T, Node>, std::vector<std::pair<T, Node>>, std::greater<std::pair<T, Node>>> pq;
-    //         pq.push({ 0, node });
+        // O(maxV + E log V), or O(maxV E) if negative edge weights
+        // Standard Dijkstra algorithm - shortest path from `node` to all other nodes for non-negative edge weights
+        // @note If the graph is undirected, this becomes equivalent to a bfs (but slightly slower)
+        // @note If negative edge weights encountered, switches to `BellmanFord()`
+        // @note Will check and error if negative weight cycle
+        std::pair<std::array<PathWeight, maxV>, std::array<Edge, maxV>> Dijkstra(Node node) const {
+            std::array<bool, maxV> seen;
+            std::fill(seen.begin(), seen.end(), false);
+            seen[node] = true;
+            std::array<PathWeight, maxV> cost;
+            cost[node] = PathWeight(0);
+            std::array<Edge, maxV> pred; // predecessor
+            std::priority_queue<
+                std::pair<PathWeight, Node>, 
+                std::vector<std::pair<PathWeight, Node>>, 
+                std::greater<std::pair<PathWeight, Node>>
+            > pq;
+            pq.push({ PathWeight(0), node });
 
-    //         while (!pq.empty()) {
-    //             Node currNode = pq.top().second;
-    //             T cost = pq.top().first;
-    //             pq.pop();
-    //             if (cost > dist[currNode]) continue;
+            while (!pq.empty()) {
+                Node currNode = pq.top().second;
+                PathWeight currCost = pq.top().first;
+                pq.pop();
+                if (cost[currNode] < currCost) continue;
 
-    //             for (std::pair<Node, T> child: (backwards ? inEdges : outEdges)[currNode]) {
-    //                 if (child.second < 0) {
-    //                     // negative edge weight, try `BellmanFord()` isntead
-    //                     fill(prevNode.begin(), prevNode.end(), 0);
-    //                     fill(dist.begin(), dist.end(), std::numeric_limits<T>::max());
-    //                     BellmanFord(node, prevNode, dist, backwards);
-    //                     return;
-    //                 }
+                for (Edge incident: getEdgesOut(currNode)) {
+                    if (incident.w < 0) {
+                        // negative edge weight, try `BellmanFord()` instead
+                        return BellmanFord(node);
+                    }
 
-    //                 T newCost = cost + child.second;
-    //                 if (newCost < dist[child.first]) {
-    //                     dist[child.first] = newCost;
-    //                     prevNode[child.first] = currNode;
-    //                     pq.push({ newCost, child.first });
+                    PathWeight newCost = currCost + incident.w;
+                    Node newNode = incident.otherSide(currNode);
+                    if (!seen[newNode] || newCost < cost[newNode]) {
+                        seen[newNode] = true;
+                        cost[newNode] = newCost;
+                        pred[newNode] = incident;
+                        pq.push({ newCost, newNode });
+                    }
+                }
+            }
+            return { cost, pred };
+        }
 
-    //                 }
-    //             }
-    //         }
-    //     }
+        // O(maxV E) Standard Bellman-Ford algorithm - shortest path from `node` to all other nodes
+        // @note Will check and error if negative weight cycle
+        std::pair<std::array<PathWeight, maxV>, std::array<Edge, maxV>> BellmanFord(Node node) const {
+            std::array<bool, maxV> seen;
+            std::fill(seen.begin(), seen.end(), false);
+            seen[node] = true;
+            std::array<PathWeight, maxV> cost;
+            cost[node] = PathWeight(0);
+            std::array<Edge, maxV> pred; // predecessor
+            for (size_t rep = 0; rep < V() - 1; ++rep) {
+                for (Edge edge: getEdges()) {
+                    if (seen[edge.u]) {
+                        PathWeight newCost = cost[edge.u] + edge.w;
+                        if (!seen[edge.v] || (newCost < cost[edge.v] && pred[edge.v] != edge)) {
+                            seen[edge.v] = true;
+                            cost[edge.v] = newCost;
+                            pred[edge.v] = edge;
+                        }
+                    }
+                    if (seen[edge.v]) {
+                        PathWeight newCost = cost[edge.v] + edge.w;
+                        if (!seen[edge.u] || (newCost < cost[edge.u] && pred[edge.u] != edge)) {
+                            seen[edge.u] = true;
+                            cost[edge.u] = newCost;
+                            pred[edge.u] = edge;
+                        }
+                    }
+                }
+            }
+            // last rep, but the minimum distance can still be reduced
+            for (Edge edge : getEdges()) {
+                if (
+                    seen[edge.u] && 
+                    seen[edge.v] && 
+                    // any more simplification of this expression assume properties of PathWeight
+                    (cost[edge.u] + edge.w < cost[edge.v] || cost[edge.v] + edge.w < cost[edge.u])
+                 ) {
+                        assert(false && "negative weight cycle");
+                }
+            }
+            return { cost, pred };
+        }
 
-    //     // O(VE) Standard Bellman-Ford algorithm - shortest path from `node` to all other nodes
-    //     // @param `backwards` Indicates whether to consider `inEdges` or `outEdges`
-    //     void BellmanFord(Node node, std::vector<Node>& prevNode, std::vector<Node>& dist, bool backwards = false) const {
-    //         for (Node rep = 0; rep < V; ++rep) {
-    //             for (std::pair<std::pair<Node, Node>, T> edge: edges) {
-    //                 Node u = edge.u.first, v = edge.u.second;
-    //                 if (backwards) std::swap(u, v);
-
-    //                 if (dist[u] == std::numeric_limits<T>::max()) continue;
-    //                 T newCost = dist[u] + edge.v;
-    //                 if (newCost < dist[v]) {
-    //                     // last rep, but the minimum distance can still be reduced
-    //                     assert(rep != V - 1 && "negative weight cycle");
-
-    //                     dist[v] = newCost;
-    //                     prevNode[v] = u;
-    //                 }
-    //             }
-    //         }
-    //     }
+        std::array<PathWeight, maxV> SSSP(Node node) const {
+            return Dijkstra(node).first;
+        }
 
     // public:
     //     // O(V + E log V), but O(VE) if negative edge weights. Finds the shortest path from `u` to `v`

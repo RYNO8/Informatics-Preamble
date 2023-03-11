@@ -239,11 +239,8 @@ public:
          *                  PROPERTIES                  *
          ************************************************/
 
-        // O(1)
-        // @returns `V`, the number of nodes
-        inline size_t size() const {
-            return nodes.size();
-        }
+        // @note No `size()` because ambiguous, use the following functions instead
+
         // @returns `V`, the number of nodes
         inline size_t V() const {
             return nodes.size();
@@ -271,6 +268,7 @@ public:
 
         // O(1)
         // @returns the imutable set of all edges
+        // @note Edges sorted by endpoints
         const std::vector<Edge> getEdges() const {
             return std::vector<Edge>(edges.begin(), edges.end());
         }
@@ -344,7 +342,7 @@ public:
             assert(!containsNode(node) && "node already exists");
             nodes.push_back(node);
             validNode[node] = true;
-            return size();
+            return V();
         }
 
         // O(log E)

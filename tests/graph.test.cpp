@@ -29,7 +29,7 @@ void testDigraph() {
 
 
     assert(repr(G1) == "1: 2 3\n2: 1 3 4\n3: 1\n4:\n");
-    assert(G1.size() == 4 && G1.V() == 4 && G1.N() == 4);
+    assert(G1.V() == 4 && G1.N() == 4);
     assert(G1.E() == 6 && G1.M() == 6);
     assert(G1.getNodes() == vector<DiGraph::Node>({1, 2, 3, 4}));
     assert(G1.getEdges() == vector<DiGraph::Edge>({
@@ -130,7 +130,7 @@ void testWeightedGraph() {
     size_t N3, M3;
     s3 >> N3 >> M3;
     vector<WeightedGraph::Edge> e(M3);
-    for (size_t i = 0; i < M3; ++i) s3 >> e[i];
+    s3 >> e;
     WeightedGraph G3(N3, e);
 
     assert(repr(G3) == "1: 2 (w = 10)\n2: 3 (w = 0)\n3:\n");

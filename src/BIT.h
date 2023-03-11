@@ -13,7 +13,7 @@ namespace DS {
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse
     template <class T, size_t... Ns>
-    class BIT_ {
+    class BITInterface_ {
 private:
         T val = T();
 
@@ -61,9 +61,9 @@ public:
     };
 
     template<class T, size_t N, size_t... Ns>
-    class BIT_<T, N, Ns...> {
+    class BITInterface_<T, N, Ns...> {
 private:
-        BIT_<T, Ns...> bit[N + 1];
+        BITInterface_<T, Ns...> bit[N + 1];
 
 public:
         /************************************************
@@ -127,10 +127,10 @@ public:
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse
     template <class T, size_t... Ns>
-    class BIT_RQPU: public BIT_<T, Ns...> {};
+    class BIT_RQPU: public BITInterface_<T, Ns...> {};
 
     template<class T, size_t N, size_t... Ns>
-    class BIT_RQPU<T, N, Ns...>: public BIT_<T, N, Ns...> {
+    class BIT_RQPU<T, N, Ns...>: public BITInterface_<T, N, Ns...> {
 private:
         BIT_RQPU<T, Ns...> bit[N + 1];
 
@@ -193,10 +193,10 @@ public:
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse
     template <class T, size_t... Ns>
-    class BIT_PQRU: public BIT_<T, Ns...> {};
+    class BIT_PQRU: public BITInterface_<T, Ns...> {};
 
     template<class T, size_t N, size_t... Ns>
-    class BIT_PQRU<T, N, Ns...>: public BIT_<T, N, Ns...> {
+    class BIT_PQRU<T, N, Ns...>: public BITInterface_<T, N, Ns...> {
 private:
         BIT_PQRU<T, Ns...> bit[N + 1];
 

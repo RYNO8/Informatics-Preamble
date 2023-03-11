@@ -27,14 +27,14 @@ YES
 using namespace DS;
 using namespace std;
 
-void testSqrtDecomp() {
+void testSqrtDecomp(istream &in, ostream &out) {
     int N, Q, bad = 0, arr[100005], curr[100005];
     vector<pair<int, int>> queries;
 
-    cin >> N >> Q;
-    for (int i = 0; i < N; ++i) cin >> arr[i];
+    in >> N >> Q;
+    for (int i = 0; i < N; ++i) in >> arr[i];
     for (int a, b, i = 0; i < Q; ++i) {
-        cin >> a >> b;
+        in >> a >> b;
         queries.push_back({ a - 1, b - 1 });
     }
 
@@ -56,9 +56,26 @@ void testSqrtDecomp() {
         return bad == ((r - l + 1) % 2 == 1);
     };
 
-    for (bool ans : chunkQueries<int, bool>(queries.begin(), queries.end(), add, rem, answer)) cout << (ans ? "YES" : "NO") << '\n';
+    for (bool ans : chunkQueries<int, bool>(queries.begin(), queries.end(), add, rem, answer)) out << (ans ? "YES" : "NO") << '\n';
 }
 
 signed main() {
-    testSqrtDecomp();
+    stringstream sin, sout;
+    sin << R"""(
+22 6
+87 79 87 95 83 85 67 72 95 68 79 71 69 95 71 79 68 95 72 67 85 83
+4 22
+9 9
+10 17
+10 11
+9 17
+10 18)""";
+    testSqrtDecomp(sin, sout);
+    string ans;
+    sout >> ans; assert(ans == "YES");
+    sout >> ans; assert(ans == "YES");
+    sout >> ans; assert(ans == "NO");
+    sout >> ans; assert(ans == "NO");
+    sout >> ans; assert(ans == "YES");
+    sout >> ans; assert(ans == "YES");
 }

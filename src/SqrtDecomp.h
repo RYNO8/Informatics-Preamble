@@ -5,33 +5,39 @@
 namespace DS {
     // O(Q + N log N), where Q is the size of `queries_` and N is the total size of the interval to be considered
     // Mo's algorithm
-    bool sqrtCmp_(std::pair<std::pair<int, int>, int> a, std::pair<std::pair<int, int>, int> b) {
-        return std::make_pair(a.first.first / SQRT_MAXN, a.first.second) < std::make_pair(b.first.first / SQRT_MAXN, b.first.second);
-    }
-
+    // note: answer should accept an inclusive inclusive range
     template<typename IndexType, typename AnsType, typename It>
     std::vector<AnsType> chunkQueries(
         It begin,
         It end,
-        std::function<void(IndexType)> add,
-        std::function<void(IndexType)> rem,
-        std::function<AnsType(IndexType, IndexType)> answer
+        const std::function<void(IndexType)> &add,
+        const std::function<void(IndexType)> &rem,
+        const std::function<AnsType(IndexType, IndexType)> &answer
     ) {
-        std::vector<std::pair<std::pair<IndexType, IndexType>, int>> queries;
-        int Q = 0;
-        for (auto val = begin; val != end; ++val, ++Q) queries.push_back({ *val, Q });
-        sort(queries.begin(), queries.end(), sqrtCmp_);
+        struct Query {
+            IndexType l, r;
+            size_t out_i;
+            bool operator<(const Query &b) const {
+                return std::make_pair(l / SQRT_MAXN, r) < std::make_pair(b.l / SQRT_MAXN, b.r);
+            }
+        };
+
+        std::vector<Query> queries;
+        size_t Q = 0;
+        for (auto val = begin; val != end; ++val, ++Q) queries.push_back({ val->first, val->second, Q });
+
+        sort(queries.begin(), queries.end());
 
         std::vector<AnsType> ans(Q);
         IndexType l = 1, r = 1;
         add(1);
         for (auto &query : queries) {
-            while (r > query.first.second) rem(r--);
-            while (r < query.first.second) add(++r);
-            while (l > query.first.first) add(--l);
-            while (l < query.first.first) rem(l++);
+            while (r > query.r) rem(r--);
+            while (r < query.r) add(++r);
+            while (l > query.l) add(--l);
+            while (l < query.l) rem(l++);
 
-            ans[query.second] = answer(l, r);
+            ans[query.out_i] = answer(l, r);
         }
 
         return ans;

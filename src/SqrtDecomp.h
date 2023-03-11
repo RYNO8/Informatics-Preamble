@@ -3,7 +3,7 @@
 #include "Constants.h"
 
 namespace DS {
-    // O(Q + N log N), where Q is the size of `queries_` and N is the total size of the interval to be considered
+    // O(Q sqrt N + N sqrt N), where Q is the size of `queries_` and N is the total size of the interval to be considered
     // Mo's algorithm
     // note: answer should accept an inclusive inclusive range
     template<typename IndexType, typename AnsType, typename It>
@@ -26,11 +26,13 @@ namespace DS {
         size_t Q = 0;
         for (auto val = begin; val != end; ++val, ++Q) queries.push_back({ val->first, val->second, Q });
 
+        std::vector<AnsType> ans(Q);
+        if (queries.empty()) return ans;
+        
         sort(queries.begin(), queries.end());
 
-        std::vector<AnsType> ans(Q);
-        IndexType l = 1, r = 1;
-        add(1);
+        IndexType l = queries[0].l, r = queries[0].l;
+        add(queries[0].l);
         for (auto &query : queries) {
             while (r > query.r) rem(r--);
             while (r < query.r) add(++r);

@@ -20,14 +20,14 @@ def doInline(filepath, seen=set()):
             currcode, seen = doInline(librarypath, seen)
             if "\ufeff" in currcode:
                 print(currcode)
-                roeis
+                raise Exception
             outcode += currcode
 
         elif not line.startswith("#pragma once"):
             outcode += line
             if "\ufeff" in line:
                 print(line)
-                dfsjl
+                raise Exception
         
 
     outcode += "\n"
@@ -111,11 +111,11 @@ if __name__ == "__main__":
         help="destination file for pack"
     )
     parser.add_argument(
-        "-no_comments",
+        "--no_comments",
         action="store_true"
     )
     parser.add_argument(
-        "-no_whitespace",
+        "--no_whitespace",
         action="store_true"
     )
     args = parser.parse_args()

@@ -4,11 +4,20 @@
 #include "Ranges.h"
 #include <functional>
 #include <algorithm>
+#include <type_traits>
 
 namespace DS {
     // `T` should preferably be a real number
     // because segtree should support ModInt
 
+    // I want to support compile time specification of whether Segtree is persistent, but
+    // error: non-type template parameters of class type only available with ‘-std=c++2a’ or ‘-std=gnu++2a’
+    // template<std::enable_if_t<!is_persistent::value, bool> = true>
+    // thankfully c++ metaprogramming has a true_type
+    // template<typename is_persistent_ = is_persistent, std::enable_if_t<!is_persistent_::value, bool> = true>
+    // template<typename is_persistent_ = is_persistent, std::enable_if_t<is_persistent_::value, bool> = true>
+    // oop turns out I'm not gonna do constexpr stuff
+    
     // I should be left and right identity of Combine
     // Combine should have `T operator()(T, T)` which is associative property
     // CombineAgg should have `operator()(T x, unsigned ll n)` which is defined as adding x to itself n times (n > 0)
@@ -19,13 +28,15 @@ namespace DS {
     template<
         typename T,
         T I,
-        class Combine,
-        class CombineAgg,
+        typename Combine,
+        typename CombineAgg,
         T Null,
-        class Update,
+        typename Update,
+        typename is_persistent,
         std::enable_if_t<is_my_integral_v<T>, bool> = true
     >
     class Segtree : public Range<ll> {
+        using MySegtree = Segtree<T, I, Combine, CombineAgg, Null, Update, is_persistent>;
 
         /************************************************
          *                INITIALISATION                *
@@ -46,18 +57,24 @@ namespace DS {
         T val = I;
         T lazy = Null;
         LazyMode lazyMode = CLEAN;
-        Segtree *lChild = nullptr, *rChild = nullptr, *parent = nullptr;
+        MySegtree *lChild = nullptr, *rChild = nullptr, *parent = nullptr;
 
         bool isLeaf() const {
             return isEmpty();
+        }
+
+        MySegtree* copy() const {
+            return new MySegtree(*this);
         }
 
         // O(1) push lazy values to children, for lazy propagation
         void push() {
             if (isLeaf()) return;
 
-            if (lChild == nullptr) lChild = new Segtree(l(), midpoint());
-            if (rChild == nullptr) rChild = new Segtree(midpoint() + 1, r());
+            if (lChild == nullptr) lChild = new MySegtree(l(), midpoint());
+            else if (is_persistent::value) lChild = lChild->copy();
+            if (rChild == nullptr) rChild = new MySegtree(midpoint() + 1, r());
+            else if (is_persistent::value) rChild = rChild->copy();
 
             if (lazyMode == SET) { // absolute, always override
                 lChild->val = CombineAgg()(lazy, (ull)lChild->length());
@@ -98,22 +115,30 @@ namespace DS {
 
         // O(N log N)
         // Initialises segtree from existing segtree, in a the given range from `l` to `r` inclusive
-        Segtree(ll _l, ll _r, Segtree t) : Range(_l, _r) {
+        Segtree(ll _l, ll _r, MySegtree t) : Range(_l, _r) {
             for (ll i = l(); i <= r(); ++i) set(i, t.query(i));
         }
 
         // O(N log N)
         // Initialise from brace enclosed initializer list
-        Segtree(ll _l, ll _r, std::vector<T> vals) : Range(_l, _r) {
+        Segtree(T* begin, T* end) : Range(0, std::distance(begin, end) - 1) {
             size_t i = 0;
-            for (ll pos = l(); i < vals.size() && pos <= r(); ++i, ++pos) set(pos, vals[i]);
+            for (auto it = begin; it != end; it++, ++i) set(i, *it);
         }
 
         // O(N log N)
         // Initialise from brace enclosed initializer list
-        Segtree(std::vector<T> vals) : Range(0, vals.size() - 1) {
+        Segtree(typename std::vector<T>::iterator begin, typename std::vector<T>::iterator end) : Range(0, std::distance(begin, end) - 1) {
             size_t i = 0;
-            for (ll pos = l(); i < vals.size() && pos <= r(); ++i, ++pos) set(pos, vals[i]);
+            for (auto it = begin; it != end; it++, ++i) set(i, *it);
+        }
+
+        // O(N log N)
+        // Initialise from brace enclosed initializer list
+        template<size_t N>
+        Segtree(typename std::array<T, N>::iterator begin, typename std::array<T, N>::iterator end) : Range(0, std::distance(begin, end) - 1) {
+            size_t i = 0;
+            for (auto it = begin; it != end; it++, ++i) set(i, *it);
         }
 
         /************************************************
@@ -121,98 +146,110 @@ namespace DS {
          ************************************************/
 
         // O(N)
-        // note: not const segtree because queries do pushes
+        // @note: not const segtree because queries do pushes
         friend std::ostream& operator<<(std::ostream &out, Segtree segtree) {
-            out << "[ ";
+            out << '[';
             for (ll i = segtree.l(); i <= segtree.r(); ++i) {
-                out << segtree.query(i);
-                if (i != segtree.r()) out << ' ';
+                out << ' ' << segtree.query(i);
+            }
+            out << " ]";
+            return out;
+        }
+
+        // O(displayRange.size())
+        // @note: not const segtree because queries do pushes
+        // @TODO this a butchered solution until I do range views
+        std::ostream& display(std::ostream &out, Range<ll> displayRange) {
+            out << '[';
+            for (ll i = displayRange.l(); i <= r(); ++i) {
+                out << ' ' << query(i);
             }
             out << " ]";
             return out;
         }
 
         // O(1)
+        // @note first part looks like display of Range<ll>, but this code has been copied
         friend std::ostream& operator<<(std::ostream &out, const Segtree* segtree) {
-            out << Range<ll>(segtree) << " = " << segtree.val << '\n';
+            out << '[' << segtree->l() << ".." << segtree->r() << "] = " << segtree->val;
             return out;
         }
+
+        
 
         /************************************************
          *                     UPDATES                  *
          ************************************************/
 
-        // O(log N) Range update: add
-        // performs T[l] = Update(T[l], x), ..., T[r] = Update(T[r], x),
-        // @returns the root of the updated segtree
-        Segtree* add(Range<ll> queryRange, T x, bool persistent = false) {
-            if (!overlaps(queryRange)) return this;
-
-            
-            Segtree* newNode = persistent ? new Segtree(*this) : this;
-            if (coveredBy(queryRange)) {
-                newNode->val = Update()(newNode->val, CombineAgg()(x , (ull)length()));
-                newNode->lazy = Update()(newNode->lazy, x);
-                if (newNode->lazyMode == CLEAN) newNode->lazyMode = AUGMENT;
+        // // O(log N) Range update: add
+        // // performs T[l] = Update(T[l], x), ..., T[r] = Update(T[r], x),
+        // // @note Modifies segtree in place
+        void add(Range<ll> queryRange, T x) {
+            if (!overlaps(queryRange)) return;
+            else if (coveredBy(queryRange)) {
+                val = Update()(val, CombineAgg()(x , (ull)length()));
+                lazy = Update()(lazy, x);
+                if (lazyMode == CLEAN) lazyMode = AUGMENT;
             }
             else {
                 push();
-                newNode->lChild = lChild->add(queryRange, x, persistent);
-                newNode->rChild = rChild->add(queryRange, x, persistent);
-                newNode->pull();
+                lChild->add(queryRange, x);
+                rChild->add(queryRange, x);
+                pull();
             }
-            return newNode;
         }
-        Segtree* add(ll i, T x) {
-            return add({i, i}, x);
+
+        // O(log N) Point update: add
+        // performs T[i] = Update(T[i], x)
+        void add(ll i, T x) {
+            add({i, i}, x);
         }
 
         // O(log N) Range update: set
         // performs T[l] = x, ..., T[r] = x
-        // @returns the root of the updated segtree
-        Segtree* set(Range<ll> queryRange, T x, bool persistent = false) {
-            if (!overlaps(queryRange)) return this;
+        // @note Modifies segtree in place
+        void set(Range<ll> queryRange, T x) {
+            if (!overlaps(queryRange)) {
 
-            
-            Segtree* newNode = persistent ? new Segtree(*this) : this;
-            if (coveredBy(queryRange)) {
-                newNode->val = CombineAgg()(x, (ull)length());
-                newNode->lazy = x;
-                newNode->lazyMode = SET;
+            } else if (coveredBy(queryRange)) {
+                val = CombineAgg()(x, (ull)length());
+                lazy = x;
+                lazyMode = SET;
             } else {
                 push();
-                newNode->lChild = lChild->set(queryRange, x, persistent);
-                newNode->rChild = rChild->set(queryRange, x, persistent);
-                newNode->pull();
+                lChild->set(queryRange, x);
+                rChild->set(queryRange, x);
+                pull();
             }
-            return newNode;
         }
-        Segtree* set(ll i, T x) {
-            return set({i, i}, x, false);
-        }
-        Segtree* set(T x) {
-            return set({l, r}, x, false);
+
+        // O(log N) Point update: set
+        // performs T[i] = x
+        void set(ll i, T x) {
+            set({i, i}, x);
         }
 
         // O(log N) Range update: set all values to I
         void clear() {
-            set({l, r}, I);
+            set({l(), r()}, I);
         }
 
         /************************************************
          *                    QUERIES                   *
          ************************************************/
 
-        // O(log N) Range query
-        // @returns Combine(T[l], Combine(..., Combine(T[r-1], T[r])...))
+        // O(log N) Range query: Combine
+        // @returns Combine(T[l], Combine(..., Combine(T[r-1], T[r])))
         // @returns I if the segtree range has no overlap with the query range
         T query(Range<ll> queryRange) {
             if (!overlaps(queryRange)) return I;
             else if (coveredBy(queryRange)) return val;
 
             push();
-            return Combine()(lChild->query(queryRange), rChild->query(queryRange)); // hoping theres no overflow
+            return Combine()(lChild->query(queryRange), rChild->query(queryRange));
         }
+
+        // TODO: pandas view kinda thing?
         T operator[](Range<ll> queryRange) {
             return query(queryRange);
         }
@@ -224,20 +261,21 @@ namespace DS {
         // O(log N) get value at index `i`
         T query(ll i) {
             assert(covers(i) && "Invalid index");
-            if (l() == r()) return val;
+            if (isLeaf()) return val;
             push();
             if (i <= midpoint()) return lChild->query(i);
             else return rChild->query(i);
         }
+
         T operator[](ll i) {
             return query(i);
         }
 
     public:
         // treewalk down the filtered tree, finding the leftmost lowest node
-        Segtree* findFirst(std::function<bool(Segtree*)> isTarget) {
+        MySegtree* findFirst(std::function<bool(MySegtree*)> isTarget) {
             if (!isTarget(this)) return nullptr;
-            Segtree* node = this;
+            MySegtree* node = this;
             while (!node->isLeaf()) {
                 node->push();
                 if (isTarget(node->lChild)) node = node->lChild;
@@ -247,9 +285,9 @@ namespace DS {
             return node;
         }
 
-        Segtree* findLast(std::function<bool(Segtree*)> isTarget) {
+        MySegtree* findLast(std::function<bool(MySegtree*)> isTarget) {
             if (!isTarget(this)) return nullptr;
-            Segtree* node = this;
+            MySegtree* node = this;
             while (!node->isLeaf()) {
                 node->push();
                 if (isTarget(node->rChild)) node = node->rChild;
@@ -259,21 +297,21 @@ namespace DS {
             return node;
         }
 
-        Segtree* extendRight(int initVal) {
-            Segtree* root = new Segtree(l(), r() + length());
+        MySegtree* extendRight(int initVal) {
+            MySegtree* root = new MySegtree(l(), r() + length());
             root->lazy = Null;
             root->lazyMode = CLEAN;
             root->lChild = this;
-            root->rChild = new Segtree(l() + length(), r() + length(), initVal);
+            root->rChild = new MySegtree(l() + length(), r() + length(), initVal);
             root->pull();
             return root;
         }
 
-        Segtree* extendLeft(int initVal) {
-            Segtree* root = new Segtree(l(), r() + length());
+        MySegtree* extendLeft(int initVal) {
+            MySegtree* root = new MySegtree(l(), r() + length());
             root->lazy = Null;
             root->lazyMode = CLEAN;
-            root->lChild = new Segtree(l() + length(), r() + length(), initVal);
+            root->lChild = new MySegtree(l() + length(), r() + length(), initVal);
             root->rChild = this;
             root->pull();
             return root;
@@ -294,7 +332,7 @@ namespace DS {
         };
 
         // @note almost identity to query(ll)
-        Segtree* findLeaf(ll i) {
+        MySegtree* findLeaf(ll i) {
             assert(covers(i) && "Invalid index");
             if (l() == r()) return this;
             push();
@@ -318,17 +356,17 @@ namespace DS {
         struct iterator {
             using iterator_category = std::random_access_iterator_tag;
             using difference_type   = std::ptrdiff_t;
-            using value_type        = Segtree const;
-            using pointer           = Segtree const*;
-            using reference         = Segtree const&;
-            using internal_type     = Segtree*;
+            using value_type        = MySegtree const;
+            using pointer           = MySegtree const*;
+            using reference         = MySegtree const&;
+            using internal_type     = MySegtree*;
 
         protected:
             ll pos;
             internal_type m_ptr;
 
         public:
-            iterator(Segtree *segtree, ll pos_) : pos(pos_) {
+            iterator(MySegtree *segtree, ll pos_) : pos(pos_) {
                 if (segtree->covers(pos)) {
                     m_ptr = segtree->findLeaf(pos);
                 } else {
@@ -496,13 +534,25 @@ public:
     };
 
     template<typename T>
-    using SumSegtree = Segtree<T, 0, std::plus<T>, std::multiplies<T>, 0, std::plus<T>>;
+    using SumSegtree = Segtree<T, 0, std::plus<T>, std::multiplies<T>, 0, std::plus<T>, std::false_type>;
 
     template<typename T>
-    using MaxSegtree = Segtree<T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>>;
+    using SumSegtreePersistent = Segtree<T, 0, std::plus<T>, std::multiplies<T>, 0, std::plus<T>, std::true_type>;
+
 
     template<typename T>
-    using MinSegtree = Segtree<T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>>;
+    using MaxSegtree = Segtree<T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>, std::false_type>;
+
+    template<typename T>
+    using MaxSegtreePersistent = Segtree<T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>, std::true_type>;
+
+
+    template<typename T>
+    using MinSegtree = Segtree<T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>, std::false_type>;
+
+    template<typename T>
+    using MinSegtreePersistent = Segtree<T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>, std::true_type>;
+
 };
 
 #endif

@@ -64,9 +64,7 @@ namespace DS {
          ************************************************/
 
         friend std::ostream& operator<<(std::ostream &out, const Range &range) {
-            out << '[';
-            out << range.l() << ".." << range.r();
-            out << ']';
+            out << '[' << range.l() << ".." << range.r() << ']';
             return out;
         }
 

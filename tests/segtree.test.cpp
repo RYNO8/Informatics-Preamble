@@ -361,7 +361,14 @@ void testSegtree_auto() {
     // };
 
 void testSegtree_iterators() {
-    SumSegtree<ll> t = vector<ll>({ 1, 2, 3, 4 });
+    ll a[] = { 1, 2, 3, 4 };
+    SumSegtree<ll> t_ = SumSegtree<ll>(begin(a), end(a));
+    assert(repr(t_) == "[ 1 2 3 4 ]");
+    assert(repr(&t_) == "[0..3] = 10");
+    assert(repr(SumSegtree<ll>(1, 2, t_)) == "[ 2 3 ]");
+    
+    vector<ll> v{ 1, 2, 3, 4 };
+    SumSegtree<ll> t = SumSegtree<ll>(v.begin(), v.end());
     assert(repr(t) == "[ 1 2 3 4 ]");
 
     using It = SumSegtree<ll>::iterator;

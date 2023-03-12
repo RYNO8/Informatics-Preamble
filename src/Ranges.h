@@ -1,8 +1,10 @@
 #ifndef RANGES_H
 #define RANGES_H
+#include <algorithm>
 #include <set>
 #include <map>
 #include <limits>
+#include <type_traits>
 #include <vector>
 #include <iostream>
 #include <assert.h>
@@ -13,26 +15,36 @@ namespace DS {
     template<typename Iterator>
     using value_type = typename std::iterator_traits<Iterator>::value_type;
 
+    // O(N log N)
     // @returns A mapping between original coordinates and compressed coordinates
     template<typename T, std::enable_if_t<std::is_integral_v<value_type<T>>, bool> = true>
     std::map<value_type<T>, value_type<T>> coordCompressMap(T begin, T end, int startI = 0) {
+        std::vector<value_type<T>> unique(begin, end);
+        sort(unique.begin(), unique.end());
+        auto last = std::unique(unique.begin(), unique.end());
+        unique.erase(last, unique.end());
+
         std::map<value_type<T>, value_type<T>> compressed;
 
         int i = startI;
-        for (auto val = begin; val != end; ++val, ++i) {
-            compressed[*val] = i;
+        for (auto it = unique.begin(); it != unique.end(); ++it, ++i) {
+            compressed[*it] = i;
         }
         return compressed;
     }
+
     // Compresses coordinates in place
     template<typename T, std::enable_if_t<std::is_integral_v<value_type<T>>, bool> = true>
     void coordCompressTransform(T begin, T end, int startI = 0){
         std::map<value_type<T>, value_type<T>> m = coordCompressMap(begin, end, startI);
-        for (T i = begin; i != end; i++) *i = m[*i];
+        for (T it = begin; it != end; it++) *it = m[*it];
     }
 
     // ahhh its probably bad to inherit from std types, but i really want the comparison operators ;-;
-    template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
+    template<
+        typename T,
+        std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>, bool> = true
+    >
     struct Range : public std::pair<T, T> {
         /************************************************
          *                 INITIALISATION               *
@@ -63,26 +75,27 @@ namespace DS {
          ************************************************/
 
         // O(1)
-        // @returns
+        // @returns Inclusive left endpoint of range
         T l() const {
             return first;
         }
 
         // O(1)
-        // @returns
+        // @returns Inclusive right endpoint of range
         T r() const {
             return second;
         }
 
         // O(1)
-        // @returns
+        // @returns Midpoint of range (rounding down)
         constexpr T midpoint() const {
             // NOTE: using the implementation so it still rounds down when
             return l() + (r() - l()) / 2;
         }
 
         // O(1)
-        // @returns
+        // @returns Inclusive inclusive length of range
+        // @note Has support for integral and non integral types T
         constexpr T length() const {
             return r() - l() + (std::numeric_limits<T>::is_integer ? T(1) : T(0));
         }
@@ -301,13 +314,13 @@ namespace DS {
          *               TRANSFORMATIONS                *
          ************************************************/
 
-        Range<T> split(T val) {
-            // TODO
-        }
+        // Range<T> split(T val) {
+        //     // TODO
+        // }
 
-        Range<T> splits(std::vector<T> val) {
-            // TODO
-        }
+        // Range<T> splits(std::vector<T> val) {
+        //     // TODO
+        // }
     };
 };
 

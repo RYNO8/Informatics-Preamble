@@ -1,22 +1,34 @@
 ﻿#include "../src/Ranges.h"
 #include "../src/Constants.h"
+#include "../src/Util.h"
 using namespace std;
 using namespace DS;
 
 void testCompression() {
     vector<int> a = { 0,6,4, 4, 0, -1 };
     coordCompressTransform(a.begin(), a.end());
-    assert(a == vector<int>({4, 1, 3, 3, 4, 5}));
+    assert(a == vector<int>({ 1, 3, 2, 2, 1, 0 }));
     
 
-    int b[] = { 0,6,4, 4, 0, -1 };
+    int b[] = { 0, 6, 4, 4, 0, -1 };
     coordCompressTransform(begin(b), end(b));
-    int expected[] = { 4, 1, 3, 3, 4, 5 };
-    assert(equal(begin(b), end(b), begin(expected)));
+    int expectedB[] = { 1, 3, 2, 2, 1, 0 };
+    assert(equal(begin(b), end(b), begin(expectedB)));
 
-    array<int, 6> c = { 0,6,4, 4, 0, -1 };
-    map<int, int> expectedC = { {-1, 5}, {0, 4}, {4, 3}, {6, 1} };
+    array<int, 6> c = { 0, 6, 4, 4, 0, -1 };
+    map<int, int> expectedC = { {-1, 0}, {0, 1}, {4, 2}, {6, 3} };
     assert(coordCompressMap(c.begin(), c.end()) == expectedC);
+
+    
+    set<int> d = {-1, 0, 4, 6};
+    map<int, int> expectedD = {
+        {-1, 0},
+        {0, 1},
+        {4, 2},
+        {6, 3}
+    };
+    assert(coordCompressMap(d.begin(), d.end()) == expectedD);
+
 }
 
 void testRange() {

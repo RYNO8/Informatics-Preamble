@@ -105,9 +105,9 @@ if __name__ == "__main__":
         help="the file path of the c++ code to be packed"
     )
     parser.add_argument(
-        "-o", dest="output",
+        "-o", dest="output_suffix",
         type=str,
-        default="packed.cpp",
+        default="_",
         help="destination file for pack"
     )
     parser.add_argument(
@@ -119,7 +119,8 @@ if __name__ == "__main__":
         action="store_true"
     )
     args = parser.parse_args()
-
+    assert args.filename.endswith(".cpp")
+    
     filepath = os.path.join(os.getcwd(), args.filename)
     code, libraries = doInline(filepath)
     #print(libraries)
@@ -127,6 +128,7 @@ if __name__ == "__main__":
         code = remComments(code)
     if args.no_whitespace:
         code = remWhitespace(code)
-        
-    assert args.output != args.filename
-    open(args.output, "w").write(code)
+    
+    assert args.output_suffix != ""
+    output_filename = args.filename[:-4] + args.output_suffix + ".cpp"
+    open(output_filename, "w").write(code)

@@ -41,16 +41,9 @@ void testBIT_rqpu() {
     int fakeBit[10][11] = {};
 
     for (int rep = 0; rep < 100000; ++rep) {
-        int opt = rand() % 3;
+        int opt = rand() % 4;
         if (opt == 0) {
-            // update index
-            int i1 = rand() % 10;
-            int i2 = rand() % 11;
-            int v = rand() % 69;
-            fakeBit[i1][i2] += v;
-            b.addIndex(v, i1, i2);
-        } else if (opt == 1) {
-            // query range
+            // range query
             int l1 = rand() % 10, r1 = rand() % 10;
             if (l1 > r1) swap(l1, r1);
             int l2 = rand() % 11, r2 = rand() % 11;
@@ -62,11 +55,25 @@ void testBIT_rqpu() {
                 }
             }
             assert(expectedTotal == b.querySum(l1, r1, l2, r2));
-        } else {
-            // query point
+        } else if (opt == 1) {
+            // point query
             int i1 = rand() % 10;
             int i2 = rand() % 11;
             assert(fakeBit[i1][i2] == b.queryIndex(i1, i2));
+        } else if (opt == 2) {
+            // point add-update
+            int i1 = rand() % 10;
+            int i2 = rand() % 11;
+            int v = rand() % 69;
+            fakeBit[i1][i2] += v;
+            b.addIndex(v, i1, i2);
+        } else if (opt == 3) {
+            // point set-update
+            int i1 = rand() % 10;
+            int i2 = rand() % 11;
+            int v = rand() % 69;
+            fakeBit[i1][i2] = v;
+            b.setIndex(v, i1, i2);
         }
     }
 }
@@ -78,15 +85,15 @@ void testBIT_pqru() {
     int fakeBit[10][11] = {};
 
     for (int rep = 0; rep < 100000; ++rep) {
-        int opt = rand() % 3;
+        int opt = rand() % 4;
         if (opt == 0) {
-            // query
+            // point query
             int i1 = rand() % 10;
             int i2 = rand() % 11;
             
             assert(fakeBit[i1][i2] == b.queryIndex(i1, i2));
         } else if (opt == 1) {
-            // update range
+            // range add-update
             int l1 = rand() % 10, r1 = rand() % 10;
             if (l1 > r1) swap(l1, r1);
             int l2 = rand() % 11, r2 = rand() % 11;
@@ -99,12 +106,19 @@ void testBIT_pqru() {
             }
             b.addRange(v, l1, r1, l2, r2);
         } else if (opt == 2) {
-            // update point
+            // point add-update
             int i1 = rand() % 10;
             int i2 = rand() % 11;
             int v = rand() % 69;
             fakeBit[i1][i2] += v;
             b.addIndex(v, i1, i2);
+        } else if (opt == 3) {
+            // point set-update
+            int i1 = rand() % 10;
+            int i2 = rand() % 11;
+            int v = rand() % 69;
+            fakeBit[i1][i2] = v;
+            b.setIndex(v, i1, i2);
         }
     }
 }

@@ -12,16 +12,29 @@ namespace DS {
     // T() is left and right identity
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse
-    template <class T, size_t... Ns>
+    template<typename T, typename Derived, size_t... Ns>
     class BITInterface_ {
 private:
         T val = T();
 
 public:
+        /************************************************
+         *                    DISPLAY                   *
+         ************************************************/
+        
         void print_helper(std::ostream& out, std::vector<T> values, size_t pos) const {
             out << values[pos];
         }
 
+        friend std::ostream& operator<<(std::ostream& out, const BITInterface_<T, Derived, Ns...> &b) {
+            out << b.val;
+            return out;
+        }
+
+        /************************************************
+         *                  PROPERTIES                  *
+         ************************************************/
+        
         std::vector<T> data() const {
             return {val};
         }
@@ -42,6 +55,14 @@ public:
             return {{}};
         }
 
+        /************************************************
+         *               QUREIES & UPDATES              *
+         ************************************************/
+
+        void setIndex(T v) {
+            val = v;
+        }
+        
         void addIndex(T v) {
             val += v;
         }
@@ -50,20 +71,19 @@ public:
             return val;
         }
 
-        
         void addRange(T v) {
             val += v;
         }
-    
+
         T querySum() const {
             return val;
         }
     };
 
-    template<class T, size_t N, size_t... Ns>
-    class BITInterface_<T, N, Ns...> {
+    template<typename T, typename Derived, size_t N, size_t... Ns>
+    class BITInterface_<T, Derived, N, Ns...> {
 private:
-        BITInterface_<T, Ns...> bit[N + 1];
+        BITInterface_<T, Derived, Ns...> bit[N + 1];
 
 public:
         /************************************************
@@ -79,10 +99,16 @@ public:
             out << ']';
         }
 
+        friend std::ostream& operator<<(std::ostream& out, const BITInterface_<T, Derived, N, Ns...> &b) {
+            b.print_helper(out, static_cast<const Derived*>(&b)->data(), 0);
+            return out;
+        }
+
         /************************************************
          *                  PROPERTIES                  *
          ************************************************/
 
+        // @note derived classes should implement this
         std::vector<T> data() const;
 
         // O(D)
@@ -119,30 +145,34 @@ public:
          *               QUREIES & UPDATES              *
          ************************************************/
 
-        template<typename... Args> void addIndex(T v, size_t pos, Args... args);
-        template<typename... Args> T queryIndex(size_t pos, Args... args) const;
+        // O((2 log N)^D)
+        template<typename... Args>
+        void setIndex(T v, size_t pos, Args... args) {
+            T currVal = static_cast<Derived*>(this)->queryIndex(pos, args...);
+            static_cast<Derived*>(this)->addIndex(v - currVal, pos, args...);
+        }
+
+        // @note derived classes should implement this
+        template<typename... Args>
+        void addIndex(T v, size_t pos, Args... args);
+
+        // @note derived classes should implement this
+        template<typename... Args>
+        T queryIndex(size_t pos, Args... args) const;
     };
 
     // T() is left and right identity
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse
-    template <class T, size_t... Ns>
-    class BIT_RQPU: public BITInterface_<T, Ns...> {};
+    template<typename T, size_t... Ns>
+    class BIT_RQPU: public BITInterface_<T, BIT_RQPU<T, Ns...>, Ns...> {};
 
-    template<class T, size_t N, size_t... Ns>
-    class BIT_RQPU<T, N, Ns...>: public BITInterface_<T, N, Ns...> {
+    template<typename T, size_t N, size_t... Ns>
+    class BIT_RQPU<T, N, Ns...>: public BITInterface_<T, BIT_RQPU<T, N, Ns...>, N, Ns...> {
 private:
         BIT_RQPU<T, Ns...> bit[N + 1];
 
 public:
-        /************************************************
-         *                    DISPLAY                   *
-         ************************************************/
-
-        friend std::ostream& operator<<(std::ostream& out, const BIT_RQPU<T, N, Ns...> &b) {
-            b.print_helper(out, b.data(), 0);
-            return out;
-        }
 
         /************************************************
          *                  PROPERTIES                  *
@@ -192,24 +222,15 @@ public:
     // T() is left and right identity
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse
-    template <class T, size_t... Ns>
-    class BIT_PQRU: public BITInterface_<T, Ns...> {};
+    template<typename T, size_t... Ns>
+    class BIT_PQRU: public BITInterface_<T, BIT_PQRU<T, Ns...>, Ns...> {};
 
-    template<class T, size_t N, size_t... Ns>
-    class BIT_PQRU<T, N, Ns...>: public BITInterface_<T, N, Ns...> {
+    template<typename T, size_t N, size_t... Ns>
+    class BIT_PQRU<T, N, Ns...>: public BITInterface_<T, BIT_PQRU<T, N, Ns...>, N, Ns...> {
 private:
         BIT_PQRU<T, Ns...> bit[N + 1];
 
 public:
-
-        /************************************************
-         *                    DISPLAY                   *
-         ************************************************/
-
-        friend std::ostream& operator<<(std::ostream& out, const BIT_PQRU<T, N, Ns...> &b) {
-            b.print_helper(out, b.data(), 0);
-            return out;
-        }
 
         /************************************************
          *                  PROPERTIES                  *

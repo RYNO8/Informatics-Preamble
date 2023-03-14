@@ -1235,17 +1235,17 @@ public:
     //      *                    PROPERTIES                *
     //      ***********************************************/
 
-    //     // O(1)
-    //     // @returns Whether the graph is directed
-    //     inline const bool isDirectedGraph() const {
-    //         return isDirected;
-    //     }
+        // O(1)
+        // @returns Whether the graph is directed
+        inline const bool isDirectedGraph() const {
+            return isDirected;
+        }
 
-    //     // O(1)
-    //     // @returns Whether the graph is weighted
-    //     inline const bool isWeightedGraph() const {
-    //         return isWeighted;
-    //     }
+        // O(1)
+        // @returns Whether the graph is weighted
+        inline const bool isWeightedGraph() const {
+            return !std::is_same_v<EdgeWeight, UnitEdgeWeight>;
+        }
 
     //     // O(V_component log V_component + V_component log E + E_component)
     //     // @returns Whether there exists a edge which connects a node to itself
@@ -1329,15 +1329,15 @@ public:
     //         return true;
     //     }
 
-    //     /************************************************
-    //      *       ALGORITHMS (COMPLEXITLY CLASS NP)      *
-    //      ************************************************/
+        /************************************************
+         *       ALGORITHMS (COMPLEXITLY CLASS NP)      *
+         ************************************************/
 
-    //     // TODO: hamiltonian path / tour
-    //     // TODO: euler path / tour
-    //     // TODO: covering set
-    //     // TODO: optimal colouring
-    //     // TODO: planar embedding?
+        // TODO: hamiltonian path / tour
+        // TODO: euler path / tour
+        // TODO: covering set
+        // TODO: optimal colouring
+        // TODO: planar embedding?
     };
 };
 

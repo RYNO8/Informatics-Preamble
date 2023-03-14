@@ -33,7 +33,7 @@ void testDigraph() {
     s1 >> e;
     DiGraph G1(N1, e);
 
-
+    assert(!G1.isWeightedGraph());
     assert(repr(G1) == "1: 2 3\n2: 1 3 4\n3: 1\n4:\n");
     assert(G1.V() == 4 && G1.N() == 4);
     assert(G1.E() == 6 && G1.M() == 6);

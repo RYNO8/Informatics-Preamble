@@ -918,8 +918,7 @@ public:
 
         // O(V + E)
         // Standard Kahn's algorithm - topological sort
-        // TODO: test
-        std::vector<Node> Kahn() const {
+        std::vector<Node> Kahns() const {
             std::array<int, maxV> depths;
             depths.fill(0);
 
@@ -944,7 +943,6 @@ public:
 
         // O(V + E)
         // Standard DFS topsort
-        // TODO: test
         std::vector<Node> dfsTopsort() const {
             std::vector<Node> topsort;
             std::array<int, maxV> state;// TODO: actually only needs to hold 3 states
@@ -953,7 +951,7 @@ public:
             std::function<void(int)> dfs;
             dfs = [&](Node node) {
                 if (state[node] == 2) return;
-                assert(state[node] == 1 && "Graph contains cycle");
+                assert(state[node] != 1 && "Graph contains cycle");
 
                 state[node] = 1;
                 for (Node v : getNeighboursOut(node)) dfs(v);
@@ -968,46 +966,36 @@ public:
         }
 
         // O(V + E)
-        // Standard DFS topsort
-        // TODO: test
-        std::vector<Node> dfsTopsort_() const {
-            std::vector<Node> topsort;
-            std::array<bool, maxV> seen;
-            seen.fill(false);
-
-            std::function<void(int)> dfs;
-            dfs = [&](Node node) {
-                if (seen[node]) return;
-                seen[node] = true;
-                for (Node v : getNeighboursOut(node)) dfs(v);
-                topsort.push_back(node);
-            };
-            for (const Node &node : nodes) dfs(node);
-            reverse(topsort.begin(), topsort.end());
-            return topsort;
-        }
-
-        // O(V + E)
         // Find strongly connected components
         // https://cp-algorithms.com/graph/strongly-connected-components.html#implementation
         std::vector<std::vector<Node>> SCCdfs() const {
-            std::vector<Node> order = dfsTopsort_();
-            
+            std::vector<Node> order;
             std::array<bool, maxV> seen;
             seen.fill(false);
+            std::function<void(int)> dfs1;
+            dfs1 = [&](Node node) {
+                if (seen[node]) return;
+                seen[node] = true;
+                for (Node v : getNeighboursOut(node)) dfs1(v);
+                order.push_back(node);
+            };
+            for (const Node &node : nodes) dfs1(node);
+            reverse(order.begin(), order.end());
+            
+            seen.fill(false);
             std::vector<std::vector<Node>> components;
-            std::function<void(int)> dfs;
-            dfs = [&](Node node) {
+            std::function<void(int)> dfs2;
+            dfs2 = [&](Node node) {
                 seen[node] = true;
                 components.back().push_back(node);
                 for (Node v : getNeighboursIn(node)) {
-                    if (!seen[v]) dfs(v);
+                    if (!seen[v]) dfs2(v);
                 }
             };
             for (const Node &node : nodes) {
                 if (!seen[node]) {
                     components.push_back({});
-                    dfs(node);
+                    dfs2(node);
                 }
             }
 
@@ -1065,6 +1053,14 @@ public:
             return components;
         }
 
+        // O(V + E)
+        // Find strongly connecsted components
+        // @returns a vector of components, where a component is a vector of nodes
+        // TODO: test whether Tarjans or dfs is faster
+        std::vector<std::vector<Node>> SSC() const {
+            return Tarjan();
+        }
+        
     // private:
     //     // O(V + E)
     //     // Standard DFS Bridge finding algorithm

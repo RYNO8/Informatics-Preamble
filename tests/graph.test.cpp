@@ -97,6 +97,13 @@ void testDigraph() {
     assert(G1.shortestPath(2, 4) == vector<DiGraph::Edge>());
     G1.insertEdge(DiGraph::Edge(2, 4));
 
+    G1.eraseEdge(DiGraph::Edge(2, 1));
+    G1.eraseEdge(DiGraph::Edge(3, 1));
+    assert(G1.dfsTopsort() == vector<DiGraph::Node>({ 1, 2, 4, 3 }));
+    assert(G1.Kahns() == vector<DiGraph::Node>({ 1, 2, 4, 3 }));
+    G1.insertEdge(DiGraph::Edge(2, 1));
+    G1.insertEdge(DiGraph::Edge(3, 1));
+
     assert(G1.SCCdfs() == vector<vector<DiGraph::Node>>({
         vector<DiGraph::Node>({ 1, 2, 3 }),
         vector<DiGraph::Node>({ 4 })

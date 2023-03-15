@@ -16,9 +16,9 @@ Functionalities include
 
 
 # todo list (no particular order)
+[] combine `Grid.h` and `Matrix.h`
 [] implement coordinate geometry (eww)
-[] wrapper for sqrt decomp
-[] dynamic tree for Tree.h (look at references)
+[] dynamic tree for `Tree.h` (look at references)
 [] fast factorisation, fast isPrime, how?? Pollard rho was dodgy
 [] change arguments to references if possible
 [] write + fix tests
@@ -32,6 +32,6 @@ Functionalities include
 
 # C++pack.py
 For such a large preamble, its helpful to `#include` it rather than copy pasting it at the
-top of your code. `C++pack.py` helps to bubdle all code into a single file, which is
+top of your code. `c++pack.py` helps to bundle all code into a single file, which is
 helpful when you want to submit (or reduce the submission file size). Some slightly hacky
 lexical analysis stuff.

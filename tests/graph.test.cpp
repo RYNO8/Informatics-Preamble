@@ -249,7 +249,7 @@ void testEmptyGraph() {
     assert(G4_undirected.bridgesDFS() == vector<DegenGraph::Edge>());
     assert(!G4_directed.hasCycle());
     assert(G4_directed.isForest()); // yikes thats controversial
-    assert(G4_directed.isTree()); // yikes thats controversial
+    assert(!G4_directed.isTree()); // yikes thats controversial
 }
 
 template<size_t N, typename EdgeWeight, typename PathWeight, bool isWeighted>

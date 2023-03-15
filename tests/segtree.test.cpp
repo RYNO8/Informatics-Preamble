@@ -137,7 +137,7 @@ struct fakeSegtree {
 void testSegtree_auto() {
     srand(time(NULL));
     for (int tI = 0; tI < 20; ++tI) {
-        cout << "REP: " << tI << "\n";
+        // cout << "REP: " << tI << "\n";
 
         int N = 5;
         int initVal = 69;

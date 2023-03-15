@@ -33,36 +33,36 @@ namespace DS {
         }
         
         // O(N) Find direction of edge each such that the tree can be rooted at 1
-        void makeDirected(const Graph<T>& g, int node = 1, int par = -1) {
-            for (std::pair<int, T> child : g.getEdgesOut(node)) {
-                if (child.first == par) continue;
-                parent[0][child.first] = { node, child.second };
-                children[node].push_back(child);
-                makeDirected(g, child.first, node);
-            }
+        // void makeDirected(const Graph<T>& g, int node = 1, int par = -1) {
+        //     for (std::pair<int, T> child : g.getEdgesOut(node)) {
+        //         if (child.first == par) continue;
+        //         parent[0][child.first] = { node, child.second };
+        //         children[node].push_back(child);
+        //         makeDirected(g, child.first, node);
+        //     }
 
-            if (g.isDirectedGraph()) {
-                for (std::pair<int, T> child : g.getEdgesIn(node)) {
-                    if (child.first == par) continue;
-                    parent[0][child.first] = { node, child.second };
-                    children[node].push_back(child);
-                    makeDirected(g, child.first, node);
-                }
-            }
-        }
+        //     if (g.isDirectedGraph()) {
+        //         for (std::pair<int, T> child : g.getEdgesIn(node)) {
+        //             if (child.first == par) continue;
+        //             parent[0][child.first] = { node, child.second };
+        //             children[node].push_back(child);
+        //             makeDirected(g, child.first, node);
+        //         }
+        //     }
+        // }
 
     public:
         // O(N log N) Initialises a tree from a graph, assuming rooted at 1
-        Tree(Graph<T>& g) {
-            assert(g.isTree() && "Initialiser graph must be a tree");
-            init(g.size(), g.isWeightedGraph());
+        // Tree(Graph<T>& g) {
+        //     assert(g.isTree() && "Initialiser graph must be a tree");
+        //     init(g.size(), g.isWeightedGraph());
 
-            makeDirected(g);
+        //     makeDirected(g);
 
-            sortChildren();
-            buildJumpPtrs();
-            buildDepths();
-        }
+        //     sortChildren();
+        //     buildJumpPtrs();
+        //     buildDepths();
+        // }
 
         // O(N log N) Initialises a tree from cin, assuming rooted at 1*/
         Tree(int _N, std::istream& in = std::cin, bool _isWeighted = false) {

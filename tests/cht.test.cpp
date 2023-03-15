@@ -18,11 +18,9 @@ using namespace DS;
 ll N, A, B, C;
 ll arr[1000005], prefix[1000005], dp[1000005];
 
-int main() {
-    cin.tie(0); ios::sync_with_stdio(0);
-    //ifstream cin{ "in.txt" };
-    cin >> N >> A >> B >> C;
-    for (ll i = 1; i <= N; ++i) cin >> arr[i];
+CHT commando(istream &in, ostream &out) {
+    in >> N >> A >> B >> C;
+    for (ll i = 1; i <= N; ++i) in >> arr[i];
     for (ll i = 1; i <= N; ++i) prefix[i] = prefix[i - 1] + arr[i];
     
     CHT cht;
@@ -37,8 +35,19 @@ int main() {
         };
         cht.addLine(l);
     }
-    cout << dp[N] << "\n";
-#ifdef DEBUG
-    cout << cht;
-#endif
+    out << dp[N] << "\n";
+    return cht;
+}
+
+int main() {
+    stringstream in, out;
+    in << R"""(
+4
+-1 10 -20
+2 2 3 4
+)""";
+    CHT cht = commando(in, out);
+    assert(repr(cht) == "[ y = 0 y = 8x-52 y = 14x-114 y = 22x-222 ]");
+    string ans;
+    out >> ans; assert(ans == "9");
 }

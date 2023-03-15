@@ -51,7 +51,8 @@ namespace DS {
     template<typename T>
     std::ostream& operator<<(std::ostream &out, const std::vector<T> &v) {
         out << "[ ";
-        copy(v.cbegin(), v.cend(), std::ostream_iterator<T>(out, " "));
+        // copy(v.cbegin(), v.cend(), std::ostream_iterator<T>(out, " "));
+        for (auto val : v) out << val << ' ';
         out << ']';
         return out;
     }
@@ -61,7 +62,8 @@ namespace DS {
     template<typename T, std::size_t N>
     std::ostream& operator<<(std::ostream& out, const std::array<T, N> &arr){
         out << "[ ";
-        copy(arr.cbegin(), arr.cend(), std::ostream_iterator<T>(out, " "));
+        // copy(arr.cbegin(), arr.cend(), std::ostream_iterator<T>(out, " "));
+        for (auto val : arr) out << val << ' ';
         out << ']';
         return out;
     }

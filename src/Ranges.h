@@ -312,13 +312,21 @@ namespace DS {
          *               TRANSFORMATIONS                *
          ************************************************/
 
-        // Range<T> split(T val) {
-        //     // TODO
-        // }
-
-        // Range<T> splits(std::vector<T> val) {
-        //     // TODO
-        // }
+        // O(N log N)
+        // `ranges.split(on)` should be equivalent to `ranges & ~Ranges({on})`
+        Ranges<T> split(Range<T> &on) {
+            Ranges<T> out;
+            for (Range<T> r : *this) {
+                if (r.covers(on)) {
+                    std::pair<Range<T>, Range<T>> partition = r.split(on);
+                    if (!partition.first.isEmpty()) out.insert(partition.first);
+                    if (!partition.second.isEmpty()) out.insert(partition.second);
+                } else {
+                    out.insert(r);
+                }
+            }
+            return out;
+        }
     };
 };
 

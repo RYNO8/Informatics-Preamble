@@ -12,7 +12,12 @@ namespace DS {
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
         friend std::ostream& operator<<(std::ostream &out, const CHTLine &line) {
-            out << "y = " << line.m << " x + " << line.b;
+            out << "y = ";
+            if (line.m != 0) {
+                out << line.m << "x";
+                if (line.b >= 0) out << '+';
+            }
+            out << line.b;
             return out;
         }
 

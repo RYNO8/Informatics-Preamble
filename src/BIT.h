@@ -7,8 +7,6 @@
 #include "Util.h"
 
 namespace DS {
-    // TODO: conversion between Grid / Matrix
-
     // T() is left and right identity
     // T operator+(T, T) is associative
     // T operator-(T, T) is inverse

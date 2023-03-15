@@ -52,14 +52,14 @@ namespace DS {
 
         // O(RC)
         // Initialises grid from cin, assuming 0 indexed
-        Grid(int _R, int _C, std::istream &in) {
-            init(_R, _C);
-            for (int r = 0; r < R; ++r) {
-                for (int c = 0; c < C; ++c) {
-                    in >> grid[r][c];
+        friend std::istream& operator>>(std::istream &in, Grid<T> &g) {
+            for (int r = 0; r < g.R; ++r) {
+                for (int c = 0; c < g.C; ++c) {
+                    in >> g.grid[r][c];
                 }
             }
-            buildPrefix();
+            g.buildPrefix();
+            return in;
         }
 
         // O(RC)

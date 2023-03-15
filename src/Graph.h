@@ -91,18 +91,8 @@ namespace DS {
 
 
     // TODO: doomed when maxV == 0?
-
-    // EdgeWeight needs a default constructor `EdgeWeight()`, which is the default weight of an edge
-    // `EdgeWeight(0)` should do as expected
-    // EdgeWeight needs the following methods, which need to behave properly
-    //  - `EdgeWeight::operator==`
-    //  - `EdgeWeight::operator+`
-    //  - `EdgeWeight::operator<` against `0` to check sign
-    //  - read from istream, display to ostream
-
-    // PathWeight needs the following methods, which need to behave properly
-    //  - `PathWeight::operator<` is a total ordering
-
+    // TODO: support conversion from directed to undirected and vice versa
+    // TODO: support mapping of edges e.g. (u, v, w) -> (u, v, 1), so conversion from weighted to unweighted
     // A insufficiently defined EdgeWeight might still produce correct results sometimes
     template<
         size_t maxV,
@@ -549,7 +539,7 @@ public:
             return MyGraph(*this, std::vector<Node>(seen.begin(), seen.end()));
         }
 
-        // O(maxV + E)
+        // O(maxV + E log E)
         // @returns All nodes grouped by their component, in arbitary order
         std::vector<MyGraph> getComponents() const {
             std::vector<MyGraph> output;
@@ -1057,58 +1047,57 @@ public:
         // Find strongly connecsted components
         // @returns a vector of components, where a component is a vector of nodes
         // TODO: test whether Tarjans or dfs is faster
+        // should I instead be returning `std::vector<MyGraph>` ?
         std::vector<std::vector<Node>> SSC() const {
             return Tarjan();
         }
-        
-    // private:
-    //     // O(V + E)
-    //     // Standard DFS Bridge finding algorithm
-    //     Node _getBridges(Node u, Node parent, Node t, std::vector<std::pair<std::pair<Node, Node>, T>>& bridges, std::vector<bool>& seen, std::vector<Node>& minTime, std::vector<Node>& entryTime) const {
-    //         seen[u] = true;
-    //         minTime[u] = entryTime[u] = ++t;
 
-    //         for (std::pair<Node, T> child: edgesOut[u]) {
-    //             Node v = child.first;
-    //             T w = child.second;
-    //             if (v == parent) continue;
-    //             if (seen[v]) {
-    //                 minTime[u] = std::min(minTime[u], entryTime[v]);
-    //             }
-    //             else {
-    //                 t = _getBridges(v, u, t, bridges, seen, minTime, entryTime);
-    //                 minTime[u] = std::min(minTime[u], minTime[v]);
+        // O(maxV + E)
+        // Standard DFS Bridge finding algorithm
+        // Find all bridges
+        // @note Breaks when we introduce multiple edges
+        // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
+        // @return A vector of edges, where each edge is represented by ((u, v), w)
+        std::vector<Edge> bridgesDFS() const {
+            assert(!isDirected && "Bridges are a property of only undirected graphs");
+            std::array<bool, maxV> seen;
+            seen.fill(false);
+            std::array<int, maxV> minTime;
+            minTime.fill(0);
+            std::array<int, maxV> entryTime;
+            entryTime.fill(0);
+            std::vector<Edge> bridges;
+            int t = 0;
 
-    //                 // bridge iff minTime[childNode] > entryTime[node] and the edge is not a double edge
-    //                 if (minTime[v] > entryTime[u]) {
-    //                     if (numEdges(u, v) == 1) bridges.push_back({ { u, v }, w });
-    //                 }
-    //             }
-    //         }
-    //         return t;
-    //     }
+            // huh this looks very similar to Tarjan's
+            std::function<void(Node, Node)> dfs;
+            dfs = [&](Node u, Node parent) {
+                seen[u] = true;
+                minTime[u] = entryTime[u] = ++t;
 
-    // public:
-    //     // O(V + E)
-    //     // Find all bridges
-    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
-    //     // @return A vector of edges, where each edge is represented by ((u, v), w)
-    //     std::vector<std::pair<std::pair<Node, Node>, T>> getBridges(Node root = 0) const {
-    //         std::vector<bool> seen = std::vector<bool>(V + 1, false);
-    //         std::vector<Node> minTime = std::vector<Node>(V + 1, 0), entryTime = std::vector<Node>(V + 1, 0);
+                for (Edge edge: edgesOut[u]) {
+                    Node v = edge.otherSide(u);
+                    if (v == parent) continue;
+                    else if (seen[v]) {
+                        minTime[u] = std::min(minTime[u], entryTime[v]);
+                    } else {
+                        dfs(v, u);
+                        minTime[u] = std::min(minTime[u], minTime[v]);
 
-    //         std::vector<std::pair<std::pair<Node, Node>, T>> bridges;
-    //         if (root == 0) {
-    //             for (Node node = 1; node <= V; ++node) {
-    //                 if (!seen[node]) _getBridges(node, 0, 0, bridges, seen, minTime, entryTime);
-    //             }
-    //         }
-    //         else {
-    //             assert(containsNode(root) && "Node index out of range");
-    //             _getBridges(root, 0, 0, bridges, seen, minTime, entryTime);
-    //         }
-    //         return bridges;
-    //     }
+                        // bridge iff minTime[childNode] > entryTime[node]
+                        // @note When graph can support multiedges, check that the edge is not a double edge
+                        if (minTime[v] > entryTime[u]) {
+                            bridges.push_back(edge);
+                        }
+                    }
+                }
+            };
+
+            for (const Node &node : nodes) {
+                if (!seen[node]) dfs(node, maxV);
+            }
+            return bridges;
+        }
 
     // private:
     //     // O(V + E log E)
@@ -1136,94 +1125,136 @@ public:
     //         return colours;
     //     }
 
+        // O(V E^2 log E) or O(V^2 E log E)
+        // Edmonds-Karp max flow algorithm
+        // @note Using `PathWeight` to represent flow, will this cause issues
+        // @returns The value of max flow
+        PathWeight EdmondsKarp(Node source, Node sink, bool doSlow = false) const {
+            assert(containsNode(source) && containsNode(sink) && "Node index out of range");
 
-    // private:
-    //     T addFlow(Node source, Node sink, const std::vector<Node> &prev, std::map<std::pair<Node, Node>, T> &remainingCap) const {
-    //         // find max flow of augmenting path
-    //         T newFlow = std::numeric_limits<T>::max();
-    //         for (Node u = sink; u != source; u = prev[u]) {
-    //             newFlow = std::min(newFlow, remainingCap[{prev[u], u}]);
-    //         }
+            if (source == sink) return MAX_WEIGHT;
 
-    //         // update path
-    //         for (Node u = sink; u != source; u = prev[u]) {
-    //             remainingCap[{prev[u], u}] -= newFlow;
-    //             remainingCap[{u, prev[u]}] += newFlow;
-    //         }
-    //         return newFlow;
-    //     }
+            std::map<std::pair<Node, Node>, PathWeight> remainingCap;
+            std::function<PathWeight(std::array<Node, maxV>)> addFlow;
+            addFlow = [&](std::array<Node, maxV> prev) {
+                // find flow of augmenting path
+                PathWeight newFlow = MAX_WEIGHT;
+                for (Node u = sink; u != source; u = prev[u]) {
+                    newFlow = std::min(newFlow, remainingCap[{prev[u], u}]);
+                }
 
-    // public:
-    //     // O(V E^2 log E) or O(V^2 E log E)
-    //     // @returns The value of max flow, using (fast) Dinic's or (slow) Edmonds-Karp
-    //     T maxFlow(Node source, Node sink, bool doSlow = false) const {
-    //         assert(containsNode(source) && containsNode(sink) && "Node index out of range");
-    //         if (source == sink) return std::numeric_limits<T>::max();
-    //         std::map<std::pair<Node, Node>, T> remainingCap;
-    //         for (std::pair<std::pair<Node, Node>, T> edge: edges) {
-    //             remainingCap[edge.u] += edge.v;
-    //         }
+                // update path
+                for (Node u = sink; u != source; u = prev[u]) {
+                    remainingCap[{prev[u], u}] -= newFlow;
+                    remainingCap[{u, prev[u]}] += newFlow;
+                }
+                return newFlow;
+            };
 
-    //         T totalFlow = T(0);
+            for (Edge edge: edges) {
+                remainingCap[{edge.u, edge.v}] += edge.w;
+                if (!isDirected) {
+                    remainingCap[{edge.v, edge.u}] += edge.w;
+                }
+            }
 
-    //         while (true) {
-    //             std::vector<int> prev = std::vector<int>(V + 1, -1);
-    //             std::vector<int> levels = std::vector<int>(V + 1, -1);
-    //             std::queue<Node> q;
-    //             levels[source] = 0;
-    //             q.push(source);
+            PathWeight totalFlow = PathWeight(0);
 
-    //             while (!q.empty()) {
-    //                 Node u = q.front();
-    //                 q.pop();
-    //                 for (Node type = 0; type <= 1; ++type) {
-    //                     for (std::pair<Node, T> edge: (type ? edgesIn : edgesOut)[u]) {
-    //                         Node v = edge.u;
-    //                         if (prev[v] == -1 && remainingCap[{u, v}] > 0) {
-    //                             prev[v] = u;
-    //                             levels[v] = levels[u] + 1;
-    //                             q.push(v);
-    //                         }
-    //                     }
-    //                 }
-    //             }
+            std::array<Node, maxV> prev;
+            while (true) {
+                prev.fill(maxV);
+                prev[source] = source;
+                std::queue<Node> q;
+                q.push(source);
 
-    //             // no augmenting path, so max flow has been found
-    //             if (prev[sink] == -1) return totalFlow;
+                while (!q.empty()) {
+                    Node u = q.front();
+                    q.pop();
+                    for (Edge edge : getEdgesOut(u)) {
+                        Node v = edge.otherSide(u);
+                        if (prev[v] == maxV && remainingCap[{u, v}] > 0) {
+                            prev[v] = u;
+                            q.push(v);
+                        }
+                    }
+                }
 
-    //             if (doSlow) {
-    //                 // Edmonds-Karp (implmentation of Ford-Fulkerson) - add any augmenting path
-    //                 totalFlow += addFlow(source, sink, prev, remainingCap);
-    //             }
-    //             else {
-    //                 // Dinic's - find best augmenting path in residual "level" graph
-    //                 Node newFlow;
-    //                 do {
-    //                     std::stack<Node> s;
-    //                     s.push(source);
-    //                     while (!s.empty() && s.top() != sink) {
-    //                         Node u = s.top();
-    //                         s.pop();
+                // no augmenting path, so max flow has been found
+                if (prev[sink] == maxV) return totalFlow;
 
-    //                         for (Node type = 0; type <= 1; ++type) {
-    //                             for (std::pair<Node, T> edge: (type ? edgesIn : edgesOut)[u]) {
-    //                                 Node v = edge.u;
-    //                                 if (levels[v] == levels[u] + 1 && remainingCap[{u, v}] > 0) {
-    //                                     prev[v] = u;
-    //                                     q.push(v);
-    //                                 }
-    //                             }
-    //                         }
-    //                     }
+                // add any augmenting path
+                totalFlow += addFlow(prev);
+            }
+        }
 
-    //                     newFlow = addFlow(source, sink, prev, remainingCap);
-    //                     totalFlow += newFlow;
-    //                 } while (newFlow != 0);
-    //             }
-    //         }
-    //     }
+        // O(V^2 E), or O(min(V^(2/3), sqrt E) E) if `!isWeightedGraph()`
+        // Dinics max flow algorithm
+        // @note Using `PathWeight` to represent flow, will this cause issues
+        // @returns The value of max flow
+        PathWeight Dinics(Node source, Node sink) {
+            assert(containsNode(source) && containsNode(sink) && "Node index out of range");
 
-    //     // TODO: is bipartite graph?
+            if (source == sink) return MAX_WEIGHT;
+
+            std::array<PathWeight, maxV> level;
+            std::map<std::pair<Node, Node>, PathWeight> remainingCap;
+            std::array<typename std::set<Edge, EdgeComp>::iterator, maxV> lastSeen;
+
+            std::function<PathWeight(Node, PathWeight)> dfs;
+            dfs = [&](Node u, PathWeight pushed) {
+                if (pushed == 0) return 0;
+                if (u == sink) return pushed;
+                
+                for (; lastSeen[u] != edgesOut[u].end(); lastSeen[u]++) {
+                    Node v = lastSeen[u]->otherSide(u);
+                    if (level[u] + 1 == level[v] && remainingCap[{u, v}] > 0) {
+                        PathWeight tr = dfs(v, std::min(pushed, remainingCap[{u, v}]));
+                        if (tr != 0) {
+                            remainingCap[{u, v}] -= tr;
+                            remainingCap[{v, u}] += tr;
+                            return tr;
+                        }
+                    }
+                }
+                return 0;
+            };
+
+            std::function<void(void)> bfs = [&]() {
+                level.fill(PathWeight(0));
+                level[source] = PathWeight(1);
+                std::queue<Node> q;
+                q.push(source);
+
+                while (!q.empty()) {
+                    Node u = q.front();
+                    q.pop();
+                    for (Edge edge : getEdgesOut(u)) {
+                        Node v = edge.otherSide(u);
+                        if (remainingCap[{u, v}] > 0 && level[v] == PathWeight(0)) {
+                            level[v] = level[u] + 1;
+                            q.push(v);
+                        }
+                    }
+                }
+            };
+
+            for (Edge edge: edges) {
+                remainingCap[{edge.u, edge.v}] += edge.w;
+                if (!isDirected) {
+                    remainingCap[{edge.v, edge.u}] += edge.w;
+                }
+            }
+
+            PathWeight f = 0;
+            while (true) {
+                bfs();
+                if (level[sink] == PathWeight(0)) break;
+                for (const Node &node : nodes) lastSeen[node] = edgesOut[node].begin();
+                for (PathWeight pushed; (pushed = dfs(source, MAX_WEIGHT)) != PathWeight(0); f += pushed);
+            }
+            return f;
+        }
+
     //     // TODO: edge matching
     //     // TODO: see: https://usaco.guide/adv/
 
@@ -1233,15 +1264,20 @@ public:
 
         // O(1)
         // @returns Whether the graph is directed
-        inline const bool isDirectedGraph() const {
+        bool isDirectedGraph() const {
             return isDirected;
         }
 
         // O(1)
         // @returns Whether the graph is weighted
-        inline const bool isWeightedGraph() const {
+        bool isWeightedGraph() const {
             return !std::is_same_v<EdgeWeight, UnitEdgeWeight>;
         }
+
+        // // TODO: is bipartite graph? (try greedy colouring)
+        // bool isBipartite() const {
+        //     return greedyColouring() <= 2;
+        // }
 
     //     // O(V_component log V_component + V_component log E + E_component)
     //     // @returns Whether there exists a edge which connects a node to itself
@@ -1271,13 +1307,30 @@ public:
     //         return false;
     //     }
 
-    //     // O(V_component log V_component + E_component)
-    //     // @returns Whether the graph has a cycle
-    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
-    //     bool hasCycle(Node root = 0) const {
-    //         assert((root == 0 || containsNode(root)) && "Node index out of range");
-    //         return (Node)Kahn(root).size() < V;
-    //     }
+        // O(V + E)
+        // @returns Whether the graph has a cycle
+        // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
+        bool hasCycle() const {
+            std::array<int, maxV> state;// TODO: actually only needs to hold 3 states
+            state.fill(0);
+
+            std::function<bool(Node)> dfs;
+            dfs = [&](Node u) {
+                if (state[u] == 2) return false;
+                else if (state[u] == 1) return true;
+
+                state[u] = 1;
+                for (Node v : getNeighboursOut(u)) {
+                    if (dfs(v)) return true;
+                }
+                state[u] = 2;
+                return false;
+            };
+            for (const Node &node : nodes) {
+                if (dfs(node)) return true;
+            }
+            return false;
+        }
 
     //     // O(V_component log V_component + V_component log E + E_component)
     //     // @returns Whether the graph is a simple graph
@@ -1287,43 +1340,24 @@ public:
     //         return !hasSelfEdges(root) && !hasDoubleEdges(root);
     //     }
 
-    //     // O(V_component log V_component + E_component)
-    //     // @returns Whether the graph is a directed acrylic graph
-    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
-    //     bool isDAG(Node root = 0) const {
-    //         assert((root == 0 || containsNode(root)) && "Node index out of range");
-    //         return isDirected && !hasCycle(root);
-    //     }
+        // O(V + E)
+        // @returns Whether the graph is a directed acrylic graph
+        // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
+        bool isDAG() const {
+            return isDirected && !hasCycle();
+        }
 
-    //     // O(V_component log V_component + E_component)
-    //     // @returns Whether the graph is a tree
-    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
-    //     bool isTree(Node root = 0) const {
-    //         assert((root == 0 || containsNode(root)) && "Node index out of range");
-    //         if (hasCycle(root) || hasDoubleEdges(root)) return false;
-
-    //         std::vector<Node> component = getComponentNodes(root);
-    //         Node numEdges = 0, numLeaves = 0, numRoots = 0;
-    //         for (Node node: component) {
-    //             for (std::pair<Node, T> edge: edgesOut[node]) {
-    //                 if (!isDirected && edge.u > node) break;
-    //                 else ++numEdges;
-    //             }
-    //             numLeaves += edgesOut[node].empty();
-    //             numRoots += edgesIn[node].empty();
-    //         }
-
-    //         if (isDirected && numLeaves > 1 && numRoots > 1) return false;
-    //         return numEdges == component.size() - 1; // E == V - 1
-    //     }
-
-    //     // O(V + E) Determines whether the graph is a forest
-    //     bool isForest() const {
-    //         for (std::vector<Node>& component: getComponentsNodes()) {
-    //             if (!isTree(component[0])) return false;
-    //         }
-    //         return true;
-    //     }
+        // O(V + E) Determines whether the graph is a forest
+        bool isForest() const {
+            return !hasCycle();
+        }
+        
+        // O(V + E)
+        // @returns Whether the graph is a tree
+        // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
+        bool isTree() const {
+            return isForest() && E() == V() - 1;
+        }
 
         /************************************************
          *       ALGORITHMS (COMPLEXITLY CLASS NP)      *

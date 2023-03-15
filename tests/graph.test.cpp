@@ -11,8 +11,8 @@ using namespace DS;
  * ^      /|
  * |     / |
  * |    /  |
- * v   |   |
- * 3<-`   4
+ * v   |   v
+ * 3<-`    4
  * 
  */
 void testDigraph() {
@@ -101,6 +101,7 @@ void testDigraph() {
     G1.eraseEdge(DiGraph::Edge(3, 1));
     assert(G1.dfsTopsort() == vector<DiGraph::Node>({ 1, 2, 4, 3 }));
     assert(G1.Kahns() == vector<DiGraph::Node>({ 1, 2, 4, 3 }));
+    assert(!G1.hasCycle());
     G1.insertEdge(DiGraph::Edge(2, 1));
     G1.insertEdge(DiGraph::Edge(3, 1));
 
@@ -113,6 +114,7 @@ void testDigraph() {
         vector<DiGraph::Node>({ 3, 2, 1 })
     }));
 
+    assert(G1.hasCycle());
 
     G1.clear();
     assert(G1.V() == 0 && G1.E() == 0);
@@ -176,7 +178,7 @@ void testGraph() {
         MyGraph::Edge(8, 2),
         MyGraph::Edge(2, 3)
     }));; // many valid diameters but again cbbs making generic test
-    
+
     auto f = G2.FloydWarshall();
     assert(f(3, 4) == 1 && f(5, 7) == 3 && f(7, 5) == 3 && f(6, 3) == 4);
     assert(f(0, 3) == INT_MAX && f(-5, 3) == INT_MAX && f(20, 3) == INT_MAX);
@@ -184,6 +186,24 @@ void testGraph() {
     G2.eraseEdge(MyGraph::Edge(1, 8));
     assert(f(1, 8) == 1);
     G2.insertEdge(MyGraph::Edge(1, 8));
+
+    assert(G2.bridgesDFS() == vector<MyGraph::Edge>({ 
+        MyGraph::Edge(1, 8),
+        MyGraph::Edge(10, 9),
+    }));
+
+    assert(G2.EdmondsKarp(3, 8) == 2);
+    assert(G2.EdmondsKarp(10, 9) == 1);
+    assert(G2.EdmondsKarp(9, 10) == 1);
+    assert(G2.EdmondsKarp(5, 1) == 1);
+    assert(G2.EdmondsKarp(2, 2) == INT_MAX);
+    assert(G2.Dinics(3, 8) == 2);
+    assert(G2.Dinics(10, 9) == 1);
+    assert(G2.Dinics(9, 10) == 1);
+    assert(G2.Dinics(5, 1) == 1);
+    assert(G2.Dinics(2, 2) == INT_MAX);
+
+    assert(G2.hasCycle());
 
     assert(G2.KruskalsCost() == 8);
 }

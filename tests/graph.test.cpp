@@ -229,6 +229,29 @@ void testWeightedGraph() {
     assert(G3.containsEdgeUnweighted(WeightedGraph::Edge(1, 2, 11)));
 }
 
+void testEmptyGraph() {
+    using DegenGraph = Graph<1, UnitEdgeWeight, int, false>;
+    using DegenDiGraph = Graph<1, UnitEdgeWeight, int, true>;
+    DegenGraph G4_undirected{};
+    DegenDiGraph G4_directed{};
+    assert(G4_directed.V() == 0);
+    assert(G4_directed.E() == 0);
+    assert(repr(G4_directed) == "");
+    assert(G4_directed.getComponents() == vector<DegenDiGraph>());
+    assert(G4_directed + G4_directed == G4_directed);
+    assert(G4_directed.FloydWarshall()(0, 0) == 0);
+    assert(G4_directed.FloydWarshall()(0, 1) == INT_MAX);
+    assert(G4_directed.KruskalsCost() == 0);
+    assert(G4_directed.Kahns() == vector<DegenDiGraph::Node>());
+    assert(G4_directed.dfsTopsort() == vector<DegenDiGraph::Node>());
+    assert(G4_directed.SCCdfs() == vector<vector<DegenDiGraph::Node>>());
+    assert(G4_directed.Tarjan() == vector<vector<DegenDiGraph::Node>>());
+    assert(G4_undirected.bridgesDFS() == vector<DegenGraph::Edge>());
+    assert(!G4_directed.hasCycle());
+    assert(G4_directed.isForest()); // yikes thats controversial
+    assert(G4_directed.isTree()); // yikes thats controversial
+}
+
 template<size_t N, typename EdgeWeight, typename PathWeight, bool isWeighted>
 void testShortestPath(Graph<N, EdgeWeight, PathWeight, isWeighted> G, array<array<int, N>, N> adj, bool testF = true) {
     for (size_t u = 0; u < N; ++u) {
@@ -340,7 +363,8 @@ int main() {
     testDigraph();
     testGraph();
     testWeightedGraph();
+    testEmptyGraph();
     testShortestPaths();
-
+    
     // TODO: https://muscat2023b.contest.codeforces.com/group/cuULm9FF5q/contest/432252/problem/P
 }

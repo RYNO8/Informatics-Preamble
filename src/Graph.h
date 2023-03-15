@@ -15,37 +15,6 @@
 #include <numeric>
 
 namespace DS {
-    // template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
-    // struct PathWeight {
-    //     T w;
-
-    //     PathWeight(T _w): w(_w) {}
-        
-    //     PathWeight(): w(std::numeric_limits<T>::max()) {}
-        
-    //     template<typename T_>
-    //     friend PathWeight<T> operator+(const PathWeight<T> &w1, const T_ &w2) {
-    //         return PathWeight<T>(w1.w + T(w2));
-    //     }
-        
-    //     friend bool operator==(const PathWeight &a, const PathWeight &b) {
-    //         return a.w == b.w;
-    //     }
-        
-    //     friend bool operator==(const PathWeight &a, const T &bw) {
-    //         return a.w == bw;
-    //     }
-        
-    //     friend bool operator<(const PathWeight &a, const PathWeight &b) {
-    //         return a.w < b.w;
-    //     }
-        
-    //     friend std::ostream& operator<<(std::ostream &out, const PathWeight &w) {
-    //         out << w.w;
-    //         return out;
-    //     }
-    // };
-    
     // I made the decision to use a class template argument for Graph, rather than
     // a default value
     // this makes reading input more convinient, and also saves some memory (this struct takes 1 byte)
@@ -90,10 +59,11 @@ namespace DS {
     };
 
 
-    // TODO: doomed when maxV == 0?
     // TODO: support conversion from directed to undirected and vice versa
     // TODO: support mapping of edges e.g. (u, v, w) -> (u, v, 1), so conversion from weighted to unweighted
-    // A insufficiently defined EdgeWeight might still produce correct results sometimes
+
+    // Graph
+    // @note A insufficiently defined EdgeWeight might still produce correct results sometimes
     template<
         size_t maxV,
         // weight data held for each edge
@@ -439,7 +409,7 @@ public:
         // @returns The index of this node
         // TODO: should I have a variation where silently passes when node exists?
         size_t pushNode(Node node) {
-            assert(/*0 <= node &&*/ node < maxV + 1 && "Node index out of range");
+            assert(node < maxV + 1 && "Node index out of range");
             assert(!containsNode(node) && "node already exists");
             nodes.push_back(node);
             validNode[node] = true;
@@ -487,12 +457,12 @@ public:
 
         // @returns whether `node` is within the acceptable bounds
         inline bool isNode(Node node) const {
-            return /*0 <= node &&*/ node < maxV;
+            return node < maxV;
         }
 
         // @returns whether `node` is in the vertex set of this graph
         inline bool containsNode(Node node) const {
-            return /*0 <= node &&*/ node < maxV && validNode[node];
+            return node < maxV && validNode[node];
         }
 
         // O(log E)
@@ -546,7 +516,7 @@ public:
             std::array<bool, maxV> seen;
             seen.fill(false);
             
-            for (Node node : getNodes()) {
+            for (Node node : nodes) {
                 if (!seen[node]) {
                     seen[node] = true;
                     std::vector<Node> component = { node };
@@ -611,7 +581,7 @@ public:
         // O(V + E)
         inline void clear() {
             edges.clear();
-            for (Node node : getNodes()) {
+            for (Node node : nodes) {
                 edgesIn[node].clear();
                 edgesOut[node].clear();
             }

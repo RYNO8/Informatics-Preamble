@@ -33,7 +33,7 @@ void testDigraph() {
     s1 >> e;
     DiGraph G1(N1, e);
 
-    assert(!G1.isWeightedGraph());
+    assert(!G1.isWeighted());
     assert(repr(G1) == "1: 2 3\n2: 1 3 4\n3: 1\n4:\n");
     assert(G1.V() == 4 && G1.N() == 4);
     assert(G1.E() == 6 && G1.M() == 6);
@@ -101,11 +101,11 @@ void testDigraph() {
     G1.eraseEdge(DiGraph::Edge(3, 1));
     assert(G1.dfsTopsort() == vector<DiGraph::Node>({ 1, 2, 4, 3 }));
     assert(G1.Kahns() == vector<DiGraph::Node>({ 1, 2, 4, 3 }));
-    assert(!G1.hasCycle());
+    assert(G1.isAcyclic());
     G1.insertEdge(DiGraph::Edge(2, 1));
     G1.insertEdge(DiGraph::Edge(3, 1));
 
-    assert(G1.SCCdfs() == vector<vector<DiGraph::Node>>({
+    assert(G1.Kosaraju() == vector<vector<DiGraph::Node>>({
         vector<DiGraph::Node>({ 1, 2, 3 }),
         vector<DiGraph::Node>({ 4 })
     }));
@@ -114,7 +114,7 @@ void testDigraph() {
         vector<DiGraph::Node>({ 3, 2, 1 })
     }));
 
-    assert(G1.hasCycle());
+    assert(G1.isCyclic());
 
     G1.clear();
     assert(G1.V() == 0 && G1.E() == 0);
@@ -203,7 +203,7 @@ void testGraph() {
     assert(G2.Dinics(5, 1) == 1);
     assert(G2.Dinics(2, 2) == INT_MAX);
 
-    assert(G2.hasCycle());
+    assert(G2.isCyclic());
 
     assert(G2.KruskalsCost() == 8);
 }
@@ -222,11 +222,18 @@ void testWeightedGraph() {
     s3 >> e;
     WeightedGraph G3(N3, e);
 
+    assert(!G3.isDirected() && G3.isWeighted());
     assert(repr(G3) == "1: 2 (w = 10)\n2: 3 (w = -1)\n3:\n");
     assert(G3.containsEdge(WeightedGraph::Edge(1, 2, 10)));
     assert(!G3.containsEdge(WeightedGraph::Edge(1, 2, 11)));
     assert(G3.containsEdgeUnweighted(WeightedGraph::Edge(1, 2, 10)));
     assert(G3.containsEdgeUnweighted(WeightedGraph::Edge(1, 2, 11)));
+
+    assert(G3 == WeightedGraph(vector<vector<WeightedGraph::EdgeWeight>>({
+        vector<WeightedGraph::EdgeWeight>({ INT_MAX, 10,      INT_MAX }),
+        vector<WeightedGraph::EdgeWeight>({ INT_MAX, INT_MAX, -1      }),
+        vector<WeightedGraph::EdgeWeight>({ INT_MAX, INT_MAX, INT_MAX }),
+    })));
 }
 
 void testEmptyGraph() {
@@ -236,6 +243,8 @@ void testEmptyGraph() {
     DegenDiGraph G4_directed{};
     assert(G4_directed.V() == 0);
     assert(G4_directed.E() == 0);
+    assert(G4_directed.isDirected() && !G4_directed.isWeighted());
+    assert(!G4_undirected.isDirected() && !G4_undirected.isWeighted());
     assert(repr(G4_directed) == "");
     assert(G4_directed.getComponents() == vector<DegenDiGraph>());
     assert(G4_directed + G4_directed == G4_directed);
@@ -244,10 +253,10 @@ void testEmptyGraph() {
     assert(G4_directed.KruskalsCost() == 0);
     assert(G4_directed.Kahns() == vector<DegenDiGraph::Node>());
     assert(G4_directed.dfsTopsort() == vector<DegenDiGraph::Node>());
-    assert(G4_directed.SCCdfs() == vector<vector<DegenDiGraph::Node>>());
+    assert(G4_directed.Kosaraju() == vector<vector<DegenDiGraph::Node>>());
     assert(G4_directed.Tarjan() == vector<vector<DegenDiGraph::Node>>());
     assert(G4_undirected.bridgesDFS() == vector<DegenGraph::Edge>());
-    assert(!G4_directed.hasCycle());
+    assert(!G4_directed.isCyclic());
     assert(G4_directed.isForest()); // yikes thats controversial
     assert(!G4_directed.isTree()); // yikes thats controversial
 }
@@ -274,7 +283,7 @@ void testShortestPaths() {
     using DirectedWeightedGraph = Graph<4, int, int, true>;
 
     testShortestPath(
-        DirectedWeightedGraph(4, vector<DirectedWeightedGraph::Edge>({
+        DirectedWeightedGraph(3, vector<DirectedWeightedGraph::Edge>({
             DirectedWeightedGraph::Edge(1, 2, 10),
             DirectedWeightedGraph::Edge(2, 3, 1),
         })),
@@ -287,7 +296,7 @@ void testShortestPaths() {
     );
 
     testShortestPath(
-        DirectedWeightedGraph(4, vector<DirectedWeightedGraph::Edge>({
+        DirectedWeightedGraph(3, vector<DirectedWeightedGraph::Edge>({
             DirectedWeightedGraph::Edge(1, 2, 10),
             DirectedWeightedGraph::Edge(2, 3, -11),
         })),
@@ -302,7 +311,7 @@ void testShortestPaths() {
     using UndirectedWeightedGraph = Graph<4, int, int, false>;
 
     testShortestPath(
-        UndirectedWeightedGraph(4, vector<UndirectedWeightedGraph::Edge>({
+        UndirectedWeightedGraph(3, vector<UndirectedWeightedGraph::Edge>({
             UndirectedWeightedGraph::Edge(1, 2, 10),
             UndirectedWeightedGraph::Edge(2, 3, 1),
         })),
@@ -315,7 +324,7 @@ void testShortestPaths() {
     );
 
     testShortestPath(
-        UndirectedWeightedGraph(4, vector<UndirectedWeightedGraph::Edge>({
+        UndirectedWeightedGraph(3, vector<UndirectedWeightedGraph::Edge>({
         UndirectedWeightedGraph::Edge(1, 2, 10),
             UndirectedWeightedGraph::Edge(2, 3, -11),
         })),
@@ -331,7 +340,7 @@ void testShortestPaths() {
     using DirectedUnweightedGraph = Graph<4, UnitEdgeWeight, int, true>;
 
     testShortestPath(
-        DirectedUnweightedGraph(4, vector<DirectedUnweightedGraph::Edge>({
+        DirectedUnweightedGraph(3, vector<DirectedUnweightedGraph::Edge>({
             DirectedUnweightedGraph::Edge(1, 2),
             DirectedUnweightedGraph::Edge(2, 3),
         })),
@@ -346,7 +355,7 @@ void testShortestPaths() {
     using UndirectedUnweightedGraph = Graph<4, UnitEdgeWeight, int, false>;
     
     testShortestPath(
-        UndirectedUnweightedGraph(4, vector<UndirectedUnweightedGraph::Edge>({
+        UndirectedUnweightedGraph(3, vector<UndirectedUnweightedGraph::Edge>({
             UndirectedUnweightedGraph::Edge(1, 2),
             UndirectedUnweightedGraph::Edge(2, 3),
         })),

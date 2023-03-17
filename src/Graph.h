@@ -67,12 +67,15 @@ namespace DS {
     template<
         size_t maxV,
         // weight data held for each edge
-        typename EdgeWeight,
+        typename EdgeWeight_,
         // accumulation of weight data over many edges
-        typename PathWeight,
+        typename PathWeight_,
         // Whether edges are directed or bidirectional
-        bool isDirected = false,
-        std::enable_if_t<std::is_integral_v<PathWeight> || std::is_floating_point_v<PathWeight>, bool> = true
+        bool isDirectedEdges = false,
+        std::enable_if_t<
+            (std::is_integral_v<PathWeight_> || std::is_floating_point_v<PathWeight_>) &&
+            (maxV != 0)
+        , bool> = true
     >
     class Graph {
 public:
@@ -80,10 +83,11 @@ public:
          *                 INITIALISATION               *
          ************************************************/
 
+        using EdgeWeight = EdgeWeight_;
+        using PathWeight = PathWeight_;
         // id of node is an unsigned integer
         using Node = size_t;
-        using isWeighted = std::negation<std::is_same<EdgeWeight, UnitEdgeWeight>>;
-        using MyGraph = Graph<maxV, EdgeWeight, PathWeight, isDirected>;
+        using MyGraph = Graph<maxV, EdgeWeight, PathWeight, isDirectedEdges>;
         PathWeight MAX_WEIGHT = std::numeric_limits<PathWeight>::max(); // TODO: make compile time?
 
         // Edges are represented internaly as (u, v) with weight w
@@ -147,7 +151,7 @@ public:
             friend bool operator==(const Edge &a, const Edge &b) {
                 return a.w == b.w && (
                     (a.u == b.u && a.v == b.v) ||
-                    (!isDirected && a.u == b.v && a.v == b.u)
+                    (isUndirected && a.u == b.v && a.v == b.u)
                 );
             }
 
@@ -171,9 +175,9 @@ public:
         struct EdgeComp {
             bool operator() (const Edge &a, const Edge &b) const {
                 Node au = a.u, av = a.v;
-                if (!isDirected && au > av) std::swap(au, av);
+                if (isUndirected() && au > av) std::swap(au, av);
                 Node bu = b.u, bv = b.v;
-                if (!isDirected && bu > bv) std::swap(bu, bv);
+                if (isUndirected() && bu > bv) std::swap(bu, bv);
 
                 if (au != bu) return au < bu;
                 return av < bv;
@@ -200,53 +204,58 @@ public:
             std::fill(std::begin(validNode), std::end(validNode), false);
         }
 
-        // O(V)
-        // Initialises an empty graph
-        Graph(size_t V) {
+        // O(V + E log E)
+        // Initalises an graph from vector of edges, assuming 1 indexed
+        Graph(size_t V, const std::vector<Edge> &_edges = {}) {
             assert(V < maxV && "Not enough capacity");
             std::fill(std::begin(validNode), std::end(validNode), false);
-            for (Node node = 1; node <= V; ++node) {
-                nodes.push_back(node);
-                validNode[node] = true;
-            }
+            for (Node node = 1; node <= V; ++node) pushNode(node);
+            for (Edge edge: _edges) insertEdge(edge);
+        }
+        
+        // O(V + E log E)
+        // Initialses a G with node set `_nodes` and edge set `_edges`
+        Graph(const std::vector<Node> &_nodes, const std::vector<Edge> &_edges = {}) {
+            std::fill(std::begin(validNode), std::end(validNode), false);
+            for (Node node : _nodes) pushNode(node);
+            for (Edge edge: _edges) insertEdge(edge);
         }
 
-        // O(|nodes| + num_induced_edges log E ) = O(|nodes| + E log E)
-        // Initialise this graph as the graph induced from `g` by `nodes`
-        // @note `V` does not change, so there may be disconnected nodes
-        Graph(const MyGraph &g, const std::vector<Node> &nodes) {
-            for (Node node : nodes) assert(g.containsNode(node) && "Node index out of range");
+        // O(V^2)
+        // Initialises a weighted graph from adjacency matrix of edge weights
+        // @note Assuming nodes 1 indexed
+        
+        Graph(const std::vector<std::vector<EdgeWeight>> &_adj) {
+            size_t V = _adj.size();
+            assert(V < maxV && "Not enough capacity");
             std::fill(std::begin(validNode), std::end(validNode), false);
-            for (Node node : nodes) {
-                pushNode(node);
-            }
-            for (Node node : nodes) {
-                for (Edge incident : g.getEdges(node)) {
-                    if (containsNode(incident.otherSide(node)) && !containsEdge(incident)) insertEdge(incident);
+            for (Node node = 1; node <= V; ++node) pushNode(node);
+            for (Node u = 1; u <= V; ++u) {
+                assert(_adj[u - 1].size() == V && "Not square matrix");
+                for (Node v = 1; v <= V; ++v) {
+                    if (_adj[u - 1][v - 1] != MAX_WEIGHT) {
+                        insertEdge(Edge(u, v, _adj[u - 1][v - 1]));
+                    }
                 }
             }
         }
 
-        // O(V + E log E)
-        // Initalises a G with node set `_nodes` and edge set `_edges`
-        Graph(const std::vector<Node> &_nodes, const std::vector<Edge> &_edges = {}) {
+        // TODO
+        // Graph(const Matrix &_adj) {
+
+        // }
+
+        // O(|nodes| + num_induced_edges log E ) = O(|nodes| + E log E)
+        // Initialise this graph as the graph induced from `g` by `nodes`
+        // @note `V` does not change, so there may be disconnected nodes
+        Graph(const MyGraph &_g, const std::vector<Node> &_nodes) {
             std::fill(std::begin(validNode), std::end(validNode), false);
+            for (Node node : _nodes) pushNode(node);
             for (Node node : _nodes) {
-                pushNode(node);
+                for (Edge incident : _g.getEdges(node)) {
+                    if (containsNode(incident.otherSide(node)) && !containsEdge(incident)) insertEdge(incident);
+                }
             }
-            for (Edge edge: _edges) insertEdge(edge);
-        }
-
-        // O(V + E log E)
-        // Initalises an unweighted graph from vector of edges, assuming 1 indexed
-        Graph(size_t V, const std::vector<Edge> &_edges) {
-            std::fill(std::begin(validNode), std::end(validNode), false);
-            for (Node node = 1; node <= V; ++node) {
-                nodes.push_back(node);
-                validNode[node] = true;
-            }
-
-            for (Edge edge: _edges) insertEdge(edge);
         }
 
         /************************************************
@@ -261,14 +270,29 @@ public:
                 out << u << ':';
                 for (Edge edge: graph.edgesOut[u]) {
                     // on an undirected graph, don't print edges twice
-                    if (!isDirected && u > edge.u) continue;
+                    if (isUndirected() && u > edge.u) continue;
 
                     out << ' ' << edge.v;
-                    if (isWeighted::value) out << " (w = " << edge.w << ')';
+                    if (isWeighted()) out << " (w = " << edge.w << ')';
                 }
                 out << '\n';
             }
             return out;
+        }
+
+        // O(maxV^2)
+        // TODO: alignment ahh
+        void displayAdj(std::ostream &out) {
+            for (Node u = 0; u < maxV; ++u) {
+                for (Node v = 0; v < maxV; ++v) {
+                    if (u == v || !containsEdgeUnweighted(Edge(u, v))) {
+                        out << "- ";
+                    } else {
+                        out << getEdge(u, v, EdgeWeight()) << ' ';
+                    }
+                }
+                out << '\n';
+            }
         }
 
 
@@ -279,27 +303,27 @@ public:
         // @note No `size()` because ambiguous, use the following functions instead
 
         // @returns `V`, the number of nodes
-        inline size_t V() const {
+        size_t V() const {
             return nodes.size();
         }
         // @returns `V`, the number of nodes
-        inline size_t N() const {
+        size_t N() const {
             return nodes.size();
         }
 
         // O(1)
         // @returns `E`, the number of edges
-        inline size_t E() const {
+        size_t E() const {
             return edges.size();
         }
         // O(1)
         // @returns `E`, the number of edges
-        inline size_t M() const {
+        size_t M() const {
             return edges.size();
         }
 
-        // @ returns the imutable set of all ndoes
-        inline const std::vector<Node>& getNodes() const {
+        // @returns the imutable set of all ndoes
+        const std::vector<Node>& getNodes() const {
             return nodes;
         }
 
@@ -327,7 +351,7 @@ public:
         // O(E)
         // Finds the edges that travel into `node`
         // @returns The imutable collection of incoming edges incident to this node
-        inline std::vector<Edge> getEdgesIn(Node node) const {
+        std::vector<Edge> getEdgesIn(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             return std::vector<Edge>(edgesIn[node].begin(), edgesIn[node].end());
         }
@@ -335,7 +359,7 @@ public:
         // O(E)
         // Finds the edges that travel out of `node`
         // @returns The imutable collection of outgoing edges incident to this node
-        inline std::vector<Edge> getEdgesOut(Node node) const {
+        std::vector<Edge> getEdgesOut(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             return std::vector<Edge>(edgesOut[node].begin(), edgesOut[node].end());
         }
@@ -353,7 +377,7 @@ public:
 
         // O(E)
         // @returns The imutable collection of neighbours reachable from `node` via 1 edge
-        inline std::vector<Node> getNeighboursIn(Node node) const {
+        std::vector<Node> getNeighboursIn(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             std::vector<Node> out;
             for (const Edge e : edgesIn[node]) {
@@ -364,7 +388,7 @@ public:
 
         // O(E)
         // @returns The imutable collection of neighbours which reach `node` via 1 edge
-        inline std::vector<Node> getNeighboursOut(Node node) const {
+        std::vector<Node> getNeighboursOut(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             std::vector<Node> out;
             for (const Edge e : getEdgesOut(node)) {
@@ -376,9 +400,9 @@ public:
         // O(1)
         // @returns The total degree of `node` (combination in in degree and out degree)
         // @note In an undirected graph, edge uv and vu will add 2 to the degree count
-        inline const size_t degree(Node node) const {
+        const size_t degree(Node node) const {
             assert(containsNode(node) && "Node index out of range");
-            if (isDirected) {
+            if (isDirected()) {
                 assert(edgesIn[node].size() == edgesOut[node].size() && "Sanity check!");
                 return edgesIn[node].size();
             } else {
@@ -388,14 +412,14 @@ public:
 
         // O(1)
         // @returns The in degree of `node`
-        inline const size_t degreeIn(Node node) const {
+        const size_t degreeIn(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             return edgesIn[node].size();
         }
 
         // O(1)
         // @returns The out degree of `node`
-        inline const size_t degreeOut(Node node) const {
+        const size_t degreeOut(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             return edgesOut[node].size();
         }
@@ -429,7 +453,7 @@ public:
             // when duplicaate edge is added, how do you find the most recently added edge
             edgesIn[e.v].insert(e);
             edgesOut[e.u].insert(e);
-            if (!isDirected) {
+            if (isUndirected()) {
                 edgesIn[e.u].insert(e);
                 edgesOut[e.v].insert(e);
             }
@@ -437,14 +461,14 @@ public:
 
         // O(log E)
         // If the specified edge (with any edge weight) is present, remove it, otherwise silently do nothing
-        inline void eraseEdge(Edge e) {
+        void eraseEdge(Edge e) {
             assert(containsNode(e.u) && containsNode(e.v) && "Node index out of range");
             assert(containsEdge(e) && "Cannot remove edge which isn't in graph");
 
             edges.erase(e);
             edgesIn[e.v].erase(e);
             edgesOut[e.u].erase(e);
-            if (!isDirected) {
+            if (isUndirected()) {
                 edgesIn[e.u].erase(e);
                 edgesOut[e.v].erase(e);
             }
@@ -456,18 +480,18 @@ public:
          ************************************************/
 
         // @returns whether `node` is within the acceptable bounds
-        inline bool isNode(Node node) const {
+        bool isNode(Node node) const {
             return node < maxV;
         }
 
         // @returns whether `node` is in the vertex set of this graph
-        inline bool containsNode(Node node) const {
+        bool containsNode(Node node) const {
             return node < maxV && validNode[node];
         }
 
         // O(log E)
         // @returns Whether the specified edge (with any edge weight) is contained in the graph
-        inline bool containsEdge(Edge e) const {
+        bool containsEdge(Edge e) const {
             if (!containsNode(e.u) || !containsNode(e.v)) return false;
             auto edgeIt = edges.find(e);
             return edgeIt != edges.end() && edgeIt->w == e.w;
@@ -475,12 +499,21 @@ public:
 
         // O(log E)
         // @returns Whether the specified edge is contained in the graph
-        inline bool containsEdgeUnweighted(Edge e) const {
+        bool containsEdgeUnweighted(Edge e) const {
             if (!containsNode(e.u) || !containsNode(e.v)) return false;
             return edges.count(e);
         }
 
-        
+        // O(log E)
+        // @returns the weight of the edge between nodes u and v, if it exists
+        // @return default otherwise
+        EdgeWeight getEdge(Node u, Node v, EdgeWeight defaultWeight) {
+            if (!containsNode(u) || !containsNode(v)) return defaultWeight;
+            auto edgeIt = edges.find(Edge(u, v));
+            if (edgeIt == edges.end()) return defaultWeight;
+            else return edgeIt->w;
+        }
+
         /************************************************
          *                   COMPONENTS                 *
          ************************************************/
@@ -571,7 +604,7 @@ public:
 
         // O(V + E log E)
         MyGraph flip() const {
-            assert(isDirected && "cannot flip undirected graph");
+            assert(isDirected() && "cannot flip undirected graph");
             MyGraph out;
             for (Node node: getNodes()) out.pushNode(node);
             for (Edge edge: getEdges()) out.insertEdge(edge.flip());
@@ -579,7 +612,7 @@ public:
         }
 
         // O(V + E)
-        inline void clear() {
+        void clear() {
             edges.clear();
             for (Node node : nodes) {
                 edgesIn[node].clear();
@@ -662,7 +695,7 @@ public:
                             cost[edge.v] = cost[edge.u] + edge.w;
                             pred[edge.v] = edge;
                         }
-                        if (!isDirected && cost[edge.v] != MAX_WEIGHT && cost[edge.v] + edge.w < cost[edge.u] && pred[edge.v] != edge) {
+                        if (isUndirected() && cost[edge.v] != MAX_WEIGHT && cost[edge.v] + edge.w < cost[edge.u] && pred[edge.v] != edge) {
                             cost[edge.u] = cost[edge.v] + edge.w;
                             pred[edge.u] = edge;
                         }
@@ -674,7 +707,7 @@ public:
                 for (Edge edge : getEdges()) {
                     if (cost[edge.u] != MAX_WEIGHT && cost[edge.v] != MAX_WEIGHT) {
                         // any more simplification of this expression assume properties of PathWeight
-                        if (isDirected) {
+                        if (isDirected()) {
                             if (cost[edge.u] + edge.w < cost[edge.v]) return NegativeCycleShortestPath(node);
                         } else if (edge != pred[edge.u]) {
                             if (cost[edge.u] + edge.w < cost[edge.v]) return NegativeCycleShortestPath(node);
@@ -815,7 +848,7 @@ public:
 
             for (const Edge edge: edges) {
                 dists[edge.u][edge.v] = std::min(dists[edge.u][edge.v], PathWeight(0) + edge.w);
-                if (!isDirected) {
+                if (isUndirected()) {
                     dists[edge.v][edge.u] = std::min(dists[edge.v][edge.u], PathWeight(0) + edge.w);
                 }
             }
@@ -840,7 +873,7 @@ public:
         // @returns A vector of vectors, with `dist[u][v]` being the minimim distance on the path from `u` to `v`
         std::function<PathWeight(Node, Node)> allShortestDist() const {
             for (const Edge edge: edges) {
-                if (edge.w < 0 && !isDirected) return NegativeCyclesAllPairsShortestPaths();
+                if (edge.w < 0 && isUndirected()) return NegativeCyclesAllPairsShortestPaths();
             }
             
             return FloydWarshall();
@@ -928,7 +961,7 @@ public:
         // O(V + E)
         // Find strongly connected components
         // https://cp-algorithms.com/graph/strongly-connected-components.html#implementation
-        std::vector<std::vector<Node>> SCCdfs() const {
+        std::vector<std::vector<Node>> Kosaraju() const {
             std::vector<Node> order;
             std::array<bool, maxV> seen;
             seen.fill(false);
@@ -966,7 +999,7 @@ public:
         // Standard Tarjan algorithm - find strongly connected components
         // @returns Vector of all strongly connected components, where each component is a vector of nodes
         std::vector<std::vector<Node>> Tarjan() const {
-            assert(isDirected && "SCC only applies to directed graphs");
+            assert(isDirected() && "SCC only applies to directed graphs");
             std::array<bool, maxV> seen;
             seen.fill(false);
             std::array<int, maxV> getIndex;
@@ -1029,7 +1062,7 @@ public:
         // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
         // @return A vector of edges, where each edge is represented by ((u, v), w)
         std::vector<Edge> bridgesDFS() const {
-            assert(!isDirected && "Bridges are a property of only undirected graphs");
+            assert(isUndirected() && "Bridges are a property of only undirected graphs");
             std::array<bool, maxV> seen;
             seen.fill(false);
             std::array<int, maxV> minTime;
@@ -1123,7 +1156,7 @@ public:
 
             for (Edge edge: edges) {
                 remainingCap[{edge.u, edge.v}] += edge.w;
-                if (!isDirected) {
+                if (isUndirected()) {
                     remainingCap[{edge.v, edge.u}] += edge.w;
                 }
             }
@@ -1210,7 +1243,7 @@ public:
 
             for (Edge edge: edges) {
                 remainingCap[{edge.u, edge.v}] += edge.w;
-                if (!isDirected) {
+                if (isUndirected()) {
                     remainingCap[{edge.v, edge.u}] += edge.w;
                 }
             }
@@ -1234,13 +1267,19 @@ public:
 
         // O(1)
         // @returns Whether the graph is directed
-        bool isDirectedGraph() const {
-            return isDirected;
+        static constexpr bool isDirected() {
+            return isDirectedEdges;
+        }
+
+        // O(1)
+        // @returns Whether the graph is undirected
+        static constexpr bool isUndirected() {
+            return !isDirectedEdges;
         }
 
         // O(1)
         // @returns Whether the graph is weighted
-        bool isWeightedGraph() const {
+        static constexpr bool isWeighted() {
             return !std::is_same_v<EdgeWeight, UnitEdgeWeight>;
         }
 
@@ -1280,7 +1319,7 @@ public:
         // O(V + E)
         // @returns Whether the graph has a cycle
         // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
-        bool hasCycle() const {
+        bool isCyclic() const {
             std::array<int, maxV> state;// TODO: actually only needs to hold 3 states
             state.fill(0);
 
@@ -1302,6 +1341,10 @@ public:
             return false;
         }
 
+        bool isAcyclic() const {
+            return !isCyclic();
+        }
+
     //     // O(V_component log V_component + V_component log E + E_component)
     //     // @returns Whether the graph is a simple graph
     //     // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
@@ -1314,12 +1357,12 @@ public:
         // @returns Whether the graph is a directed acrylic graph
         // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
         bool isDAG() const {
-            return isDirected && !hasCycle();
+            return isDirected() && isAcyclic();
         }
 
         // O(V + E) Determines whether the graph is a forest
         bool isForest() const {
-            return !hasCycle();
+            return isAcyclic();
         }
         
         // O(V + E)

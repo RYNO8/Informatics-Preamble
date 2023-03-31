@@ -61,7 +61,8 @@ namespace DS {
 
     // TODO: support conversion from directed to undirected and vice versa
     // TODO: support mapping of edges e.g. (u, v, w) -> (u, v, 1), so conversion from weighted to unweighted
-
+    // TODO: breaks for maxV = 1e5
+    
     // Graph
     // @note A insufficiently defined EdgeWeight might still produce correct results sometimes
     template<
@@ -441,12 +442,13 @@ public:
         }
 
         // O(log E)
-        // Add the specified edge to the graph - this may create a double edge
+        // Add the specified edge to the graph, or error if this will become a double edge
         // @note Edge weight is ignored if the graph is unweighted
         // TODO: should I have a variation where silently passes when edge exists?
         void insertEdge(Edge e) {
+            // NOTE: this check is duplicated, but included for clear error messages
             assert(containsNode(e.u) && containsNode(e.v) && "Node index out of range");
-            assert(!edges.count(e) && "Edge already in graph, is this an unintended operation?");
+            assert(!containsEdgeUnweighted(e) && "Edge already in graph, is this an unintended operation?");
 
             edges.insert(e);
             // NOTE: this is preventing support of multiedges
@@ -462,8 +464,7 @@ public:
         // O(log E)
         // If the specified edge (with any edge weight) is present, remove it, otherwise silently do nothing
         void eraseEdge(Edge e) {
-            assert(containsNode(e.u) && containsNode(e.v) && "Node index out of range");
-            assert(containsEdge(e) && "Cannot remove edge which isn't in graph");
+            if (!containsEdgeUnweighted(e)) return;
 
             edges.erase(e);
             edgesIn[e.v].erase(e);

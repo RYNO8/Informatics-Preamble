@@ -45,13 +45,13 @@ namespace DS {
     private:
         enum LazyMode {
             // no lazy needs to be performed here
-            CLEAN = 0,
+            CLEAN,
 
             // relative, corresponds to `data := Update(data, v)` operations (i.e. augmenting operations)
-            AUGMENT = 1,
+            AUGMENT,
 
             // absolute (always override), corresponds to `data := v` operations
-            SET = 2
+            SET
         };
 
         T val = I;
@@ -71,10 +71,18 @@ namespace DS {
         void push() {
             if (isLeaf()) return;
 
-            if (lChild == nullptr) lChild = new MySegtree(l(), midpoint());
-            else if (is_persistent::value) lChild = lChild->copy();
-            if (rChild == nullptr) rChild = new MySegtree(midpoint() + 1, r());
-            else if (is_persistent::value) rChild = rChild->copy();
+            // if (lChild == nullptr) lChild = new MySegtree(l(), midpoint());
+            // else if (is_persistent::value) lChild = lChild->copy();
+            // if (rChild == nullptr) rChild = new MySegtree(midpoint() + 1, r());
+            // else if (is_persistent::value) rChild = rChild->copy();
+
+            if (lChild == nullptr) {
+                lChild = new MySegtree(l(), midpoint());
+                rChild = new MySegtree(midpoint() + 1, r());
+            } else if (is_persistent::value) {
+                lChild = lChild->copy();
+                rChild = rChild->copy();
+            }
 
             if (lazyMode == SET) { // absolute, always override
                 lChild->val = CombineAgg()(lazy, (ull)lChild->length());
@@ -139,6 +147,19 @@ namespace DS {
         Segtree(typename std::array<T, N>::iterator begin, typename std::array<T, N>::iterator end) : Range(0, std::distance(begin, end) - 1) {
             size_t i = 0;
             for (auto it = begin; it != end; it++, ++i) set(i, *it);
+        }
+
+        // O(N)
+        // Create the entire tree (such that is it no longer lazy propagation)
+        // Cleans all nodes (no more lazy values)
+        // This could help with constant factor optimisations, since initailising nodes is expensive
+        // @note Modifies tree in place
+        void pushAll() {
+            if (!isLeaf()) {
+                push();
+                lChild->pushAll();
+                rChild->pushAll();
+            }
         }
 
         /************************************************
@@ -208,10 +229,9 @@ namespace DS {
         // O(log N) Range update: set
         // performs T[l] = x, ..., T[r] = x
         // @note Modifies segtree in place
-        void set(Range<ll> queryRange, T x) {
-            if (!overlaps(queryRange)) {
-
-            } else if (coveredBy(queryRange)) {
+        void set(const Range<ll> &queryRange, T x) {
+            if (!overlaps(queryRange)) return;
+            else if (coveredBy(queryRange)) {
                 val = CombineAgg()(x, (ull)length());
                 lazy = x;
                 lazyMode = SET;
@@ -241,7 +261,7 @@ namespace DS {
         // O(log N) Range query: Combine
         // @returns Combine(T[l], Combine(..., Combine(T[r-1], T[r])))
         // @returns I if the segtree range has no overlap with the query range
-        T query(Range<ll> queryRange) {
+        T query(const Range<ll> &queryRange) {
             if (!overlaps(queryRange)) return I;
             else if (coveredBy(queryRange)) return val;
 
@@ -250,7 +270,7 @@ namespace DS {
         }
 
         // TODO: pandas view kinda thing?
-        T operator[](Range<ll> queryRange) {
+        T operator[](const Range<ll> queryRange) {
             return query(queryRange);
         }
 

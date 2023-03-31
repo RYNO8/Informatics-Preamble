@@ -13,6 +13,23 @@
 #include <sstream>
 #include "Constants.h"
 
+
+namespace std {
+    template<>
+    struct hash<pair<int, int>> {
+        size_t operator()(const pair<int, int> k) const {
+            return hash<long long>()(((long long)k.first) << 32 | (long long) k.second);
+        }
+    };
+
+    template<>
+    struct hash<pair<unsigned int, unsigned int>> {
+        size_t operator()(const pair<unsigned int, unsigned int> k) const {
+            return hash<unsigned long long>()(((unsigned long long)k.first) << 32 | (unsigned long long) k.second);
+        }
+    };
+}
+
 namespace DS {
     /************************************************
      *                    DISPLAY                   *

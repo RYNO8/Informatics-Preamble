@@ -20,21 +20,11 @@ Functionalities include
 [] implement coordinate geometry (eww)
 [] dynamic tree for `Tree.h` (look at references)
 [] fast factorisation, fast isPrime, how?? Pollard rho was dodgy
-[] change arguments to references if possible
 [] write + fix tests
 [] docstrings for ranges
 [] Graph with self edges and multiple edges? (This is so rare though, I feel like support isn't worth it)
-[] boolalpha
 [] only works on C++17
-[] ```c++
-namespace std {
-	template<>
-	struct hash<pair<int, int>> {
-		size_t operator()(const pair<int, int> k) const {
-			return hash<long long>()(((long long)k.first) << 32 | (long long) k.second);
-		}
-	};
-}```
+
 
 # Notes
  - It is probably not the fastest or most memory efficient, because I have prioritised verbosity over constant factor optimisations.

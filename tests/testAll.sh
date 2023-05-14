@@ -5,7 +5,7 @@
 # done
 
 echo "Misc" &&
-g++ misc.test.cpp -O3 -std=c++17 -Wall -o temp && ./temp && 
+g++ ./misc.test.cpp -O3 -std=c++17 -Wall -o ./temp && ./temp && 
 
 echo "BIT" &&
 g++ bit.test.cpp -O3 -std=c++17 -Wall -o temp && ./temp &&
@@ -34,7 +34,8 @@ g++ segtree.test.cpp -O3 -std=c++17 -Wall -o temp && ./temp &&
 echo "Sqrt Decomp" &&
 g++ sqrtdecomp.test.cpp -O3 -std=c++17 -Wall -o temp && ./temp &&
 
-# echo "Tree" &&
+echo "Tree" &&
+g++ tree.test.cpp -O3 -std=c++17 -Wall -o temp && ./temp &&
 
 echo "Util" &&
 g++ util.test.cpp -O3 -std=c++17 -Wall -o temp && ./temp && 

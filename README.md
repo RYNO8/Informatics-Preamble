@@ -24,7 +24,7 @@ Functionalities include
 [] docstrings for ranges
 [] Graph with self edges and multiple edges? (This is so rare though, I feel like support isn't worth it)
 [] only works on C++17
-
+[] cartesian product
 
 # Notes
  - It is probably not the fastest or most memory efficient, because I have prioritised verbosity over constant factor optimisations.

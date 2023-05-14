@@ -1,116 +1,195 @@
 ﻿#pragma once
+#include "Util.h"
 #include "Constants.h"
 #include "Graph.h"
+#include <limits>
+
+constexpr size_t numberOfBits(size_t x) {
+    return x < 2 ? x : 1 + numberOfBits(x >> 1);
+}
 
 namespace DS {
-    template<typename T> class Tree {
+    // Tree
+    template<
+        // Max number of nodes allowed
+        size_t maxV,
+        // weight data held for each edge
+        typename EdgeWeight_,
+        // accumulation of weight data over many edges
+        typename PathWeight_,
+        std::enable_if_t<
+            std::is_arithmetic_v<PathWeight_> &&
+            maxV != 0
+        , bool> = true
+    >
+    class Tree {
+public:
         /************************************************
-         *                INITIALISATION                *
+         *                 INITIALISATION               *
          ************************************************/
 
-    private:
-        // Number of nodes
-        int N;
-        // Whether edges are weighted
-        // Unweighted edges are assigned unit weights
-        bool isWeighted;
-        // `parent[d][node]` is the parent which is 2^d steps higher than `node`, so `parent[0][node]` is the direct parent
-        std::vector<std::pair<int, T>> parent[LOG_MAXN + 5];
-        // `children[node]` is a vector of children, where each child is a (node, weight) pair
-        std::vector<std::vector<std::pair<int, T>>> children;
-        // `depth[node]` is the distance from node 1, with `depth[1] = 1`
-        std::vector<int> depth;
+        using EdgeWeight = EdgeWeight_;
+        using PathWeight = PathWeight_;
+        // id of node is an unsigned integer
+        using Node = size_t;
+        using Depth = size_t;
+        using MyTree = Tree<maxV, EdgeWeight, PathWeight>;
+        constexpr static PathWeight MAX_WEIGHT = std::numeric_limits<PathWeight>::max(); 
+        constexpr static Depth logMaxV = numberOfBits(maxV);
+        constexpr static Depth INVALID_DEPTH = std::numeric_limits<Depth>::max();
 
-        // O(N log N) Initialises all variables
-        void init(int _N, bool _isWeighted) {
-            assert(1 <= _N && _N <= MAXN);
-            N = _N;
-            isWeighted = _isWeighted;
-            for (int d = 0; d <= LOG_MAXN; ++d) parent[d].resize(N + 1);
-            parent[0][1] = { 1, T(0) };
-            children.resize(N + 1);
-            depth.resize(N + 1);
-        }
-        
-        // O(N) Find direction of edge each such that the tree can be rooted at 1
-        // void makeDirected(const Graph<T>& g, int node = 1, int par = -1) {
-        //     for (std::pair<int, T> child : g.getEdgesOut(node)) {
-        //         if (child.first == par) continue;
-        //         parent[0][child.first] = { node, child.second };
-        //         children[node].push_back(child);
-        //         makeDirected(g, child.first, node);
-        //     }
+        // Edges are represented internaly as (u, v) with weight w
+        // u is the jmp, v is the child
+        // NOTE: allowing self cycles, because the root has an edge to itself in lca
+        struct Edge {
+            Node u = 0, v = 0;
+            PathWeight w;
 
-        //     if (g.isDirectedGraph()) {
-        //         for (std::pair<int, T> child : g.getEdgesIn(node)) {
-        //             if (child.first == par) continue;
-        //             parent[0][child.first] = { node, child.second };
-        //             children[node].push_back(child);
-        //             makeDirected(g, child.first, node);
-        //         }
-        //     }
-        // }
-
-    public:
-        // O(N log N) Initialises a tree from a graph, assuming rooted at 1
-        // Tree(Graph<T>& g) {
-        //     assert(g.isTree() && "Initialiser graph must be a tree");
-        //     init(g.size(), g.isWeightedGraph());
-
-        //     makeDirected(g);
-
-        //     sortChildren();
-        //     buildJumpPtrs();
-        //     buildDepths();
-        // }
-
-        // O(N log N) Initialises a tree from cin, assuming rooted at 1*/
-        Tree(int _N, std::istream& in = std::cin, bool _isWeighted = false) {
-            init(_N, _isWeighted);
-
-            for (int i = 2; i <= N; ++i) {
-                in >> parent[0][i].first;
-                if (isWeighted) in >> parent[0][i].second;
-                else parent[0][i].second = T(1);
-                children[parent[0][i].first].push_back({ i, parent[0][i].second });
+            Edge() {
+                
             }
 
-            sortChildren();
-            buildJumpPtrs();
-            buildDepths();
-        }
+            // Edge(Node u_, Node v_, EdgeWeight w_) : u(u_), v(v_), w(PathWeight() + w_) {
+            //     assert(u != v && "Self cycles do not exist in trees");
+            //     assert(u < maxV && v < maxV && "Node index out of range");
+            // }
 
-        // O(1) Initialises a tree with a single node (node 1)
-        Tree(bool _isWeighted = false) {
-            init(1, _isWeighted);
+            Edge(Node u_, Node v_, PathWeight w_) : u(u_), v(v_), w(w_) {
+                assert(u < maxV && v < maxV && "Node index out of range");
+            }
 
-            sortChildren();
-            buildJumpPtrs();
-            buildDepths();
-        }
+            // #if __cplusplus >= 202002L
+            // template<std::enable_if_t<isWeighted::value, bool> = false>
+            // #endif
+            Edge(Node u_, Node v_) : u(u_), v(v_), w(EdgeWeight()) {
+                assert(u < maxV && v < maxV && "Node index out of range");
+            }
+            // Given u, return v
+            // Given v, return u
+            Node otherSide(Node node) const {
+                assert((node == v || node == u) && "Must provide an endpoint of this edge");
+                return u ^ v ^ node;
+                // if (node == u) return v;
+                // else if (node == v) return u;
+                // else assert(false && "Must provide an endpoint of this edge");
+            }
 
-    private:
-        // O(N log N) Ensure that the children are always in sorted order
-        void sortChildren() {
-            for (int node = 1; node <= N; ++node) sort(children[node].begin(), children[node].end());
-        }
+            // friend bool operator<(const Edge &a, const Edge &b) {
+            //     if (a.u != b.u) return a.u < b.u;
+            //     else if (a.v != b.v) return a.v < b.v;
+            //     else return a.w < b.w;
+            // }
 
-        // O(N log N) Builds `parents` from [1..LOG_MAXN], assuming `parents[0]` has been built
+            friend bool operator==(const Edge &a, const Edge &b) {
+                return a.u == b.u && a.v == b.v && a.w == b.w;
+            }
+
+            friend bool operator!=(const Edge &a, const Edge &b) {
+                return !(a == b);
+            }
+
+            friend std::istream& operator>>(std::istream &in, Edge &e) {
+                in >> e.u >> e.v >> e.w;
+                return in;
+            }
+
+            friend std::ostream& operator<<(std::ostream &out, Edge &e) {
+                out << e.u << "->" << e.v << " (w = " << e.w << ')';
+                return out;
+            }
+        };
+
+        // arbitary total order of edges
+        struct EdgeComp {
+            bool operator() (const Edge &a, const Edge &b) const {
+                if (a.u != b.u) return a.u < b.u;
+                return a.v < b.v;
+            }
+        };
+
+private:
+        Node root;
+        std::vector<Node> nodes; // not garunteed sorted!
+        // depth of root is 0, depth of invalid node is -1
+        Depth depth[maxV];
+
+        // TODO: is it reasonable to support multiset?
+        // TODO: `edgesIn` and `edgesOut` store copies of each edge - not memory efficient?
+        // A set of all edges
+        std::set<Edge, EdgeComp> edges;
+        // `jmp[d][node]` is the jmp which is 2^d steps higher than `node`, so `jmp[0][node]` is the direct jmp
+        Edge jmp[logMaxV + 1][maxV];
+        // `children[node]` is a vector of children, where each child is a (node, weight) pair
+        std::set<Edge, EdgeComp> children[maxV];
+        // `depth[node]` is the distance from node 1, with `depth[1] = 1`
+
+        // O(N log N) Builds `jmps` from [1..LOG_MAXN], assuming `jmps[0]` has been built
         void buildJumpPtrs() {
-            for (int d = 0; d < LOG_MAXN; ++d) {
-                for (int i = 1; i <= N; ++i) {
-                    parent[d + 1][i] = {
-                        parent[d][parent[d][i].first].first,
-                        parent[d][i].second + parent[d][parent[d][i].first].second
-                    };
+            for (Depth d = 0; d < logMaxV; ++d) {
+                for (Node node : nodes) {
+                    jmp[d + 1][node] = Edge(
+                        jmp[d][jmp[d][node].u].u,
+                        node,
+                        jmp[d][node].w + jmp[d][jmp[d][node].u].w
+                    );
                 }
             }
         }
 
-        // O(N) Builds `depth` using a dfs
-        void buildDepths(int node = 1) {
-            depth[node] = depth[parent[0][node].first] + 1;
-            for (std::pair<int, T> child : children[node]) buildDepths(child.first);
+public:
+        // O(V)
+        // Initialises an empty graph with no nodes
+        Tree() {
+            std::fill(std::begin(depth), std::end(depth), INVALID_DEPTH);
+        }
+
+        // O(V log V)
+        // Initialises tree from a graph, given a root
+        // @note G is treated as undirected
+        template<bool isDirected>
+        Tree(const Graph<maxV, EdgeWeight, PathWeight, isDirected> &G, Node root_): root(root_) {
+            assert(G.containsNode(root) && "Wanted root is not a node in input graph");
+            assert(G.E() == G.V() - 1 && "Definitely not a tree"); // redundant check, remove?
+            
+            std::fill(std::begin(depth), std::end(depth), -1);
+            
+            std::function<void(Node, int)> buildDfs;
+            buildDfs = [&](Node node, int d) {
+                nodes.push_back(node);
+                depth[node] = d;
+                for (auto edge : G.getEdges(node)) {
+                    Node child = edge.otherSide(node);
+                    if (depth[child] == INVALID_DEPTH) {
+                        Edge treeEdge = Edge(node, child, PathWeight() + edge.w);
+                        children[node].insert(treeEdge);
+                        jmp[0][child] = treeEdge;
+                        buildDfs(child, d + 1);
+                    }
+                }
+            };
+            jmp[0][root] = Edge(root, root, PathWeight());
+            buildDfs(root, 0);
+            
+            buildJumpPtrs();
+        }
+
+        // O(V log V)
+        // Initialise line graph with nodes 1..V, rooted at 1
+        Tree(size_t V, EdgeWeight w = EdgeWeight()) {
+            assert(V < maxV && "Insufficient capacity");
+
+            std::fill(std::begin(depth), std::end(depth), -1);
+
+            for (Node node = 1; node <= V; ++node) {
+                nodes.push_back(node);
+                depth[node] = node - 1;
+                if (node < V) {
+                    edges.insert(Edge(node, node + 1, w));
+                    children[node + 1].insert(node);
+                }
+            }
+
+            buildJumpPtrs();
         }
 
         /************************************************
@@ -118,301 +197,308 @@ namespace DS {
          ************************************************/
 
     public:
-        // O(N) Displays the graph, showing the parent of each node
-        // @param `out` The string representation of the graph is piped to this output stream
-        friend std::ostream& operator<<(std::ostream &out, const Tree<T> &tree) {
-            for (int i = 1; i <= tree.N; ++i) out << tree.parent[0][i].first << ' ';
-            out << '\n';
+        // O(N) Displays the graph to `out` with fancy indenting for depth, showing the jmp of each node
+        friend std::ostream& operator<<(std::ostream &out, const MyTree &tree) {
+            std::function<void(Node, std::string)> pprint;
+            pprint = [&](Node node, std::string prefix) {
+                size_t i = 0;
+                for (Edge edge : tree.children[node]) {
+                    bool isLast = i++ == tree.children[node].size() - 1;
+                    Node child = edge.otherSide(node);
+                    out << prefix << (isLast ? "└" : "├") << std::string("─") * edge.w << child << '\n';
+                    pprint(child, prefix + (isLast ? " " : "│") + std::string(" ") * edge.w);
+                }
+            };
+            out << tree.root << '\n';
+            pprint(tree.root, "");
             return out;
         }
 
-        // O(N) Displays the graph to `out` with fancy indenting for depth, showing the parent of each node
-        // @param `out` The string representation of the graph is piped to this output stream
-        // @param `newLine` Indicates whether to end with a trailing `\\n`
-        // @param `showWeight` Whether to indent each node according to their edge weights
-        void pprint(std::ostream &out = std::cout, bool newLine = true, bool showWeight = true, int node = 1, std::string prefix = "", bool isLast = true) const {
-            out << prefix << "|\n" << prefix << (isLast ? "`" : "|");
-            if (showWeight) {
-                out << std::string(parent[0][node].second, '-');
-            }
-            else {
-                out << '-';
-            }
-            out << node << '\n';
+    //     /************************************************
+    //      *                    UTILITY                   *
+    //      ************************************************/
 
-            prefix += (isLast ? " " : "|");
-            if (showWeight) prefix += std::string(parent[0][node].second, ' ');
-            for (std::pair<int, T> child : children[node]) {
-                pprint(out, false, showWeight, child.first, prefix, child == children[node].back());
-            }
+    //     // O(1) Gets the size of the tree - the number of nodes
+    //     size_t size() {
+    //         return N;
+    //     }
 
-            if (newLine) out << '\n';
-        }
+    //     // O(1) Gets the depth of `node`
+    //     int getDepth(int node) {
+    //         return depth[node];
+    //     }
+    //     // O(N) Gets the children of `node`
+    //     std::vector<std::pair<int, T>> getChildren(int node) {
+    //         return children[node];
+    //     }
 
-        /************************************************
-         *                    UTILITY                   *
-         ************************************************/
+    //     // O(N) Gets the neighbours (children and jmp) of `node`
+    //     std::vector<std::pair<int, T>> getNeigbours(int node) {
+    //         std::vector<std::pair<int, T>> neighbours = children[node];
+    //         neighbours.push_back(jmp[node]);
+    //         return neighbours;
+    //     }
 
-        // O(1) Gets the size of the tree - the number of nodes
-        size_t size() {
-            return N;
-        }
+    //     // O(N) Finds all descendants of `node`
+    //     // @returns vector of nodes
+    //     std::vector<int> getDescendants(int node = 1) {
+    //         return preOrder(node); // lmao
+    //     }
 
-        // O(1) Gets the depth of `node`
-        int getDepth(int node) {
-            return depth[node];
-        }
-        // O(N) Gets the children of `node`
-        std::vector<std::pair<int, T>> getChildren(int node) {
-            return children[node];
-        }
+    //     // O(1) Determines if `node` is a leaf node (has no children)
+    //     bool isLeaf(int node) {
+    //         return children[node].empty();
+    //     }
 
-        // O(N) Gets the neighbours (children and parent) of `node`
-        std::vector<std::pair<int, T>> getNeigbours(int node) {
-            std::vector<std::pair<int, T>> neighbours = children[node];
-            neighbours.push_back(parent[node]);
-            return neighbours;
-        }
+    //     // /O(N) Finds the leaves (nodes that have no children) in ascending order
+    //     std::vector<int> getLeaves() {
+    //         std::vector<int> leaves;
+    //         for (int node = 1; node <= N; ++node) {
+    //             if (isLeaf(node)) leaves.push_back(node);
+    //         }
+    //         return leaves;
+    //     }
 
-        // O(N) Finds all descendants of `node`
-        // @returns vector of nodes
-        std::vector<int> getDescendants(int node = 1) {
-            return preOrder(node); // lmao
-        }
+    //     // O(N) Finds the breath of the tree - the number of leaves
+    //     int getBreadth() {
+    //         int total = 0;
+    //         for (int node = 1; node <= N; ++node) total += children[node].size() == 0;
+    //         return total;
+    //     }
 
-        // O(1) Determines if `node` is a leaf node (has no children)
-        bool isLeaf(int node) {
-            return children[node].empty();
-        }
+    //     // O(log N) Add a node to the tree, and return the index of the new node */
+    //     // @note Edge weight is ignored if the graph is unweighted
+    //     int addNode(int par, T w = T(1)) {
+    //         if (!isWeighted) w = T(1);
 
-        // /O(N) Finds the leaves (nodes that have no children) in ascending order
-        std::vector<int> getLeaves() {
-            std::vector<int> leaves;
-            for (int node = 1; node <= N; ++node) {
-                if (isLeaf(node)) leaves.push_back(node);
-            }
-            return leaves;
-        }
+    //         ++N;
+    //         jmp[0].push_back({ par, w });
+    //         for (int d = 0; d < LOG_MAXN; ++d) {
+    //             jmp[d + 1].push_back({
+    //                 jmp[d][jmp[d][N].first].first,
+    //                 jmp[d][N].second + jmp[d][jmp[d][N].first].second
+    //                 });
+    //         }
+    //         children[par].push_back({ N, w }); // make sure children[par] are still sorted
+    //         children.push_back({});
+    //         depth.push_back(depth[par] + 1);
+    //         return N;
+    //     }
 
-        // O(N) Finds the breath of the tree - the number of leaves
-        int getBreadth() {
-            int total = 0;
-            for (int node = 1; node <= N; ++node) total += children[node].size() == 0;
-            return total;
-        }
+    //     /************************************************
+    //      *                   PROPERTIES                 *
+    //      ************************************************/
 
-        // O(log N) Add a node to the tree, and return the index of the new node */
-        // @note Edge weight is ignored if the graph is unweighted
-        int addNode(int par, T w = T(1)) {
-            if (!isWeighted) w = T(1);
+    //     // [ O(N log N) ] Returns whether the tree is a binary tree - there are at most a left and right child for each node
+    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
+    //     bool isBinary(int root = 1) {
+    //         for (int node = 1; node <= N; ++node) {
+    //             if (children[node].size() > 2 && isAncestor(root, node)) return false;
+    //         }
+    //         return true;
+    //     }
 
-            ++N;
-            parent[0].push_back({ par, w });
-            for (int d = 0; d < LOG_MAXN; ++d) {
-                parent[d + 1].push_back({
-                    parent[d][parent[d][N].first].first,
-                    parent[d][N].second + parent[d][parent[d][N].first].second
-                    });
-            }
-            children[par].push_back({ N, w }); // make sure children[par] are still sorted
-            children.push_back({});
-            depth.push_back(depth[par] + 1);
-            return N;
-        }
+    //     // O(N log N) Finds whether the tree is a balanced tree - height of the left and right subtree differ by not more than 1
+    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
+    //     bool isBalanced(int root = 1) {
+    //         int subtreeSize = getDescendants(root).size();
+    //         int maxDepth = 0;
+    //         for (int node = 1; node <= N; ++node) {
+    //             if (isAncestor(root, node)) maxDepth = std::max(maxDepth, depth[node] - depth[root]);
+    //         }
+    //         return (1 << maxDepth) <= subtreeSize && subtreeSize < 2 * (1 << maxDepth);
+    //     }
 
-        /************************************************
-         *                   PROPERTIES                 *
-         ************************************************/
+    //     /************************************************
+    //      *                   ALGORITHMS                 *
+    //      ************************************************/
 
-        // [ O(N log N) ] Returns whether the tree is a binary tree - there are at most a left and right child for each node
-        // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
-        bool isBinary(int root = 1) {
-            for (int node = 1; node <= N; ++node) {
-                if (children[node].size() > 2 && isAncestor(root, node)) return false;
-            }
-            return true;
-        }
+    //     // O(log N) Finds the lowest common ancestor of `u` and `v`, using jump pointers with `depth` and `jmp`
+    //     int lca(int u, int v) {
+    //         for (int d = LOG_MAXN; d >= 0; --d) {
+    //             if (depth[jmp[d][u].first] >= depth[v]) u = jmp[d][u].first;
+    //             if (depth[jmp[d][v].first] >= depth[u]) v = jmp[d][v].first;
+    //         }
 
-        // O(N log N) Finds whether the tree is a balanced tree - height of the left and right subtree differ by not more than 1
-        // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
-        bool isBalanced(int root = 1) {
-            int subtreeSize = getDescendants(root).size();
-            int maxDepth = 0;
-            for (int node = 1; node <= N; ++node) {
-                if (isAncestor(root, node)) maxDepth = std::max(maxDepth, depth[node] - depth[root]);
-            }
-            return (1 << maxDepth) <= subtreeSize && subtreeSize < 2 * (1 << maxDepth);
-        }
+    //         for (int d = LOG_MAXN; d >= 0; --d) {
+    //             if (jmp[d][u].first != jmp[d][v].first) {
+    //                 u = jmp[d][u].first;
+    //                 v = jmp[d][v].first;
+    //             }
+    //         }
 
-        /************************************************
-         *                   ALGORITHMS                 *
-         ************************************************/
+    //         if (u == v) return u;
+    //         assert(jmp[0][u].first == jmp[0][v].first);
+    //         return jmp[0][u].first;
+    //     }
 
-        // O(log N) Finds the lowest common ancestor of `u` and `v`, using jump pointers with `depth` and `parent`
-        int lca(int u, int v) {
-            for (int d = LOG_MAXN; d >= 0; --d) {
-                if (depth[parent[d][u].first] >= depth[v]) u = parent[d][u].first;
-                if (depth[parent[d][v].first] >= depth[u]) v = parent[d][v].first;
-            }
+    //     // O(log N) Finds whether `ancestor` is actually an ancestor of `node`. Note that u node is its own ancestor
+    //     bool isAncestor(int ancestor, int node) {
+    //         return lca(ancestor, node) == ancestor;
+    //     }
 
-            for (int d = LOG_MAXN; d >= 0; --d) {
-                if (parent[d][u].first != parent[d][v].first) {
-                    u = parent[d][u].first;
-                    v = parent[d][v].first;
-                }
-            }
+    //     // O(log n) Finds the `nth` jmp of `node`
+    //     // @note The `0th` jmp of `node` is `node`, and `1` is the jmp of itself
+    //     int getParent(int node, int n = 1) {
+    //         assert(n >= 0 && "Can't find a negative jmp");
+    //         n = std::min(n, N);
+    //         int par = node;
+    //         for (int d = 0; n; ++d, n /= 2) {
+    //             if (n & 1) par = jmp[d][par].first;
+    //         }
+    //         return par;
+    //     }
 
-            if (u == v) return u;
-            assert(parent[0][u].first == parent[0][v].first);
-            return parent[0][u].first;
-        }
+    //     // O(log N) Finds the shortest distance between nodes `u` and `v`, by traversing `u` -> `lca(u, v)` -> `v`
+    //     T dist(int u, int v) {
+    //         int targetDepth = depth[lca(u, v)];
+    //         T total = T(0);
+    //         for (int d = LOG_MAXN; d >= 0; --d) {
+    //             if (depth[jmp[d][u].first] >= targetDepth) {
+    //                 total += jmp[d][u].second;
+    //                 u = jmp[d][u].first;
+    //             }
+    //             if (depth[jmp[d][v].first] >= targetDepth) {
+    //                 total += jmp[d][v].second;
+    //                 v = jmp[d][v].first;
+    //             }
+    //         }
 
-        // O(log N) Finds whether `ancestor` is actually an ancestor of `node`. Note that u node is its own ancestor
-        bool isAncestor(int ancestor, int node) {
-            return lca(ancestor, node) == ancestor;
-        }
+    //         return total;
+    //     }
 
-        // O(log n) Finds the `nth` parent of `node`
-        // @note The `0th` parent of `node` is `node`, and `1` is the parent of itself
-        int getParent(int node, int n = 1) {
-            assert(n >= 0 && "Can't find a negative parent");
-            n = std::min(n, N);
-            int par = node;
-            for (int d = 0; n; ++d, n /= 2) {
-                if (n & 1) par = parent[d][par].first;
-            }
-            return par;
-        }
+    //     // O(N) Find the path with the shortest distance, between nodes `u` and `v`
+    //     // @returns u vector of nodes on the path, starting from `u` and ending with `v`
+    //     std::vector<int> getPath(int u, int v) {
+    //         std::vector<int> path;
+    //         int mid = lca(u, v);
+    //         for (int node = u; node != mid; node = jmp[0][node].first) path.push_back(node);
+    //         path.push_back(mid);
 
-        // O(log N) Finds the shortest distance between nodes `u` and `v`, by traversing `u` -> `lca(u, v)` -> `v`
-        T dist(int u, int v) {
-            int targetDepth = depth[lca(u, v)];
-            T total = T(0);
-            for (int d = LOG_MAXN; d >= 0; --d) {
-                if (depth[parent[d][u].first] >= targetDepth) {
-                    total += parent[d][u].second;
-                    u = parent[d][u].first;
-                }
-                if (depth[parent[d][v].first] >= targetDepth) {
-                    total += parent[d][v].second;
-                    v = parent[d][v].first;
-                }
-            }
+    //         int midLen = path.size();
+    //         for (int node = v; node != mid; node = jmp[0][node].first) path.push_back(node);
+    //         reverse(path.begin() + midLen, path.end());
 
-            return total;
-        }
+    //         return path;
+    //     }
 
-        // O(N) Find the path with the shortest distance, between nodes `u` and `v`
-        // @returns u vector of nodes on the path, starting from `u` and ending with `v`
-        std::vector<int> getPath(int u, int v) {
-            std::vector<int> path;
-            int mid = lca(u, v);
-            for (int node = u; node != mid; node = parent[0][node].first) path.push_back(node);
-            path.push_back(mid);
+    // private:
+    //     // O(N) Finds the diameter - the simple path with the maximum distance
+    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
+    //     // @returns Distance of the path, and a vector of nodes representing the path
+    //     // @note Cannot have negative weight cycles
+    //     std::pair<int, T> _diameterPath(std::pair<std::pair<int, int>, T>& best, int root = 1) {
+    //         T furthest1 = T(0), furthest2 = T(0);
+    //         int node1 = root, node2 = -1;
 
-            int midLen = path.size();
-            for (int node = v; node != mid; node = parent[0][node].first) path.push_back(node);
-            reverse(path.begin() + midLen, path.end());
+    //         for (std::pair<int, T> child : children[root]) {
+    //             std::pair<int, T> path = _diameterPath(best, child.first);
+    //             path.second += child.second;
+    //             if (path.second > furthest1) {
+    //                 furthest2 = furthest1;
+    //                 node2 = node1;
 
-            return path;
-        }
+    //                 furthest1 = path.second;
+    //                 node1 = path.first;
+    //             }
+    //             else if (path.second > furthest2) {
+    //                 furthest2 = path.second;
+    //                 node2 = path.first;
+    //             }
+    //         }
 
-    private:
-        // O(N) Finds the diameter - the simple path with the maximum distance
-        // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
-        // @returns Distance of the path, and a vector of nodes representing the path
-        // @note Cannot have negative weight cycles
-        std::pair<int, T> _diameterPath(std::pair<std::pair<int, int>, T>& best, int root = 1) {
-            T furthest1 = T(0), furthest2 = T(0);
-            int node1 = root, node2 = -1;
+    //         if (node1 != -1 && node2 != -1) {
+    //             if (furthest1 + furthest2 > best.second) {
+    //                 best = { {node1, node2}, furthest1 + furthest2 };
+    //             }
+    //         }
 
-            for (std::pair<int, T> child : children[root]) {
-                std::pair<int, T> path = _diameterPath(best, child.first);
-                path.second += child.second;
-                if (path.second > furthest1) {
-                    furthest2 = furthest1;
-                    node2 = node1;
+    //         return { node1, furthest1 };
+    //     }
 
-                    furthest1 = path.second;
-                    node1 = path.first;
-                }
-                else if (path.second > furthest2) {
-                    furthest2 = path.second;
-                    node2 = path.first;
-                }
-            }
+    // public:
+    //     // O(N) Returns the end points of the diameter (the longest simple path through the tree)
+    //     std::pair<int, int> diameterPath() {
+    //         std::pair<std::pair<int, int>, T> best = { {-1, -1}, T(0) };
+    //         _diameterPath(best);
+    //         return best.first;
+    //     }
 
-            if (node1 != -1 && node2 != -1) {
-                if (furthest1 + furthest2 > best.second) {
-                    best = { {node1, node2}, furthest1 + furthest2 };
-                }
-            }
+    //     // O(N) Returns the length of the diameter (the longest simple path through the tree) 
+    //     int diameterDist() {
+    //         std::pair<std::pair<int, int>, T> best = { {-1, -1}, T(0) };
+    //         _diameterPath(best);
+    //         return best.second;
+    //     }
 
-            return { node1, furthest1 };
-        }
+    // private:
+    //     // O(N) DFS to find in-order traversal, assuming tree is a binary tree
+    //     std::vector<int> _inOrder(std::vector<int>& traversal, int node = 1) {
+    //         assert(children[node].size() <= 2 && "In-order traversals are only valid in binary trees");
+    //         if (children[node].size() > 0) _inOrder(traversal, children[node][0].first);
+    //         traversal.push_back(node);
+    //         if (children[node].size() > 1) _inOrder(traversal, children[node][1].first);
+    //         return traversal;
+    //     }
 
-    public:
-        // O(N) Returns the end points of the diameter (the longest simple path through the tree)
-        std::pair<int, int> diameterPath() {
-            std::pair<std::pair<int, int>, T> best = { {-1, -1}, T(0) };
-            _diameterPath(best);
-            return best.first;
-        }
+    //     // O(N) DFS to find a tree traversal
+    //     // @param `pushPre` Whether to add the node to the traversal before exploring children
+    //     // @param `pushPost` Whether to add the node to the traversal after exploring children
+    //     std::vector<int> _multiOrder(std::vector<int>& traversal, bool pushPre, bool pushPost, int node = 1) {
+    //         if (pushPre) traversal.push_back(node);
+    //         for (std::pair<int, T> child : children[node]) _multiOrder(traversal, pushPre, pushPost, child.first);
+    //         if (pushPost) traversal.push_back(node);
+    //         return traversal;
+    //     }
 
-        // O(N) Returns the length of the diameter (the longest simple path through the tree) 
-        int diameterDist() {
-            std::pair<std::pair<int, int>, T> best = { {-1, -1}, T(0) };
-            _diameterPath(best);
-            return best.second;
-        }
+    // public:
+    //     // O(N) Finds in-order traversal, assuming tree is a binary tree
+    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
+    //     std::vector<int> inOrder(int root = 1) {
+    //         std::vector<int> traversal;
+    //         return _inOrder(traversal, root);
+    //     }
 
-    private:
-        // O(N) DFS to find in-order traversal, assuming tree is a binary tree
-        std::vector<int> _inOrder(std::vector<int>& traversal, int node = 1) {
-            assert(children[node].size() <= 2 && "In-order traversals are only valid in binary trees");
-            if (children[node].size() > 0) _inOrder(traversal, children[node][0].first);
-            traversal.push_back(node);
-            if (children[node].size() > 1) _inOrder(traversal, children[node][1].first);
-            return traversal;
-        }
+    //     // O(N) Finds pre-order traversal
+    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
+    //     std::vector<int> preOrder(int root = 1) {
+    //         std::vector<int> traversal;
+    //         return _multiOrder(traversal, true, false, root);
+    //     }
 
-        // O(N) DFS to find a tree traversal
-        // @param `pushPre` Whether to add the node to the traversal before exploring children
-        // @param `pushPost` Whether to add the node to the traversal after exploring children
-        std::vector<int> _multiOrder(std::vector<int>& traversal, bool pushPre, bool pushPost, int node = 1) {
-            if (pushPre) traversal.push_back(node);
-            for (std::pair<int, T> child : children[node]) _multiOrder(traversal, pushPre, pushPost, child.first);
-            if (pushPost) traversal.push_back(node);
-            return traversal;
-        }
+    //     // O(N) Finds post-order traversal
+    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
+    //     std::vector<int> postOrder(int root = 1) {
+    //         std::vector<int> traversal;
+    //         return _multiOrder(traversal, false, true, root);
+    //     }
 
-    public:
-        // O(N) Finds in-order traversal, assuming tree is a binary tree
-        // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
-        std::vector<int> inOrder(int root = 1) {
-            std::vector<int> traversal;
-            return _inOrder(traversal, root);
-        }
-
-        // O(N) Finds pre-order traversal
-        // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
-        std::vector<int> preOrder(int root = 1) {
-            std::vector<int> traversal;
-            return _multiOrder(traversal, true, false, root);
-        }
-
-        // O(N) Finds post-order traversal
-        // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
-        std::vector<int> postOrder(int root = 1) {
-            std::vector<int> traversal;
-            return _multiOrder(traversal, false, true, root);
-        }
-
-        // O(N) Finds euler tour traversal
-        // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
-        std::vector<int> eulerTour(int root = 1) {
-            std::vector<int> traversal;
-            return _multiOrder(traversal, true, true, root);
-        }
+    //     // O(N) Finds euler tour traversal
+    //     // @param `root` If specified, consider its connected component. Otherwise consider the whole tree
+    //     std::vector<int> eulerTour(int root = 1) {
+    //         std::vector<int> traversal;
+    //         return _multiOrder(traversal, true, true, root);
+    //     }
+    // };
     };
+
+    template<size_t maxV>
+    using UnweightedDiTree = Tree<maxV, UnitEdgeWeight, int, true>;
+    template<size_t maxV>
+    using DirectedUnweightedTree = Tree<maxV, UnitEdgeWeight, int, true>;
+
+    template<size_t maxV>
+    using WeightedDiTree = Tree<maxV, int, int, true>;
+    template<size_t maxV>
+    using DirectedWeightedTree = Tree<maxV, int, int, true>;
+
+    template<size_t maxV>
+    using WeightedTree = Tree<maxV, int, int, false>;
+    template<size_t maxV>
+    using UndirectedWeightedTree = Tree<maxV, int, int, false>;
+
+    template<size_t maxV>
+    using UnWeightedTree = Tree<maxV, UnitEdgeWeight, int, false>;
+    template<size_t maxV>
+    using UndirectedUnweightedTree = Tree<maxV, UnitEdgeWeight, int, false>;
 };

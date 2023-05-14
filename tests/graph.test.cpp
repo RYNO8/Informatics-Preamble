@@ -16,9 +16,9 @@ using namespace DS;
  * 
  */
 void testDigraph() {
-    using DiGraph = Graph<10, UnitEdgeWeight, int, true>;
+    using DiGraph = UnweightedDiGraph<10>;
     stringstream s1;
-    s1 << R""""(
+    s1 << R"(
 4 6
 1 2
 2 1
@@ -26,7 +26,7 @@ void testDigraph() {
 3 1
 2 3
 2 4
-)"""";
+)";
     size_t N1, M1;
     s1 >> N1 >> M1;
     vector<DiGraph::Edge> e(M1);
@@ -47,6 +47,8 @@ void testDigraph() {
         DiGraph::Edge(3, 1),
     }));
     assert(G1.getEdgesOut(3) == vector<DiGraph::Edge>({ DiGraph::Edge(3, 1) }));
+    assert(G1.getSources() == vector<DiGraph::Node>({}));
+    assert(G1.getSinks() == vector<DiGraph::Node>({ 4}));
     assert(G1.containsEdge(DiGraph::Edge(1, 2)));
     assert(G1.containsEdge(DiGraph::Edge(2, 1)));
     assert(!G1.containsEdge(DiGraph::Edge(3, 4)));
@@ -140,7 +142,7 @@ void testDigraph() {
 void testGraph() {
     using MyGraph = Graph<20, UnitEdgeWeight, int, false>;
     stringstream s2;
-    s2 << R""""(
+    s2 << R"(
 10 11
 1 7
 1 8
@@ -153,7 +155,7 @@ void testGraph() {
 2 4
 3 4
 10 9
-)"""";
+)";
     size_t N2, M2;
     s2 >> N2 >> M2;
     vector<MyGraph::Edge> e(M2);
@@ -211,11 +213,11 @@ void testGraph() {
 void testWeightedGraph() {
     using WeightedGraph = Graph<20, int, int, false>;
     stringstream s3;
-    s3 << R""""(
+    s3 << R"(
 3 2
 1 2 10
 2 3 -1
-)"""";
+)";
     size_t N3, M3;
     s3 >> N3 >> M3;
     vector<WeightedGraph::Edge> e(M3);

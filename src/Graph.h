@@ -74,8 +74,8 @@ namespace DS {
         // Whether edges are directed or bidirectional
         bool isDirectedEdges = false,
         std::enable_if_t<
-            (std::is_integral_v<PathWeight_> || std::is_floating_point_v<PathWeight_>) &&
-            (maxV != 0)
+            std::is_arithmetic_v<PathWeight_> &&
+            maxV != 0
         , bool> = true
     >
     class Graph {
@@ -89,7 +89,7 @@ public:
         // id of node is an unsigned integer
         using Node = size_t;
         using MyGraph = Graph<maxV, EdgeWeight, PathWeight, isDirectedEdges>;
-        PathWeight MAX_WEIGHT = std::numeric_limits<PathWeight>::max(); // TODO: make compile time?
+        constexpr static PathWeight MAX_WEIGHT = std::numeric_limits<PathWeight>::max();
 
         // Edges are represented internaly as (u, v) with weight w
         // Undirected edges are either (u, v) or (v, u), which are interfaced with as such
@@ -166,7 +166,11 @@ public:
             }
 
             friend std::ostream& operator<<(std::ostream &out, Edge &e) {
-                out << e.u << "--" << e.v << " (w = " << e.w << ')';
+                if constexpr (isDirectedEdges) {
+                    out << e.u << "->" << e.v << " (w = " << e.w << ')';
+                } else {
+                    out << e.u << "--" << e.v << " (w = " << e.w << ')';
+                }
                 return out;
             }
         };
@@ -352,7 +356,7 @@ public:
         // O(E)
         // Finds the edges that travel into `node`
         // @returns The imutable collection of incoming edges incident to this node
-        std::vector<Edge> getEdgesIn(Node node) const {
+        const std::vector<Edge> getEdgesIn(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             return std::vector<Edge>(edgesIn[node].begin(), edgesIn[node].end());
         }
@@ -360,7 +364,7 @@ public:
         // O(E)
         // Finds the edges that travel out of `node`
         // @returns The imutable collection of outgoing edges incident to this node
-        std::vector<Edge> getEdgesOut(Node node) const {
+        const std::vector<Edge> getEdgesOut(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             return std::vector<Edge>(edgesOut[node].begin(), edgesOut[node].end());
         }
@@ -378,7 +382,7 @@ public:
 
         // O(E)
         // @returns The imutable collection of neighbours reachable from `node` via 1 edge
-        std::vector<Node> getNeighboursIn(Node node) const {
+        const std::vector<Node> getNeighboursIn(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             std::vector<Node> out;
             for (const Edge e : edgesIn[node]) {
@@ -389,11 +393,37 @@ public:
 
         // O(E)
         // @returns The imutable collection of neighbours which reach `node` via 1 edge
-        std::vector<Node> getNeighboursOut(Node node) const {
+        const std::vector<Node> getNeighboursOut(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             std::vector<Node> out;
             for (const Edge e : getEdgesOut(node)) {
                 out.push_back(e.otherSide(node));
+            }
+            return out;
+        }
+
+        // O(E)
+        // @returns The imutable collection of nodes which can be the start of a topsort
+        const std::vector<Node> getSources() const {
+            assert(isDirected() && "cannot find sources of undirected graph");
+            std::vector<Node> out;
+            for (const Node node : nodes) {
+                if (degreeIn(node) == 0) {
+                    out.push_back(node);
+                }
+            }
+            return out;
+        }
+
+        // O(E)
+        // @returns The imutable collection of nodes which can be the end of a topsort
+        const std::vector<Node> getSinks() const {
+            assert(isDirected() && "cannot find sources of undirected graph");
+            std::vector<Node> out;
+            for (const Node node : nodes) {
+                if (degreeOut(node) == 0) {
+                    out.push_back(node);
+                }
             }
             return out;
         }
@@ -1383,6 +1413,26 @@ public:
         // TODO: optimal colouring
         // TODO: planar embedding?
     };
+
+    template<size_t maxV>
+    using UnweightedDiGraph = Graph<maxV, UnitEdgeWeight, int, true>;
+    template<size_t maxV>
+    using DirectedUnweightedGraph = Graph<maxV, UnitEdgeWeight, int, true>;
+
+    template<size_t maxV>
+    using WeightedDiGraph = Graph<maxV, int, int, true>;
+    template<size_t maxV>
+    using DirectedWeightedGraph = Graph<maxV, int, int, true>;
+
+    template<size_t maxV>
+    using WeightedGraph = Graph<maxV, int, int, false>;
+    template<size_t maxV>
+    using UndirectedWeightedGraph = Graph<maxV, int, int, false>;
+
+    template<size_t maxV>
+    using UnWeightedGraph = Graph<maxV, UnitEdgeWeight, int, false>;
+    template<size_t maxV>
+    using UndirectedUnweightedGraph = Graph<maxV, UnitEdgeWeight, int, false>;
 };
 
 #endif

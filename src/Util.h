@@ -1,16 +1,17 @@
 #ifndef UTIL_H
 #define UTIL_H
+#include <unordered_map>
+#include <unordered_set>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
+#include <utility>
 #include <vector>
 #include <queue>
 #include <stack>
 #include <deque>
 #include <map>
-#include <unordered_map>
 #include <set>
-#include <unordered_set>
-#include <sstream>
 #include "Constants.h"
 
 
@@ -333,6 +334,16 @@ namespace DS {
         std::stringstream s;
         s << obj;
         return s.str();
+    }
+
+    std::string repeat(const std::string& input, size_t num) {
+        std::ostringstream os;
+        std::fill_n(std::ostream_iterator<std::string>(os), num, input);
+        return os.str();
+    }
+
+    std::string operator*(std::string str, std::size_t n) {
+        return repeat(std::move(str), n);
     }
 
     // whats the units?

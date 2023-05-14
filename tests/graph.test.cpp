@@ -3,6 +3,7 @@
 #include <sstream>
 #include "../src/Graph.h"
 #include "../src/Util.h"
+#include "helpers.h"
 using namespace std;
 using namespace DS;
 
@@ -37,15 +38,15 @@ void testDigraph() {
     assert(repr(G1) == "1: 2 3\n2: 1 3 4\n3: 1\n4:\n");
     assert(G1.V() == 4 && G1.N() == 4);
     assert(G1.E() == 6 && G1.M() == 6);
-    assert(G1.getNodes() == vector<DiGraph::Node>({1, 2, 3, 4}));
-    assert(G1.getEdges() == vector<DiGraph::Edge>({
+    assert(unordered_eq(G1.getNodes(), vector<DiGraph::Node>({1, 2, 3, 4})));
+    assert(unordered_eq(G1.getEdges(), vector<DiGraph::Edge>({
         DiGraph::Edge(1, 2),
         DiGraph::Edge(1, 3),
         DiGraph::Edge(2, 1),
         DiGraph::Edge(2, 3),
         DiGraph::Edge(2, 4),
         DiGraph::Edge(3, 1),
-    }));
+    })));
     assert(G1.getEdgesOut(3) == vector<DiGraph::Edge>({ DiGraph::Edge(3, 1) }));
     assert(G1.getSources() == vector<DiGraph::Node>({}));
     assert(G1.getSinks() == vector<DiGraph::Node>({ 4}));

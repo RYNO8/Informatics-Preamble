@@ -336,15 +336,26 @@ namespace DS {
         return s.str();
     }
 
-    std::string repeat(const std::string& input, size_t num) {
-        std::ostringstream os;
-        std::fill_n(std::ostream_iterator<std::string>(os), num, input);
+    template<typename T> std::basic_string<T> repeat(const std::basic_string<T>& input, size_t num) {
+        std::basic_stringstream<T> os;
+        std::fill_n(std::ostream_iterator<std::basic_string<T>, T>(os), num, input);
         return os.str();
     }
 
-    std::string operator*(std::string str, std::size_t n) {
+    template<typename T> std::basic_string<T> operator*(std::basic_string<T> str, std::size_t n) {
         return repeat(std::move(str), n);
     }
+
+
+    // std::wstring repeat(const std::wstring& input, size_t num) {
+    //     std::wstringstream os;
+    //     std::fill_n(std::ostream_iterator<std::wstring, wchar_t>(os), num, input);
+    //     return os.str();
+    // }
+
+    // std::wstring operator*(std::wstring str, std::size_t n) {
+    //     return repeat(std::move(str), n);
+    // }
 
     // whats the units?
     double timeNow() {

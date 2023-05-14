@@ -3,39 +3,51 @@
 #include "Constants.h"
 #include "Graph.h"
 #include <limits>
+#include <type_traits>
 
 constexpr size_t numberOfBits(size_t x) {
     return x < 2 ? x : 1 + numberOfBits(x >> 1);
 }
 
 namespace DS {
+    constexpr size_t TREE_PRINT_SPACING = 2;
+
     // Tree
     // @note: does not preserve/store order of children nodes
+    // @note: there is no distinction between weighted and unweighted trees
+    // because all algorithms can be applied regardless
+    // @note: asserts that Weight() is the 0 (and minimum) weight
+    // @note: My definition: root is never a leaf
     template<
         // Max number of nodes allowed
         size_t maxV,
         // accumulation of weight data over many edges
         typename Weight_,
         std::enable_if_t<
-            (std::is_arithmetic_v<Weight_> || std::is_same_v<Weight_, UnitEdgeWeight>) &&
+            std::is_arithmetic_v<Weight_> &&
+            Weight_() == std::numeric_limits<Weight_>::min() &&
             maxV != 0
         , bool> = true
     >
     class Tree {
-public:
         /************************************************
          *                 INITIALISATION               *
          ************************************************/
 
+public:
         using Weight = Weight_;
         // id of node is an unsigned integer
         using Node = size_t;
         using Depth = size_t;
-        using MyTree = Tree<maxV, Weight>;
+        
         constexpr static Weight MAX_WEIGHT = std::numeric_limits<Weight>::max(); 
         constexpr static Depth logMaxV = numberOfBits(maxV);
         constexpr static Depth INVALID_DEPTH = std::numeric_limits<Depth>::max();
 
+private:
+        using MyTree = Tree<maxV, Weight>;
+
+public:
         // Edges are represented internaly as (u, v) with weight w
         // u is the jmp, v is the child
         // NOTE: allowing self cycles, because the root has an edge to itself in lca
@@ -43,16 +55,14 @@ public:
             Node u = 0, v = 0;
             Weight w = Weight(1);
 
-            Edge() {
-                
+            Edge() {}
+
+            Edge(Node u_, Node v_) : u(u_), v(v_) {
+                assert(u < maxV && v < maxV && "Node index out of range");
             }
 
-            // Edge(Node u_, Node v_, EdgeWeight w_) : u(u_), v(v_), w(Weight() + w_) {
-            //     assert(u != v && "Self cycles do not exist in trees");
-            //     assert(u < maxV && v < maxV && "Node index out of range");
-            // }
-
-            Edge(Node u_, Node v_, Weight w_) : u(u_), v(v_), w(w_) {
+            template<typename ForeignWeight>
+            Edge(Node u_, Node v_, ForeignWeight w_) : u(u_), v(v_), w(Weight() + w_) {
                 assert(u < maxV && v < maxV && "Node index out of range");
             }
 
@@ -99,6 +109,8 @@ public:
         // };
 
         // arbitary total order of edges
+
+private:
         struct EdgeComp {
             bool operator() (const Edge &a, const Edge &b) const {
                 if (a.u != b.u) return a.u < b.u;
@@ -106,23 +118,28 @@ public:
             }
         };
 
-private:
+        // root node
+        // must be a valid node
         Node root;
-        std::vector<Node> nodes; // not garunteed sorted!
-        // depth of root is 0, depth of invalid node is INVALID, +1 for each child
+
+        // not garunteed sorted!
+        std::vector<Node> nodes;
+
+        // `depth[node]` is the number of edges between `node` and `root`
+        // depth of invalid nodes is `INVALID_DEPTH`
         Depth depth[maxV];
+
         // height of root is 0, height of invalid node should not be accessed, +w for each child
+        // height of invalid nodes should not be accessed
         Weight height[maxV];
 
-        // TODO: is it reasonable to support multiset?
-        // TODO: `edgesIn` and `edgesOut` store copies of each edge - not memory efficient?
-        // A set of all edges
-        std::set<Edge, EdgeComp> edges;
-        // `jmp[d][node]` is the jmp which is 2^d steps higher than `node`, so `jmp[0][node]` is the direct jmp
-        Edge jmp[logMaxV + 1][maxV];
         // `children[node]` is a vector of children, where each child is a (node, weight) pair
+        // children of invalid nodes should not be accessed
         std::set<Edge, EdgeComp> children[maxV];
-        // `depth[node]` is the distance from node 1, with `depth[1] = 1`
+
+        // `jmp[d][node]` is the jmp which is 2^d steps higher than `node`, so `jmp[0][node]` is the direct jmp
+        // jump of invalid nodes should not be accessed
+        Edge jmp[logMaxV + 1][maxV];
 
         // O(N log N) Builds `jmps` from [1..LOG_MAXN], assuming `jmps[0]` has been built
         void buildJumpPtrs(const std::vector<Node> &todo) {
@@ -139,9 +156,15 @@ private:
 
 public:
         // O(V)
-        // Initialises an empty graph with no nodes
-        Tree() {
+        // Initialises a singleton tree with the node labeled `root`
+        Tree(Node root_): root(root_) {
             std::fill(std::begin(depth), std::end(depth), INVALID_DEPTH);
+            nodes = { root };
+            depth[root] = 0;
+            height[root] = Weight();
+            children[root] = {};
+            jmp[0][root] = 0;
+            buildJumpPtrs(nodes);
         }
 
         // O(V log V)
@@ -154,22 +177,23 @@ public:
             
             std::fill(std::begin(depth), std::end(depth), -1);
             
-            std::function<void(Node, int)> buildDfs;
-            buildDfs = [&](Node node, int d) {
+            std::function<void(Node, Depth, Weight)> buildDfs;
+            buildDfs = [&](Node node, Depth d, Weight h) {
                 nodes.push_back(node);
                 depth[node] = d;
+                height[node] = h;
                 for (auto edge : G.getEdges(node)) {
                     Node child = edge.otherSide(node);
                     if (depth[child] == INVALID_DEPTH) {
                         Edge treeEdge = Edge(node, child, Weight() + edge.w);
                         children[node].insert(treeEdge);
                         jmp[0][child] = treeEdge;
-                        buildDfs(child, d + 1);
+                        buildDfs(child, d + 1, h + edge.w);
                     }
                 }
             };
             jmp[0][root] = Edge(root, root, Weight());
-            buildDfs(root, 0);
+            buildDfs(root, 0, Weight());
             
             buildJumpPtrs(nodes);
         }
@@ -181,13 +205,16 @@ public:
 
             std::fill(std::begin(depth), std::end(depth), -1);
 
-            for (Node node = 1; node <= V; ++node) {
+            nodes.push_back(1);
+            depth[root] = 0;
+            height[root] = Weight();
+            jmp[0][root] = 0;
+            for (Node node = 2; node <= V; ++node) {
                 nodes.push_back(node);
-                depth[node] = node - 1;
-                if (node < V) {
-                    edges.insert(Edge(node, node + 1, w));
-                    children[node + 1].insert(node);
-                }
+                depth[node] = depth[node - 1] + 1;
+                height[node] = height[node - 1] + w;
+                children[node - 1].push(Edge(node - 1, node, w));
+                jmp[0][node] = Edge(node - 1, node, w);
             }
 
             buildJumpPtrs(nodes);
@@ -215,6 +242,300 @@ public:
             return out;
         }
 
+        // O(maxV)
+        // trying to do it with minimal additional memory is too painful
+        // friend std::ostream& operator<<(std::ostream &out, const MyTree *tree) {
+        //     size_t spacing = 1;
+        //     std::vector<size_t> offset(maxV, 0);
+        //     std::function<size_t(Node, size_t)> findSize;
+        //     findSize = [&](Node node, size_t currOffset) {
+        //         if (tree->numChildren(node) == 0) {
+        //             offset[node] = currOffset;
+        //             return repr(node).size();
+        //         } else if (tree->numChildren(node) == 1) {
+        //             Node child = tree->getChildren(node)[0];
+        //             size_t childSize = findSize(child, currOffset);
+        //             offset[node] = currOffset;
+        //             return std::max(childSize, repr(node).size());
+        //         } else if (tree->numChildren(node) == 2) {
+        //             Node leftChild = tree->getChildren(node)[0];
+        //             Node rightChild = tree->getChildren(node)[1];
+        //             size_t leftSize = findSize(leftChild, currOffset);
+        //             offset[node] = currOffset + leftSize + spacing;
+        //             size_t rightSize = findSize(rightChild, currOffset + leftSize + spacing + repr(node).size() + spacing);
+        //             return leftSize + spacing + repr(node).size() + spacing + rightSize;
+        //         } else {
+        //             assert(false && "Cannot print non binary tree in binary format, use `out << tree` instead");
+        //         }
+        //     };
+        //     findSize(tree->root, 0);
+
+        //     std::vector<Node> bfsOrder = tree->getBfsOrder();
+        //     size_t i = 0;
+        //     for (Depth d = 0; i < bfsOrder.size(); ++d) {
+        //         size_t currOffset = 0;
+        //         for ( ; i < bfsOrder.size() && tree->depth[bfsOrder[i]] == d; ++i) {
+        //             while (currOffset < offset[bfsOrder[i]]) {
+        //                 out << ' ';
+        //                 currOffset++;
+        //             }
+        //             out << bfsOrder[i];
+        //             currOffset += repr(bfsOrder[i]).size();
+        //         }
+        //         out << '\n';
+        //     }
+
+        //     return out;
+        // }
+
+private:
+        // additional requirement that all lines have equal length
+        struct Display {
+            size_t width;
+            std::deque<std::string> display;
+            size_t offset = 0;
+
+            void operator+=(Display o) {
+                while (display.size() < o.display.size()) {
+                    display.push_back(std::string(" ") * width);
+                }
+                for (size_t i = 0; i < display.size(); ++i) {
+                    display[i] += i < o.display.size() ? o.display[i] : std::string(" ") * o.width;
+                }
+                width += o.width;
+            }
+
+            friend std::ostream& operator<<(std::ostream& out, Display d) {
+                for (std::string line: d.display) {
+                    out << line << '\n';
+                }
+                return out;
+            }
+        };
+
+
+        Display print(Node node) const {
+            std::string nodeData = repr(node);
+            if (children[node].empty()) {
+                return Display{
+                    nodeData.size() + TREE_PRINT_SPACING, 
+                    { nodeData + std::string(" ") * TREE_PRINT_SPACING },
+                    nodeData.size() / 2
+                };
+            }
+
+            std::vector<size_t> offsets;
+            Display d = Display{0, {}};
+            for (Node child: getChildren(node)) {
+                Display childDisplay = print(child);
+                offsets.push_back(d.width + childDisplay.offset);
+                d += childDisplay;
+            }
+
+            d.offset = (offsets.front() + offsets.back()) / 2;
+
+            std::string header;
+            size_t i = 0;
+            for (; i < offsets[0]; ++i) header += " ";
+            for (size_t offsetI = 0; offsetI < offsets.size(); i++, offsetI++) {
+                for (; i < offsets[offsetI]; ++i) header += i == d.offset ? "┴" : "─";
+                if (offsets.size() == 1) {
+                    header += i == d.offset ? "│" : "│";
+                } else if (offsetI == 0) {
+                    header += i == d.offset ? "├" : "┌";
+                } else if (offsetI == offsets.size() - 1) {
+                    header += i == d.offset ? "┤" : "┐";
+                } else {
+                    header += i == d.offset ? "┼" : "┬";
+                }
+            }
+            for (; i < d.width; ++i) header += " ";
+
+            d.display.push_front(header);
+            d.display.push_front(
+                std::string(" ") * (d.offset - nodeData.size() / 2) + 
+                nodeData +
+                std::string(" ") * (d.width - d.offset + nodeData.size() / 2 - nodeData.size())
+            );
+            return d;
+        };
+
+public:
+        // O(maxV ^ 2) probably
+        friend std::ostream& operator<<(std::ostream &out, const MyTree *tree) {
+            out << tree->print(tree->root);
+            return out;
+        }
+
+
+        /************************************************
+         *                  PROPERTIES                  *
+         ************************************************/
+
+        size_t size() const {
+            return nodes.size();
+        }
+
+        // @returns `V`, the number of nodes
+        size_t V() const {
+            return nodes.size();
+        }
+        // @returns `V`, the number of nodes
+        size_t N() const {
+            return nodes.size();
+        }
+
+        // O(1)
+        // @returns `E`, the number of edges
+        size_t E() const {
+            return nodes.size() - 1;
+        }
+        // O(1)
+        // @returns `E`, the number of edges
+        size_t M() const {
+            return nodes.size() - 1;
+        }
+
+        // O(1)
+        // @returns the root of the tree
+        Node getRoot() const {
+            return root;
+        }
+
+        // O(1)
+        // @returns the imutable set of all ndoes
+        const std::vector<Node> getNodes() const {
+            return nodes;
+        }
+
+        // O(V)
+        // @returns the imutable set of all edges
+        // @note Edges sorted by endpoints
+        std::vector<Edge> getEdges() const {
+            std::vector<Edge> out;
+            out.reserve(E()); // optimisation
+            for (Node node: nodes) {
+                out.insert(out.end(), children[node].begin(), children[node].end());
+            }
+            return out;
+        }
+
+        /************************************************
+         *                INCIDENT DATA                 *
+         ************************************************/
+
+        // O(num children) = O(V)
+        // @returns The imutable collection of edges (to children) incident to this node
+        const std::vector<Edge> getEdges(Node node) const {
+            assert(containsNode(node) && "Node index out of range");
+            return std::vector<Edge>(children[node].begin(), children[node].end());
+        }
+
+        // O(num children) = O(V)
+        // @returns The imutable colelction of children, in sorted order
+        const std::vector<Node> getChildren(Node node) const {
+            assert(containsNode(node) && "Node index out of range");
+            std::vector<Node> out;
+            for (const Edge e : getEdges(node)) {
+                out.push_back(e.otherSide(node));
+            }
+            return out;
+        }
+
+        // O(1)
+        // @returns The total degree of `node`, including the parent (if there is one)
+        size_t degree(Node node) const {
+            assert(containsNode(node) && "Node index out of range");
+            return children[node].size() + (node != root);
+        }
+
+        // O(1)
+        // @returns The number of children of `node`
+        size_t numChildren(Node node) const {
+            assert(containsNode(node) && "Node index out of range");
+            return children[node].size();
+        }
+
+        /************************************************
+         *               TREE MODIFICATIONS             *
+         ************************************************/
+
+        // O(log V)
+        // Add a edge from an existing node (parent) to a new node, or error if this isn't possible
+        void insert(Edge e) {
+            // NOTE: this check is duplicated, but included for clear error messages
+            assert(containsNode(e.u) && "Parent node of edge already in graph");
+            assert(!containsNode(e.v) && "Child node of edge already in graph");
+
+            depth[e.v] = depth[e.u] + 1;
+            height[e.v] = height[e.u] + e.w;
+            children[e.u].insert(e);
+            jmp[0][e.v] = e;
+            buildJumpPtrs({ e.v });
+        }
+
+        // O(log V)
+        // If the specified edge (with any edge weight) is present, remove it, otherwise silently do nothing
+        // @note Can only remove edges incident to non-root leaves
+        void erase(Node node) {
+            assert(isLeaf(node) && "Only supports removing edges incident to leaves");
+
+            Node par = children[jmp[0][node]];
+            depth[node] = INVALID_DEPTH;
+            children[par].erase(children[par].lower_bound(Edge(par, node, Weight())));
+            // NOTE: left jump pointers as is
+            // remember to not touch jump pointers if node is invalid
+        }
+
+        /************************************************
+         *                    CONTAINS                  *
+         ************************************************/
+
+        // O(1)
+        // @returns whether `node` is within the acceptable bounds
+        bool isNode(Node node) const {
+            // NOTE: dont need to check 0 <= node, because Node=size_t
+            return node < maxV;
+        }
+
+        // O(1)
+        // @returns whether `node` is in the vertex set of this graph
+        bool containsNode(Node node) const {
+            // NOTE: dont need to check 0 <= node, because Node=size_t
+            return node < maxV && depth[node] != INVALID_DEPTH;
+        }
+
+        // O(log E)
+        // @returns Whether the specified edge (with any weight) is contained in the graph
+        bool containsEdge(Edge e) const {
+            if (!containsNode(e.u) || !containsNode(e.v)) return false;
+            auto edgeIt = children[e.u].find(e);
+            return edgeIt != children[e.u].end() && edgeIt->w == e.w;
+        }
+
+        // O(log E)
+        // @returns Whether the specified edge (with the specific weight) is contained in the graph
+        bool containsEdgeUnweighted(Edge e) const {
+            if (!containsNode(e.u) || !containsNode(e.v)) return false;
+            return children[e.u].count(e);
+        }
+
+        // O(log E)
+        // @returns the weight of the edge between nodes u and v, if it exists
+        // @return default otherwise
+        Weight getEdge(Node u, Node v, Weight defaultWeight) {
+            if (!containsNode(u) || !containsNode(v)) return defaultWeight;
+            auto edgeIt = children[u].find(Edge(u, v));
+            return edgeIt == children[u].end() ? defaultWeight: edgeIt->w;
+        }
+
+
+
+
+
+
+
+
         // TODO: stub pls fix
         bool isBinary() const {
             for (Node node : nodes) {
@@ -234,226 +555,17 @@ public:
             return out;
         }
 
-        // O(maxV)
-        void printBinary(std::ostream &out) const {
-            std::vector<size_t> offset(maxV, 0);
-            std::function<size_t(Node, size_t)> findSize;
-            findSize = [&](Node node, size_t currOffset) {
-                if (children[node].size() == 0) {
-                    offset[node] = currOffset;
-                    return repr(node).size();
-                } else if (children[node].size() == 1) {
-                    Node child = getChildren(node)[0];
-                    size_t childSize = findSize(child, currOffset);
-                    offset[node] = currOffset;
-                    return std::max(childSize, repr(node).size());
-                } else if (children[node].size() == 2) {
-                    Node leftChild = getChildren(node)[0];
-                    Node rightChild = getChildren(node)[1];
-                    size_t leftSize = findSize(leftChild, currOffset);
-                    offset[node] = currOffset + leftSize;
-                    size_t rightSize = findSize(rightChild, currOffset + leftSize + repr(node).size());
-                    return leftSize + repr(node).size() + rightSize;
-                } else {
-                    assert(false && "Cannot print non binary tree in binary format, use `out << tree` instead");
-                }
-            };
-            findSize(root, 0);
-
-            std::vector<Node> bfsOrder = getBfsOrder();
-            size_t i = 0;
-            for (Depth d = 0; i < bfsOrder.size(); ++d) {
-                size_t currOffset = 0;
-                for ( ; i < bfsOrder.size() && depth[bfsOrder[i]] == d; ++i) {
-                    while (currOffset < offset[bfsOrder[i]]) {
-                        out << ' ';
-                        currOffset++;
-                    }
-                    out << bfsOrder[i];
-                    currOffset += repr(bfsOrder[i]).size();
-                }
-                out << '\n';
-            }
-        }
-
-
-        /************************************************
-         *                  PROPERTIES                  *
-         ************************************************/
-
-        // @note No `size()` because ambiguous, use the following functions instead
-
-        // @returns `V`, the number of nodes
-        size_t V() const {
-            return nodes.size();
-        }
-        // @returns `V`, the number of nodes
-        size_t N() const {
-            return nodes.size();
-        }
-
-        // O(1)
-        // @returns `E`, the number of edges
-        size_t E() const {
-            return edges.size();
-        }
-        // O(1)
-        // @returns `E`, the number of edges
-        size_t M() const {
-            return edges.size();
-        }
-
-        // @returns the imutable set of all ndoes
-        const std::vector<Node>& getNodes() const {
-            return nodes;
-        }
-
-        // O(E) = O(V)
-        // @returns the imutable set of all edges
-        // @note Edges sorted by endpoints
-        const std::vector<Edge> getEdges() const {
-            return std::vector<Edge>(edges.begin(), edges.end());
-        }
-
-        /************************************************
-         *                INCIDENT DATA                 *
-         ************************************************/
-
-        // O(num children) = O(V)
-        // @returns The imutable collection of unique edges incident to this node
-        const std::vector<Edge> getEdges(Node node) const {
-            assert(containsNode(node) && "Node index out of range");
-            return std::vector<Edge>(children[node].begin(), children[node].end());
-        }
-
-        // O(num children) = O(V)
-        // @returns The imutable colelction of unique neighbours, in sorted order
-        const std::vector<Node> getChildren(Node node) const {
-            assert(containsNode(node) && "Node index out of range");
-            std::vector<Node> out;
-            for (const Edge e : getEdges(node)) {
-                out.push_back(e.otherSide(node));
-            }
-            return out;
-        }
-
-        // O(1)
-        // @returns The total degree of `node`
-        // @note Counts parent (if there is one)
-        const size_t degree(Node node) const {
-            assert(containsNode(node) && "Node index out of range");
-            return children[node].size() + (node != root);
-        }
-
-        /************************************************
-         *               GRAPH MODIFICATIONS            *
-         ************************************************/
-
-
-        // O(log E)
-        // Add a edge from an existing node (parent) to a new node, or error if this isn't possible
-        void insert(Edge e) {
-            // NOTE: this check is duplicated, but included for clear error messages
-            assert(containsNode(e.u) && "Parent node of edge already in graph");
-            assert(!containsNode(e.v) && "Child node of edge already in graph");
-
-            depth[e.v] = depth[e.u] + 1;
-            edges.insert(e);
-            children[e.u].insert(e);
-            jmp[0][e.v] = e;
-            buildJumpPtrs({ e.v });
-        }
-
-        // O(log E)
-        // If the specified edge (with any edge weight) is present, remove it, otherwise silently do nothing
-        // @note Can only remove edges incident to non-root leaves
-        void eraseEdge(Edge e) {
-            if (!containsEdge(e)) return;
-
-            depth[e.v] = INVALID_DEPTH;
-            edges.erase(e);
-            children[e.u].erase(e);
-            // NOTE: left jump pointers as is, remember to not touch jump pointers
-            // if node is invalid
-        }
-
-
-        /************************************************
-         *                    CONTAINS                  *
-         ************************************************/
-
-        // @returns whether `node` is within the acceptable bounds
-        bool isNode(Node node) const {
-            // NOTE: dont need to check 0 <= node, because Node=size_t
-            return node < maxV;
-        }
-
-        // @returns whether `node` is in the vertex set of this graph
-        bool containsNode(Node node) const {
-            // NOTE: dont need to check 0 <= node, because Node=size_t
-            return node < maxV && depth[node] != INVALID_DEPTH;
-        }
-
-        // O(log E)
-        // @returns Whether the specified edge (with any edge weight) is contained in the graph
-        bool containsEdge(Edge e) const {
-            if (!containsNode(e.u) || !containsNode(e.v)) return false;
-            auto edgeIt = children[e.u].find(e);
-            return edgeIt != children[e.u].end() && edgeIt->w == e.w;
-        }
-
-        // O(log E)
-        // @returns Whether the specified edge is contained in the graph
-        bool containsEdgeUnweighted(Edge e) const {
-            if (!containsNode(e.u) || !containsNode(e.v)) return false;
-            return children[e.u].count(e);
-        }
-
-        // O(log E)
-        // @returns the weight of the edge between nodes u and v, if it exists
-        // @return default otherwise
-        Weight getEdge(Node u, Node v, Weight defaultWeight) {
-            if (!containsNode(u) || !containsNode(v)) return defaultWeight;
-            auto edgeIt = edges.find(Edge(u, v));
-            if (edgeIt == edges.end()) return defaultWeight;
-            else return edgeIt->w;
-        }
-
-    //     /************************************************
-    //      *                    UTILITY                   *
-    //      ************************************************/
-
-    //     // O(1) Gets the size of the tree - the number of nodes
-    //     size_t size() {
-    //         return N;
-    //     }
-
-    //     // O(1) Gets the depth of `node`
-    //     int getDepth(int node) {
-    //         return depth[node];
-    //     }
-    //     // O(N) Gets the children of `node`
-    //     std::vector<std::pair<int, T>> getChildren(int node) {
-    //         return children[node];
-    //     }
-
-    //     // O(N) Gets the neighbours (children and jmp) of `node`
-    //     std::vector<std::pair<int, T>> getNeigbours(int node) {
-    //         std::vector<std::pair<int, T>> neighbours = children[node];
-    //         neighbours.push_back(jmp[node]);
-    //         return neighbours;
-    //     }
-
     //     // O(N) Finds all descendants of `node`
     //     // @returns vector of nodes
     //     std::vector<int> getDescendants(int node = 1) {
     //         return preOrder(node); // lmao
     //     }
 
-    //     // O(1) Determines if `node` is a leaf node (has no children)
-    //     bool isLeaf(int node) {
-    //         return children[node].empty();
-    //     }
+        // O(1) Determines if `node` is a leaf node (has no children)
+        // @note From my own definition, root is never a leaf
+        bool isLeaf(Node node) {
+            return children[node].empty() && node != root;
+        }
 
     //     // /O(N) Finds the leaves (nodes that have no children) in ascending order
     //     std::vector<int> getLeaves() {
@@ -471,24 +583,6 @@ public:
     //         return total;
     //     }
 
-    //     // O(log N) Add a node to the tree, and return the index of the new node */
-    //     // @note Edge weight is ignored if the graph is unweighted
-    //     int addNode(int par, T w = T(1)) {
-    //         if (!isWeighted) w = T(1);
-
-    //         ++N;
-    //         jmp[0].push_back({ par, w });
-    //         for (int d = 0; d < LOG_MAXN; ++d) {
-    //             jmp[d + 1].push_back({
-    //                 jmp[d][jmp[d][N].first].first,
-    //                 jmp[d][N].second + jmp[d][jmp[d][N].first].second
-    //                 });
-    //         }
-    //         children[par].push_back({ N, w }); // make sure children[par] are still sorted
-    //         children.push_back({});
-    //         depth.push_back(depth[par] + 1);
-    //         return N;
-    //     }
 
     //     /************************************************
     //      *                   PROPERTIES                 *

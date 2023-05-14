@@ -513,12 +513,14 @@ public:
          *                    CONTAINS                  *
          ************************************************/
 
+        // O(1)
         // @returns whether `node` is within the acceptable bounds
         bool isNode(Node node) const {
             // NOTE: dont need to check 0 <= node, because Node=size_t
             return node < maxV;
         }
 
+        // O(1)
         // @returns whether `node` is in the vertex set of this graph
         bool containsNode(Node node) const {
             // NOTE: dont need to check 0 <= node, because Node=size_t

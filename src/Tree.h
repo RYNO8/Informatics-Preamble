@@ -10,15 +10,14 @@ constexpr size_t numberOfBits(size_t x) {
 
 namespace DS {
     // Tree
+    // @note: does not preserve/store order of children nodes
     template<
         // Max number of nodes allowed
         size_t maxV,
-        // weight data held for each edge
-        typename EdgeWeight_,
         // accumulation of weight data over many edges
-        typename PathWeight_,
+        typename Weight_,
         std::enable_if_t<
-            std::is_arithmetic_v<PathWeight_> &&
+            (std::is_arithmetic_v<Weight_> || std::is_same_v<Weight_, UnitEdgeWeight>) &&
             maxV != 0
         , bool> = true
     >
@@ -28,13 +27,12 @@ public:
          *                 INITIALISATION               *
          ************************************************/
 
-        using EdgeWeight = EdgeWeight_;
-        using PathWeight = PathWeight_;
+        using Weight = Weight_;
         // id of node is an unsigned integer
         using Node = size_t;
         using Depth = size_t;
-        using MyTree = Tree<maxV, EdgeWeight, PathWeight>;
-        constexpr static PathWeight MAX_WEIGHT = std::numeric_limits<PathWeight>::max(); 
+        using MyTree = Tree<maxV, Weight>;
+        constexpr static Weight MAX_WEIGHT = std::numeric_limits<Weight>::max(); 
         constexpr static Depth logMaxV = numberOfBits(maxV);
         constexpr static Depth INVALID_DEPTH = std::numeric_limits<Depth>::max();
 
@@ -43,27 +41,21 @@ public:
         // NOTE: allowing self cycles, because the root has an edge to itself in lca
         struct Edge {
             Node u = 0, v = 0;
-            PathWeight w;
+            Weight w = Weight(1);
 
             Edge() {
                 
             }
 
-            // Edge(Node u_, Node v_, EdgeWeight w_) : u(u_), v(v_), w(PathWeight() + w_) {
+            // Edge(Node u_, Node v_, EdgeWeight w_) : u(u_), v(v_), w(Weight() + w_) {
             //     assert(u != v && "Self cycles do not exist in trees");
             //     assert(u < maxV && v < maxV && "Node index out of range");
             // }
 
-            Edge(Node u_, Node v_, PathWeight w_) : u(u_), v(v_), w(w_) {
+            Edge(Node u_, Node v_, Weight w_) : u(u_), v(v_), w(w_) {
                 assert(u < maxV && v < maxV && "Node index out of range");
             }
 
-            // #if __cplusplus >= 202002L
-            // template<std::enable_if_t<isWeighted::value, bool> = false>
-            // #endif
-            Edge(Node u_, Node v_) : u(u_), v(v_), w(EdgeWeight()) {
-                assert(u < maxV && v < maxV && "Node index out of range");
-            }
             // Given u, return v
             // Given v, return u
             Node otherSide(Node node) const {
@@ -98,6 +90,13 @@ public:
                 return out;
             }
         };
+        
+        // struct UnitEdge: Edge {
+        //     friend std::istream& operator>>(std::istream &in, Edge &e) {
+        //         in >> e.u >> e.v;
+        //         return in;
+        //     }
+        // };
 
         // arbitary total order of edges
         struct EdgeComp {
@@ -110,8 +109,10 @@ public:
 private:
         Node root;
         std::vector<Node> nodes; // not garunteed sorted!
-        // depth of root is 0, depth of invalid node is -1
+        // depth of root is 0, depth of invalid node is INVALID, +1 for each child
         Depth depth[maxV];
+        // height of root is 0, height of invalid node should not be accessed, +w for each child
+        Weight height[maxV];
 
         // TODO: is it reasonable to support multiset?
         // TODO: `edgesIn` and `edgesOut` store copies of each edge - not memory efficient?
@@ -124,9 +125,9 @@ private:
         // `depth[node]` is the distance from node 1, with `depth[1] = 1`
 
         // O(N log N) Builds `jmps` from [1..LOG_MAXN], assuming `jmps[0]` has been built
-        void buildJumpPtrs() {
+        void buildJumpPtrs(const std::vector<Node> &todo) {
             for (Depth d = 0; d < logMaxV; ++d) {
-                for (Node node : nodes) {
+                for (Node node : todo) {
                     jmp[d + 1][node] = Edge(
                         jmp[d][jmp[d][node].u].u,
                         node,
@@ -146,7 +147,7 @@ public:
         // O(V log V)
         // Initialises tree from a graph, given a root
         // @note G is treated as undirected
-        template<bool isDirected>
+        template<typename EdgeWeight, typename PathWeight = Weight, bool isDirected>
         Tree(const Graph<maxV, EdgeWeight, PathWeight, isDirected> &G, Node root_): root(root_) {
             assert(G.containsNode(root) && "Wanted root is not a node in input graph");
             assert(G.E() == G.V() - 1 && "Definitely not a tree"); // redundant check, remove?
@@ -160,22 +161,22 @@ public:
                 for (auto edge : G.getEdges(node)) {
                     Node child = edge.otherSide(node);
                     if (depth[child] == INVALID_DEPTH) {
-                        Edge treeEdge = Edge(node, child, PathWeight() + edge.w);
+                        Edge treeEdge = Edge(node, child, Weight() + edge.w);
                         children[node].insert(treeEdge);
                         jmp[0][child] = treeEdge;
                         buildDfs(child, d + 1);
                     }
                 }
             };
-            jmp[0][root] = Edge(root, root, PathWeight());
+            jmp[0][root] = Edge(root, root, Weight());
             buildDfs(root, 0);
             
-            buildJumpPtrs();
+            buildJumpPtrs(nodes);
         }
 
         // O(V log V)
-        // Initialise line graph with nodes 1..V, rooted at 1
-        Tree(size_t V, EdgeWeight w = EdgeWeight()) {
+        // Initialise path graph with nodes 1..V, rooted at 1
+        Tree(size_t V, Weight w) {
             assert(V < maxV && "Insufficient capacity");
 
             std::fill(std::begin(depth), std::end(depth), -1);
@@ -189,7 +190,7 @@ public:
                 }
             }
 
-            buildJumpPtrs();
+            buildJumpPtrs(nodes);
         }
 
         /************************************************
@@ -197,21 +198,225 @@ public:
          ************************************************/
 
     public:
-        // O(N) Displays the graph to `out` with fancy indenting for depth, showing the jmp of each node
+        // O(V) Displays the graph to `out` with fancy indenting for depth, showing the jmp of each node
         friend std::ostream& operator<<(std::ostream &out, const MyTree &tree) {
-            std::function<void(Node, std::string)> pprint;
-            pprint = [&](Node node, std::string prefix) {
+            std::function<void(Node, std::string)> print;
+            print = [&](Node node, std::string prefix) {
                 size_t i = 0;
                 for (Edge edge : tree.children[node]) {
                     bool isLast = i++ == tree.children[node].size() - 1;
                     Node child = edge.otherSide(node);
                     out << prefix << (isLast ? "└" : "├") << std::string("─") * edge.w << child << '\n';
-                    pprint(child, prefix + (isLast ? " " : "│") + std::string(" ") * edge.w);
+                    print(child, prefix + (isLast ? " " : "│") + std::string(" ") * edge.w);
                 }
             };
             out << tree.root << '\n';
-            pprint(tree.root, "");
+            print(tree.root, "");
             return out;
+        }
+
+        // TODO: stub pls fix
+        bool isBinary() const {
+            for (Node node : nodes) {
+                if (children[node].size() > 2) return false;
+            }
+            return true;
+        }
+
+        // TODO: move to the right place, write documentation
+        std::vector<Node> getBfsOrder() const {
+            std::vector<Node> out = { root };
+            for (size_t i = 0; i < out.size(); ++i) {
+                for (Node child: getChildren(out[i])) {
+                    out.push_back(child);
+                }
+            }
+            return out;
+        }
+
+        // O(maxV)
+        void printBinary(std::ostream &out) const {
+            std::vector<size_t> offset(maxV, 0);
+            std::function<size_t(Node, size_t)> findSize;
+            findSize = [&](Node node, size_t currOffset) {
+                if (children[node].size() == 0) {
+                    offset[node] = currOffset;
+                    return repr(node).size();
+                } else if (children[node].size() == 1) {
+                    Node child = getChildren(node)[0];
+                    size_t childSize = findSize(child, currOffset);
+                    offset[node] = currOffset;
+                    return std::max(childSize, repr(node).size());
+                } else if (children[node].size() == 2) {
+                    Node leftChild = getChildren(node)[0];
+                    Node rightChild = getChildren(node)[1];
+                    size_t leftSize = findSize(leftChild, currOffset);
+                    offset[node] = currOffset + leftSize;
+                    size_t rightSize = findSize(rightChild, currOffset + leftSize + repr(node).size());
+                    return leftSize + repr(node).size() + rightSize;
+                } else {
+                    assert(false && "Cannot print non binary tree in binary format, use `out << tree` instead");
+                }
+            };
+            findSize(root, 0);
+
+            std::vector<Node> bfsOrder = getBfsOrder();
+            size_t i = 0;
+            for (Depth d = 0; i < bfsOrder.size(); ++d) {
+                size_t currOffset = 0;
+                for ( ; i < bfsOrder.size() && depth[bfsOrder[i]] == d; ++i) {
+                    while (currOffset < offset[bfsOrder[i]]) {
+                        out << ' ';
+                        currOffset++;
+                    }
+                    out << bfsOrder[i];
+                    currOffset += repr(bfsOrder[i]).size();
+                }
+                out << '\n';
+            }
+        }
+
+
+        /************************************************
+         *                  PROPERTIES                  *
+         ************************************************/
+
+        // @note No `size()` because ambiguous, use the following functions instead
+
+        // @returns `V`, the number of nodes
+        size_t V() const {
+            return nodes.size();
+        }
+        // @returns `V`, the number of nodes
+        size_t N() const {
+            return nodes.size();
+        }
+
+        // O(1)
+        // @returns `E`, the number of edges
+        size_t E() const {
+            return edges.size();
+        }
+        // O(1)
+        // @returns `E`, the number of edges
+        size_t M() const {
+            return edges.size();
+        }
+
+        // @returns the imutable set of all ndoes
+        const std::vector<Node>& getNodes() const {
+            return nodes;
+        }
+
+        // O(E) = O(V)
+        // @returns the imutable set of all edges
+        // @note Edges sorted by endpoints
+        const std::vector<Edge> getEdges() const {
+            return std::vector<Edge>(edges.begin(), edges.end());
+        }
+
+        /************************************************
+         *                INCIDENT DATA                 *
+         ************************************************/
+
+        // O(num children) = O(V)
+        // @returns The imutable collection of unique edges incident to this node
+        const std::vector<Edge> getEdges(Node node) const {
+            assert(containsNode(node) && "Node index out of range");
+            return std::vector<Edge>(children[node].begin(), children[node].end());
+        }
+
+        // O(num children) = O(V)
+        // @returns The imutable colelction of unique neighbours, in sorted order
+        const std::vector<Node> getChildren(Node node) const {
+            assert(containsNode(node) && "Node index out of range");
+            std::vector<Node> out;
+            for (const Edge e : getEdges(node)) {
+                out.push_back(e.otherSide(node));
+            }
+            return out;
+        }
+
+        // O(1)
+        // @returns The total degree of `node`
+        // @note Counts parent (if there is one)
+        const size_t degree(Node node) const {
+            assert(containsNode(node) && "Node index out of range");
+            return children[node].size() + (node != root);
+        }
+
+        /************************************************
+         *               GRAPH MODIFICATIONS            *
+         ************************************************/
+
+
+        // O(log E)
+        // Add a edge from an existing node (parent) to a new node, or error if this isn't possible
+        void insert(Edge e) {
+            // NOTE: this check is duplicated, but included for clear error messages
+            assert(containsNode(e.u) && "Parent node of edge already in graph");
+            assert(!containsNode(e.v) && "Child node of edge already in graph");
+
+            depth[e.v] = depth[e.u] + 1;
+            edges.insert(e);
+            children[e.u].insert(e);
+            jmp[0][e.v] = e;
+            buildJumpPtrs({ e.v });
+        }
+
+        // O(log E)
+        // If the specified edge (with any edge weight) is present, remove it, otherwise silently do nothing
+        // @note Can only remove edges incident to non-root leaves
+        void eraseEdge(Edge e) {
+            if (!containsEdge(e)) return;
+
+            depth[e.v] = INVALID_DEPTH;
+            edges.erase(e);
+            children[e.u].erase(e);
+            // NOTE: left jump pointers as is, remember to not touch jump pointers
+            // if node is invalid
+        }
+
+
+        /************************************************
+         *                    CONTAINS                  *
+         ************************************************/
+
+        // @returns whether `node` is within the acceptable bounds
+        bool isNode(Node node) const {
+            // NOTE: dont need to check 0 <= node, because Node=size_t
+            return node < maxV;
+        }
+
+        // @returns whether `node` is in the vertex set of this graph
+        bool containsNode(Node node) const {
+            // NOTE: dont need to check 0 <= node, because Node=size_t
+            return node < maxV && depth[node] != INVALID_DEPTH;
+        }
+
+        // O(log E)
+        // @returns Whether the specified edge (with any edge weight) is contained in the graph
+        bool containsEdge(Edge e) const {
+            if (!containsNode(e.u) || !containsNode(e.v)) return false;
+            auto edgeIt = children[e.u].find(e);
+            return edgeIt != children[e.u].end() && edgeIt->w == e.w;
+        }
+
+        // O(log E)
+        // @returns Whether the specified edge is contained in the graph
+        bool containsEdgeUnweighted(Edge e) const {
+            if (!containsNode(e.u) || !containsNode(e.v)) return false;
+            return children[e.u].count(e);
+        }
+
+        // O(log E)
+        // @returns the weight of the edge between nodes u and v, if it exists
+        // @return default otherwise
+        Weight getEdge(Node u, Node v, Weight defaultWeight) {
+            if (!containsNode(u) || !containsNode(v)) return defaultWeight;
+            auto edgeIt = edges.find(Edge(u, v));
+            if (edgeIt == edges.end()) return defaultWeight;
+            else return edgeIt->w;
         }
 
     //     /************************************************
@@ -481,24 +686,4 @@ public:
     //     }
     // };
     };
-
-    template<size_t maxV>
-    using UnweightedDiTree = Tree<maxV, UnitEdgeWeight, int, true>;
-    template<size_t maxV>
-    using DirectedUnweightedTree = Tree<maxV, UnitEdgeWeight, int, true>;
-
-    template<size_t maxV>
-    using WeightedDiTree = Tree<maxV, int, int, true>;
-    template<size_t maxV>
-    using DirectedWeightedTree = Tree<maxV, int, int, true>;
-
-    template<size_t maxV>
-    using WeightedTree = Tree<maxV, int, int, false>;
-    template<size_t maxV>
-    using UndirectedWeightedTree = Tree<maxV, int, int, false>;
-
-    template<size_t maxV>
-    using UnWeightedTree = Tree<maxV, UnitEdgeWeight, int, false>;
-    template<size_t maxV>
-    using UndirectedUnweightedTree = Tree<maxV, UnitEdgeWeight, int, false>;
 };

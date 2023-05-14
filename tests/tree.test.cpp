@@ -8,26 +8,25 @@ using namespace std;
 using namespace DS;
 
 /*
- * 1<----->2
- * ^      /|
- * |     / |
- * |    /  |
- * v   |   v
- * 3<-`    4
+ *    1
+ *  2   3
+ * 4 5 6 7
+ *       8
  * 
  */
 void testBinaryTree() {
     using Graph1 = Graph<10, UnitEdgeWeight, int, true>;
-    using Tree1 = Tree<10, UnitEdgeWeight, int>;
+    using Tree1 = Tree<10, int>;
     stringstream s1;
     s1 << R"(
-7
+8
 1 2
 1 3
 2 4
 2 5
 3 6
 3 7
+7 8
 )";
     size_t N1;
     s1 >> N1;
@@ -43,12 +42,35 @@ void testBinaryTree() {
 "└─3\n"
 "  ├─6\n"
 "  └─7\n"
+"    └─8\n"
+    );
+
+    stringstream s_;
+    T1.printBinary(s_);
+    assert(s_.str() ==
+"   1\n"
+" 2   3\n"
+"4 5 6 7\n"
+"      8\n"
     );
 }
 
+/*
+ * 1
+ * ├───2
+ * ├────3
+ * │    └─────4
+ * │          └────5
+ * │               └──────6
+ * └───7
+ *     ├──8
+ *     └─────9
+ *         ├──────10
+ *         └───────11
+*/
 void testWeightedTree() {
     using Graph2 = WeightedDiGraph<12>;
-    using Tree2 = Tree<12, int, int>;
+    using Tree2 = Tree<12, int>;
     stringstream s2;
     s2 << R"""(
 11

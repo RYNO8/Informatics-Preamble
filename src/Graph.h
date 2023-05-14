@@ -21,8 +21,11 @@ namespace DS {
     struct UnitEdgeWeight {
         UnitEdgeWeight() {}
         
+        template<typename T>
+        UnitEdgeWeight(T _) {}
+
         template<typename PathWeight, std::enable_if_t<std::is_integral_v<PathWeight> || std::is_floating_point_v<PathWeight>, bool> = true>
-        friend PathWeight operator+(const PathWeight &w1, const UnitEdgeWeight &w2) {
+        friend PathWeight operator+(const PathWeight &w1, const UnitEdgeWeight &w2){
             return w1 + PathWeight(1);
         }
         
@@ -370,7 +373,7 @@ public:
         }
 
         // O(E)
-        // @returns The imutable colelction of unique neighbours (sorted order?)
+        // @returns The imutable colelction of unique neighbours, in sorted order
         const std::vector<Node> getNeighbours(Node node) const {
             assert(containsNode(node) && "Node index out of range");
             std::vector<Node> out;
@@ -496,7 +499,7 @@ public:
         void eraseEdge(Edge e) {
             if (!containsEdgeUnweighted(e)) return;
 
-            edges.erase(e);
+            edges.erase(e); // TODO: if edge weight is different is this logic error?
             edgesIn[e.v].erase(e);
             edgesOut[e.u].erase(e);
             if (isUndirected()) {
@@ -512,11 +515,13 @@ public:
 
         // @returns whether `node` is within the acceptable bounds
         bool isNode(Node node) const {
+            // NOTE: dont need to check 0 <= node, because Node=size_t
             return node < maxV;
         }
 
         // @returns whether `node` is in the vertex set of this graph
         bool containsNode(Node node) const {
+            // NOTE: dont need to check 0 <= node, because Node=size_t
             return node < maxV && validNode[node];
         }
 

@@ -64,7 +64,7 @@ namespace DS {
 
     // TODO: support conversion from directed to undirected and vice versa
     // TODO: support mapping of edges e.g. (u, v, w) -> (u, v, 1), so conversion from weighted to unweighted
-    // TODO: breaks for maxV = 1e5
+    // TODO: breaks for maxV = 1e5 (too slow? too much memory?)
     
     // Graph
     // @note A insufficiently defined EdgeWeight might still produce correct results sometimes
@@ -83,9 +83,6 @@ namespace DS {
     >
     class Graph {
 public:
-        /************************************************
-         *                 INITIALISATION               *
-         ************************************************/
 
         using EdgeWeight = EdgeWeight_;
         using PathWeight = PathWeight_;
@@ -196,18 +193,23 @@ public:
 
     private:
         std::vector<Node> nodes; // not garunteed sorted!
-        bool validNode[maxV];
+        std::array<bool, maxV> validNode;
 
         // TODO: is it reasonable to support multiset?
         // TODO: `edgesIn` and `edgesOut` store copies of each edge - not memory efficient?
         // A set of all edges
         std::set<Edge, EdgeComp> edges;
         // `edgesIn[node]` is the set of edges leading into `node`
-        std::set<Edge, EdgeComp> edgesIn[maxV];
+        std::array<std::set<Edge, EdgeComp>, maxV> edgesIn;
         // `edgesOut[node]` is the set of edges leading out of `node`
-        std::set<Edge, EdgeComp> edgesOut[maxV];
+        std::array<std::set<Edge, EdgeComp>, maxV> edgesOut;
 
     public:
+
+        /************************************************
+         *                 INITIALISATION               *
+         ************************************************/
+
         // O(V)
         // Initialises an empty graph with no nodes
         Graph() {
@@ -250,9 +252,13 @@ public:
             }
         }
 
-        // TODO
         // Graph(const Matrix &_adj) {
+            // TODO
+        // }
 
+        // template<typename Weight = PathWeight>
+        // Graph(const Tree<maxV, Weight> &_tree) {
+        //     // TODO
         // }
 
         // O(|nodes| + num_induced_edges log E ) = O(|nodes| + E log E)

@@ -162,7 +162,7 @@ private:
 
         // `children[node]` is a vector of children, where each child is a (node, weight) pair
         // children of invalid nodes should not be accessed
-        std::set<Edge, EdgeComp> children[maxV];
+        std::array<std::set<Edge, EdgeComp>, maxV> children;
 
         // `jmp[d][node]` is the jmp which is 2^d steps higher than `node`, so `jmp[0][node]` is the direct jmp
         // jump of invalid nodes should not be accessed

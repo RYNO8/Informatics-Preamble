@@ -9,15 +9,30 @@ using namespace std;
 using namespace DS;
 
 /*
- *    1
- *  2   3
- * 4 5 6 7
- *       8
- * 
- */
+ *     1     
+ *  ┌──┴──┐  
+ *  2     3  
+ * ┌┴─┐  ┌┴─┐
+ * 4  5  6  7
+ *          │
+ *          8
+ *
+ *
+ * 1
+ * ├─2
+ * │ ├─4
+ * │ └─5
+ * │   ├─9
+ * │   └─10
+ * └─3
+ *   ├─6
+ *   └─7
+ *     └─8
+ *
+ **/
 void testBinaryTree() {
-    using Graph1 = UnweightedDiGraph<11>;
-    using Tree1 = Tree<11, unsigned int>;
+    using Graph1 = UnweightedDiGraph<12>;
+    using Tree1 = Tree<12, unsigned int>;
     stringstream s1;
     s1 << R"(
 8
@@ -69,12 +84,12 @@ void testBinaryTree() {
 
     assert(T1.isNode(0) == true);
     assert(T1.isNode(1) == true);
-    assert(T1.isNode(10) == true);
-    assert(T1.isNode(11) == false);
+    assert(T1.isNode(11) == true);
+    assert(T1.isNode(12) == false);
     assert(T1.containsNode(0) == false);
     assert(T1.containsNode(1) == true);
-    assert(T1.containsNode(10) == false);
     assert(T1.containsNode(11) == false);
+    assert(T1.containsNode(12) == false);
     assert(T1.containsEdge(Tree1::Edge(1, 2, 1)) == true);
     assert(T1.containsEdge(Tree1::Edge(1, 2, 3175368)) == false);
     assert(T1.containsEdge(Tree1::Edge(1, 5, 1)) == false);
@@ -85,43 +100,67 @@ void testBinaryTree() {
     assert(T1.getEdge(2, 3, 69) == 69);
 
 
-//     assert(repr(T1) == 
-// "1\n"
-// "├─2\n"
-// "│ ├─4\n"
-// "│ └─5\n"
-// "└─3\n"
-// "  ├─6\n"
-// "  └─7\n"
-// "    └─8\n"
-//     );
+    assert(repr(T1) == 
+"1\n"
+"├─2\n"
+"│ ├─4\n"
+"│ └─5\n"
+"└─3\n"
+"  ├─6\n"
+"  └─7\n"
+"    └─8\n"
+    );
+    assert(TREE_PRINT_SPACING == 2);
+    assert(repr(&T1) ==
+"    1     \n"
+" ┌──┴──┐  \n"
+" 2     3  \n"
+"┌┴─┐  ┌┴─┐\n"
+"4  5  6  7\n"
+"         │\n"
+"         8\n"
+    );
 
-//     assert(repr(&T1) ==
-// "   1\n"
-// " 2   3\n"
-// "4 5 6 7\n"
-// "      8\n"
-//     );
-    cout << &T1 << "\n";
     T1.insert(Tree1::Edge(5, 9));
     T1.insert(Tree1::Edge(5, 10));
-//     assert(repr(T1) == 
-// "1\n"
-// "├─2\n"
-// "│ ├─4\n"
-// "│ └─5\n"
-// "│   ├─9\n"
-// "│   └─10\n"
-// "└─3\n"
-// "  ├─6\n"
-// "  └─7\n"
-// "    └─8\n"
-//     );
-    
-    cout << &T1;
-    // T1.erase(9);
-    // T1.erase(10);
-    // cout << T1;
+    assert(repr(T1) == 
+"1\n"
+"├─2\n"
+"│ ├─4\n"
+"│ └─5\n"
+"│   ├─9\n"
+"│   └─10\n"
+"└─3\n"
+"  ├─6\n"
+"  └─7\n"
+"    └─8\n"
+    );
+    assert(repr(&T1) ==
+"      1       \n"
+"  ┌───┴────┐  \n"
+"  2        3  \n"
+"┌─┴──┐    ┌┴─┐\n"
+"4    5    6  7\n"
+"   ┌─┴─┐     │\n"
+"   9  10     8\n"
+    );
+
+    T1.erase(9);
+    T1.erase(10);
+
+    assert(T1.isBinary());
+    T1.insert(Tree1::Edge(5, 9));
+    assert(T1.isBinary());
+    T1.insert(Tree1::Edge(5, 10));
+    assert(T1.isBinary());
+    T1.insert(Tree1::Edge(5, 11));
+    assert(!T1.isBinary());
+    T1.erase(9);
+    T1.erase(10);
+    T1.erase(11);
+
+    assert(!T1.isPath());
+    // assert(Tree1(10, 1).isPath());
 }
 
 /*
@@ -136,7 +175,19 @@ void testBinaryTree() {
  *     └─────9
  *         ├──────10
  *         └───────11
-*/
+ *
+ *
+ *     1          
+ * ┌──┬┴────┐     
+ * 2  3     7     
+ *    │  ┌──┴──┐  
+ *    4  8     9  
+ *    │      ┌─┴─┐
+ *    5     10  11
+ *    │           
+ *    6           
+ *
+ **/
 void testWeightedTree() {
     using Graph2 = WeightedDiGraph<12>;
     using Tree2 = Tree<12, unsigned int>;
@@ -172,6 +223,17 @@ void testWeightedTree() {
 "    └─────9\n"
 "          ├──────10\n"
 "          └───────11\n"
+    );
+    assert(repr(&T2) == 
+"    1          \n"
+"┌──┬┴────┐     \n"
+"2  3     7     \n"
+"   │  ┌──┴──┐  \n"
+"   4  8     9  \n"
+"   │      ┌─┴─┐\n"
+"   5     10  11\n"
+"   │           \n"
+"   6           \n"
     );
 }
 

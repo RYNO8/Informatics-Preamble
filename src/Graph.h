@@ -178,8 +178,10 @@ public:
             }
         };
 
+        using Path = std::vector<Edge>;
+
+    private:
         // comparison ignoring weights - use this in containers
-        // TODO: better name?
         struct EdgeComp {
             bool operator() (const Edge &a, const Edge &b) const {
                 Node au = a.u, av = a.v;
@@ -800,7 +802,7 @@ public:
         // O(maxV + E log V), or O(maxV E) if negative edge weights
         // @returns Distance of the shortest path from `u` to `v`, and a vector of nodes representing the path
         // @note Component containing `u` and `v` cannot have negative weight cycles
-        std::vector<Edge> shortestPath(Node u, Node v) const {
+        Path shortestPath(Node u, Node v) const {
             assert(containsNode(u) && containsNode(v) && "Node index out of range");
 
             // @note Important to start from `u` and reverse path later, because digraphs
@@ -808,7 +810,7 @@ public:
             std::array<PathWeight, maxV> &cost = res.first;
             std::array<Edge, maxV> &pred = res.second;
 
-            std::vector<Edge> path;
+            Path path;
             if (cost[v] != MAX_WEIGHT) {
                 for (Node node = v; node != u; node = pred[node].otherSide(node)) {
                     path.push_back(pred[node].directTo(node));
@@ -835,7 +837,7 @@ public:
         // Diameter is defined as the shortest simple path with maximal weight
         // @returns Distance of the path, and a vector of nodes representing the path
         // @note Component containing `root` cannot have negative weight cycles
-        std::vector<Edge> diameter(Node root) {
+        Path diameter(Node root) {
             assert(containsNode(root) && "Node index out of range");
             std::array<PathWeight, maxV> cost1 = SSSP(root).first;
 
@@ -857,7 +859,7 @@ public:
                 }
             }
 
-            std::vector<Edge> path;
+            Path path;
             for (Node node = furthestNode2; node != furthestNode1; node = pred2[node].otherSide(node)) {
                 path.push_back(pred2[node].directFrom(node));
             }

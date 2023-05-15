@@ -6,7 +6,7 @@
 #include "Constants.h"
 
 namespace DS {
-    // TODO: test all
+    // @TODO test all
     template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
     class Point : public std::complex<T> {
         /************************************************
@@ -46,13 +46,14 @@ namespace DS {
         /************************************************
          *               BASCIC OPERATIONS              *
          ************************************************/
+
         /*bool operator==(Point o) const {
-            // TODO: if `T` is a floating point type, account for floating point imprecisions
+            // @TODO if `T` is a floating point type, account for floating point imprecisions
             return this->real() == o.real() && this->imag() == o.imag();
         }
 
         bool operator!=(Point o) const {
-            // TODO: if `T` is a floating point type, account for floating point imprecisions
+            // @TODO if `T` is a floating point type, account for floating point imprecisions
             return this->real() != o.real() || this->imag() != o.imag();
         }
 
@@ -77,7 +78,7 @@ namespace DS {
             *this = *this - o;
             return *this;
         }*/
-        
+
         /************************************************
          *               VECTOR OPERATIONS              *
          ************************************************/
@@ -145,9 +146,9 @@ namespace DS {
         }
     };
 
-
     template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
     class Line {
+
         /************************************************
          *                INITIALISATION                *
          ************************************************/
@@ -163,6 +164,7 @@ namespace DS {
         /************************************************
          *                    DISPLAY                   *
          ************************************************/
+
         // O(1)
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
@@ -174,14 +176,16 @@ namespace DS {
         /************************************************
          *                   PROPERTIES                 *
          ************************************************/
+
         // O(1) Gets both endpoints of the line, in no particular order
         const std::pair<Point<T>, Point<T>> getPoints() {
             return { a, b };
         }
-        
+
         /************************************************
          *               BASCIC OPERATIONS              *
          ************************************************/
+
         // O(1)
         // @returns Whether if the line segment `q` was extended infinitely, it would intesect `this`
         bool intersects(Line<T> &l) {
@@ -196,13 +200,13 @@ namespace DS {
             }
 
             if (denom == 0) {
-                // TODO: collinear, case bash to check for overlap
+                // @TODO collinear, case bash to check for overlap
                 return false;
             }
             return 0 < std::min(numerator1, numerator2) && std::max(numerator1, numerator2) < denom;
         }
 
-        // TODO: ccw algorithm to determine line line intersection
+        // @TODO ccw algorithm to determine line line intersection
         bool intersects2(Line<T>& l) {
             return true;
         }
@@ -221,9 +225,11 @@ namespace DS {
 
     template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
     class Polygon {
+
         /************************************************
          *                INITIALISATION                *
          ************************************************/
+
     private:
         std::vector<Point<T>> points;
 
@@ -238,6 +244,7 @@ namespace DS {
         /************************************************
          *                    DISPLAY                   *
          ************************************************/
+
         // O(1)
         // @param `out` The string representation of the graph is piped to this output stream
         // @param `newLine` Indicates whether to end with a trailing `\\n`
@@ -249,6 +256,7 @@ namespace DS {
         /************************************************
          *                   OPERATIONS                 *
          ************************************************/
+
         // O(n^2) Gift wrapping algorithm to find convex hull
         // @note updates in place
         void makeConvexHull() {
@@ -298,7 +306,7 @@ namespace DS {
         // O(n)
         // @returns whether point is stictly within the boundary of the polygon
         bool isContained2(Point<T> point) {
-            // TODO: use ray tracing
+            // @TODO use ray tracing
             return true;
         }
     };

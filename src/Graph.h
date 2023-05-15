@@ -20,15 +20,15 @@ namespace DS {
     // this makes reading input more convinient, and also saves some memory (this struct takes 1 byte)
     struct UnitEdgeWeight {
         UnitEdgeWeight() {}
-        
+
         template<typename T>
         UnitEdgeWeight(T _) {}
 
         template<typename PathWeight, std::enable_if_t<std::is_integral_v<PathWeight> || std::is_floating_point_v<PathWeight>, bool> = true>
-        friend PathWeight operator+(const PathWeight &w1, const UnitEdgeWeight &w2){
+        friend PathWeight operator+(const PathWeight &w1, const UnitEdgeWeight &w2) {
             return w1 + PathWeight(1);
         }
-        
+
         template<typename PathWeight, std::enable_if_t<std::is_integral_v<PathWeight> || std::is_floating_point_v<PathWeight>, bool> = true>
         friend PathWeight operator+=(PathWeight &w1, const UnitEdgeWeight &w2) {
             return ++w1;
@@ -49,23 +49,22 @@ namespace DS {
             assert(b == 0);
             return false;
         }
-        
+
         // lol
         friend std::istream& operator>>(std::istream &in, const UnitEdgeWeight &w) {
             return in;
         }
-        
+
         friend std::ostream& operator<<(std::ostream &out, const UnitEdgeWeight &w) {
             out << 1;
             return out;
         }
     };
 
+    // @TODO support conversion from directed to undirected and vice versa
+    // @TODO support mapping of edges e.g. (u, v, w) -> (u, v, 1), so conversion from weighted to unweighted
+    // @TODO breaks for maxV = 1e5 (too slow? too much memory?)
 
-    // TODO: support conversion from directed to undirected and vice versa
-    // TODO: support mapping of edges e.g. (u, v, w) -> (u, v, 1), so conversion from weighted to unweighted
-    // TODO: breaks for maxV = 1e5 (too slow? too much memory?)
-    
     // Graph
     // @note A insufficiently defined EdgeWeight might still produce correct results sometimes
     template<
@@ -99,7 +98,7 @@ public:
             EdgeWeight w;
 
             Edge() {
-                
+
             }
 
             Edge(Node u_, Node v_, EdgeWeight w_) : u(u_), v(v_), w(w_) {
@@ -195,8 +194,8 @@ public:
         std::vector<Node> nodes; // not garunteed sorted!
         std::array<bool, maxV> validNode;
 
-        // TODO: is it reasonable to support multiset?
-        // TODO: `edgesIn` and `edgesOut` store copies of each edge - not memory efficient?
+        // @TODO is it reasonable to support multiset?
+        // @TODO `edgesIn` and `edgesOut` store copies of each edge - not memory efficient?
         // A set of all edges
         std::set<Edge, EdgeComp> edges;
         // `edgesIn[node]` is the set of edges leading into `node`
@@ -213,22 +212,22 @@ public:
         // O(V)
         // Initialises an empty graph with no nodes
         Graph() {
-            std::fill(std::begin(validNode), std::end(validNode), false);
+            validNode.fill(false);
         }
 
         // O(V + E log E)
         // Initalises an graph from vector of edges, assuming 1 indexed
         Graph(size_t V, const std::vector<Edge> &_edges = {}) {
             assert(V < maxV && "Not enough capacity");
-            std::fill(std::begin(validNode), std::end(validNode), false);
+            validNode.fill(false);
             for (Node node = 1; node <= V; ++node) pushNode(node);
             for (Edge edge: _edges) insertEdge(edge);
         }
-        
+
         // O(V + E log E)
         // Initialses a G with node set `_nodes` and edge set `_edges`
         Graph(const std::vector<Node> &_nodes, const std::vector<Edge> &_edges = {}) {
-            std::fill(std::begin(validNode), std::end(validNode), false);
+            validNode.fill(false);
             for (Node node : _nodes) pushNode(node);
             for (Edge edge: _edges) insertEdge(edge);
         }
@@ -236,11 +235,11 @@ public:
         // O(V^2)
         // Initialises a weighted graph from adjacency matrix of edge weights
         // @note Assuming nodes 1 indexed
-        
+
         Graph(const std::vector<std::vector<EdgeWeight>> &_adj) {
             size_t V = _adj.size();
             assert(V < maxV && "Not enough capacity");
-            std::fill(std::begin(validNode), std::end(validNode), false);
+            validNode.fill(false);
             for (Node node = 1; node <= V; ++node) pushNode(node);
             for (Node u = 1; u <= V; ++u) {
                 assert(_adj[u - 1].size() == V && "Not square matrix");
@@ -253,19 +252,19 @@ public:
         }
 
         // Graph(const Matrix &_adj) {
-            // TODO
+            // @TODO
         // }
 
         // template<typename Weight = PathWeight>
         // Graph(const Tree<maxV, Weight> &_tree) {
-        //     // TODO
+        //     // @TODO
         // }
 
-        // O(|nodes| + num_induced_edges log E ) = O(|nodes| + E log E)
+        // O(|nodes| + num_induced_edges log E) = O(|nodes| + E log E)
         // Initialise this graph as the graph induced from `g` by `nodes`
         // @note `V` does not change, so there may be disconnected nodes
         Graph(const MyGraph &_g, const std::vector<Node> &_nodes) {
-            std::fill(std::begin(validNode), std::end(validNode), false);
+            validNode.fill(false);
             for (Node node : _nodes) pushNode(node);
             for (Node node : _nodes) {
                 for (Edge incident : _g.getEdges(node)) {
@@ -297,7 +296,7 @@ public:
         }
 
         // O(maxV^2)
-        // TODO: alignment ahh
+        // @TODO alignment ahh
         void displayAdj(std::ostream &out) {
             for (Node u = 0; u < maxV; ++u) {
                 for (Node v = 0; v < maxV; ++v) {
@@ -310,7 +309,6 @@ public:
                 out << '\n';
             }
         }
-
 
         /************************************************
          *                  PROPERTIES                  *
@@ -473,7 +471,7 @@ public:
         // O(1)
         // Adds a new node with no edges
         // @returns The index of this node
-        // TODO: should I have a variation where silently passes when node exists?
+        // @TODO should I have a variation where silently passes when node exists?
         size_t pushNode(Node node) {
             assert(node < maxV + 1 && "Node index out of range");
             assert(!containsNode(node) && "node already exists");
@@ -485,14 +483,14 @@ public:
         // O(log E)
         // Add the specified edge to the graph, or error if this will become a double edge
         // @note Edge weight is ignored if the graph is unweighted
-        // TODO: should I have a variation where silently passes when edge exists?
+        // @TODO should I have a variation where silently passes when edge exists?
         void insertEdge(Edge e) {
-            // NOTE: this check is duplicated, but included for clear error messages
+            // @note this check is duplicated, but included for clear error messages
             assert(containsNode(e.u) && containsNode(e.v) && "Node index out of range");
             assert(!containsEdgeUnweighted(e) && "Edge already in graph, is this an unintended operation?");
 
             edges.insert(e);
-            // NOTE: this is preventing support of multiedges
+            // @note this is preventing support of multiedges
             // when duplicaate edge is added, how do you find the most recently added edge
             edgesIn[e.v].insert(e);
             edgesOut[e.u].insert(e);
@@ -507,7 +505,7 @@ public:
         void eraseEdge(Edge e) {
             if (!containsEdgeUnweighted(e)) return;
 
-            edges.erase(e); // TODO: if edge weight is different is this logic error?
+            edges.erase(e); // @TODO if edge weight is different is this logic error?
             edgesIn[e.v].erase(e);
             edgesOut[e.u].erase(e);
             if (isUndirected()) {
@@ -516,7 +514,6 @@ public:
             }
         }
 
-
         /************************************************
          *                    CONTAINS                  *
          ************************************************/
@@ -524,14 +521,14 @@ public:
         // O(1)
         // @returns whether `node` is within the acceptable bounds
         bool isNode(Node node) const {
-            // NOTE: dont need to check 0 <= node, because Node=size_t
+            // @note dont need to check 0 <= node, because Node=size_t
             return node < maxV;
         }
 
         // O(1)
         // @returns whether `node` is in the vertex set of this graph
         bool containsNode(Node node) const {
-            // NOTE: dont need to check 0 <= node, because Node=size_t
+            // @note dont need to check 0 <= node, because Node=size_t
             return node < maxV && validNode[node];
         }
 
@@ -552,7 +549,7 @@ public:
 
         // O(log E)
         // @returns the weight of the edge between nodes u and v, if it exists
-        // @return default otherwise
+        // @returns default otherwise
         EdgeWeight getEdge(Node u, Node v, EdgeWeight defaultWeight) {
             if (!containsNode(u) || !containsNode(v)) return defaultWeight;
             auto edgeIt = edges.find(Edge(u, v));
@@ -594,7 +591,7 @@ public:
             std::vector<MyGraph> output;
             std::array<bool, maxV> seen;
             seen.fill(false);
-            
+
             for (Node node : nodes) {
                 if (!seen[node]) {
                     seen[node] = true;
@@ -664,7 +661,7 @@ public:
                 edgesIn[node].clear();
                 edgesOut[node].clear();
             }
-            std::fill(std::begin(validNode), std::end(validNode), false);
+            validNode.fill(false);
             nodes.clear();
         }
 
@@ -694,8 +691,8 @@ public:
 
             if (containsNode(node)) {
                 std::priority_queue<
-                    std::pair<PathWeight, Node>, 
-                    std::vector<std::pair<PathWeight, Node>>, 
+                    std::pair<PathWeight, Node>,
+                    std::vector<std::pair<PathWeight, Node>>,
                     std::greater<std::pair<PathWeight, Node>>
                 > pq;
                 pq.push({ PathWeight(0), node });
@@ -921,14 +918,14 @@ public:
             for (const Edge edge: edges) {
                 if (edge.w < 0 && isUndirected()) return NegativeCyclesAllPairsShortestPaths();
             }
-            
+
             return FloydWarshall();
         }
 
         // Amortised O(E log V)
         // Standard Kruskal's algorithm - finds the cost of the minimum spanning tree, using union find (DSU)
         // @note If k components, return lowest cost to make k disjoint spanning trees
-        // TODO: return a tree
+        // @TODO return a tree
         PathWeight KruskalsCost() const {
             std::array<Node, maxV> parent;
             std::iota(parent.begin(), parent.end(), 0);
@@ -984,7 +981,7 @@ public:
         // Standard DFS topsort
         std::vector<Node> dfsTopsort() const {
             std::vector<Node> topsort;
-            std::array<int, maxV> state;// TODO: actually only needs to hold 3 states
+            std::array<int, maxV> state;// @TODO actually only needs to hold 3 states
             state.fill(0);
 
             std::function<void(int)> dfs;
@@ -1020,7 +1017,7 @@ public:
             };
             for (const Node &node : nodes) dfs1(node);
             reverse(order.begin(), order.end());
-            
+
             seen.fill(false);
             std::vector<std::vector<Node>> components;
             std::function<void(int)> dfs2;
@@ -1095,7 +1092,7 @@ public:
         // O(V + E)
         // Find strongly connecsted components
         // @returns a vector of components, where a component is a vector of nodes
-        // TODO: test whether Tarjans or dfs is faster
+        // @TODO test whether Tarjans or dfs is faster
         // should I instead be returning `std::vector<MyGraph>` ?
         std::vector<std::vector<Node>> SSC() const {
             return Tarjan();
@@ -1106,7 +1103,7 @@ public:
         // Find all bridges
         // @note Breaks when we introduce multiple edges
         // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
-        // @return A vector of edges, where each edge is represented by ((u, v), w)
+        // @returns A vector of edges, where each edge is represented by ((u, v), w)
         std::vector<Edge> bridgesDFS() const {
             assert(isUndirected() && "Bridges are a property of only undirected graphs");
             std::array<bool, maxV> seen;
@@ -1253,7 +1250,7 @@ public:
             dfs = [&](Node u, PathWeight pushed) {
                 if (pushed == 0) return 0;
                 if (u == sink) return pushed;
-                
+
                 for (; lastSeen[u] != edgesOut[u].end(); lastSeen[u]++) {
                     Node v = lastSeen[u]->otherSide(u);
                     if (level[u] + 1 == level[v] && remainingCap[{u, v}] > 0) {
@@ -1304,12 +1301,12 @@ public:
             return f;
         }
 
-    //     // TODO: edge matching
-    //     // TODO: see: https://usaco.guide/adv/
+    //     // @TODO edge matching
+    //     // @TODO see: https://usaco.guide/adv/
 
-    //     /************************************************
-    //      *                    PROPERTIES                *
-    //      ***********************************************/
+        /************************************************
+         *                    PROPERTIES                *
+         ***********************************************/
 
         // O(1)
         // @returns Whether the graph is directed
@@ -1329,7 +1326,7 @@ public:
             return !std::is_same_v<EdgeWeight, UnitEdgeWeight>;
         }
 
-        // // TODO: is bipartite graph? (try greedy colouring)
+        // // @TODO is bipartite graph? (try greedy colouring)
         // bool isBipartite() const {
         //     return greedyColouring() <= 2;
         // }
@@ -1358,7 +1355,7 @@ public:
     //                 }
     //             }
     //         }
-            
+
     //         return false;
     //     }
 
@@ -1366,7 +1363,7 @@ public:
         // @returns Whether the graph has a cycle
         // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
         bool isCyclic() const {
-            std::array<int, maxV> state;// TODO: actually only needs to hold 3 states
+            std::array<int, maxV> state;// @TODO actually only needs to hold 3 states
             state.fill(0);
 
             std::function<bool(Node)> dfs;
@@ -1410,7 +1407,7 @@ public:
         bool isForest() const {
             return isAcyclic();
         }
-        
+
         // O(V + E)
         // @returns Whether the graph is a tree
         // @param `root` If specified, consider its connected component. Otherwise consider the whole graph
@@ -1422,11 +1419,11 @@ public:
          *       ALGORITHMS (COMPLEXITLY CLASS NP)      *
          ************************************************/
 
-        // TODO: hamiltonian path / tour
-        // TODO: euler path / tour
-        // TODO: covering set
-        // TODO: optimal colouring
-        // TODO: planar embedding?
+        // @TODO hamiltonian path / tour
+        // @TODO euler path / tour
+        // @TODO covering set
+        // @TODO optimal colouring
+        // @TODO planar embedding?
     };
 
     template<size_t maxV>

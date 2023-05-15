@@ -13,8 +13,9 @@ namespace DS {
     >;
     template<typename T> inline constexpr bool is_modint_v = is_modint<T>::value;
 
-    // TODO: Montgomery
+    // @TODO Montgomery
     template<uintmax_t N> class ModInt : ModIntIndicator {
+
         /************************************************
          *                INITIALISATION                *
          ************************************************/
@@ -26,7 +27,7 @@ namespace DS {
         // O(1)
         // if not given an initialiser value, initalise to 0
         ModInt() : val(0) {}
-        
+
         // O(1)
         // Initialises a ModInt from a signed integer type
         template<typename T, std::enable_if_t<is_signed_int_v<T>, bool> = true>
@@ -56,7 +57,7 @@ namespace DS {
          *                   PROPERTIES                 *
          ************************************************/
 
-        // O(1) 
+        // O(1)
         // @returns val
         const uintmax_t num() const {
             return val;
@@ -85,7 +86,7 @@ namespace DS {
         friend bool operator!=(const ModInt<N> &a, const ModInt<N> &b) {
             return a.num() != b.num();
         }
-        
+
         // O(1)
         // Standard modular addition
         friend ModInt<N> operator+(const ModInt<N> &a, const ModInt<N> &b) {
@@ -142,7 +143,7 @@ namespace DS {
             }
             return a;
         }
-        
+
         // O(1)
         // Negation
         friend ModInt<N> operator-(const ModInt<N> &a) {
@@ -220,7 +221,7 @@ public:
         std::vector<ModInt<N>> allCongreunt(const ModInt<N> &denom) const {
             intmax_t u, v;
             uintmax_t d = extendedEuclidean(denom.val, N, u, v);
-            
+
             std::vector<ModInt<N>> ans;
             if (val % d == 0ll) {
                 ModInt<N> x0 = u * (intmax_t)(val / d);

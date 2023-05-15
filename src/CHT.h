@@ -14,7 +14,7 @@ namespace DS {
         friend std::ostream& operator<<(std::ostream &out, const CHTLine &line) {
             out << "y = ";
             if (line.m != 0) {
-                out << line.m << "x";
+                out << line.m << 'x';
                 if (line.b >= 0) out << '+';
             }
             out << line.b;

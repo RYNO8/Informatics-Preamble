@@ -16,10 +16,11 @@ private:
         T val = T();
 
 public:
+
         /************************************************
          *                    DISPLAY                   *
          ************************************************/
-        
+
         void print_helper(std::ostream& out, std::vector<T> values, size_t pos) const {
             out << values[pos];
         }
@@ -32,7 +33,7 @@ public:
         /************************************************
          *                  PROPERTIES                  *
          ************************************************/
-        
+
         std::vector<T> data() const {
             return {val};
         }
@@ -60,7 +61,7 @@ public:
         void setIndex(T v) {
             val = v;
         }
-        
+
         void addIndex(T v) {
             val += v;
         }
@@ -84,6 +85,7 @@ private:
         BITInterface_<T, Derived, Ns...> bit[N + 1];
 
 public:
+
         /************************************************
          *                    DISPLAY                   *
          ************************************************/
@@ -206,7 +208,7 @@ public:
             for (size_t x = pos + 0; x; x -= x & -x) res -= bit[x].queryIndex(args...);
             return res;
         }
-        
+
         // O((2 log N)^D)
         template<typename... Args> T querySum(size_t l, size_t r, Args... args) const {
             assert(0 <= l && l <= r && r < N && "index out of range");

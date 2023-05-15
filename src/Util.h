@@ -32,10 +32,11 @@ namespace std {
 }
 
 namespace DS {
+
     /************************************************
      *                    DISPLAY                   *
      ************************************************/
-    
+
     // Displays a pair:
     // (A, B)
     template<typename A, typename B>
@@ -58,7 +59,7 @@ namespace DS {
         out << "[ ";
         for (T it = range.begin; it != range.end; ) {
             out << *it;
-            if (++it != range.end) out << " ";
+            if (++it != range.end) out << ' ';
         }
         out << " ]";
         return out;
@@ -76,9 +77,9 @@ namespace DS {
     }
 
     // Displays a std::array
-    // [ T, T, ..., T ]
+    // [ T T ... T ]
     template<typename T, std::size_t N>
-    std::ostream& operator<<(std::ostream& out, const std::array<T, N> &arr){
+    std::ostream& operator<<(std::ostream& out, const std::array<T, N> &arr) {
         out << "[ ";
         // copy(arr.cbegin(), arr.cend(), std::ostream_iterator<T>(out, " "));
         for (auto val : arr) out << val << ' ';
@@ -91,7 +92,7 @@ namespace DS {
     // @note takes copy of queue
     template<typename T>
     std::ostream& operator<<(std::ostream &out, std::queue<T> q) {
-        out << "<";
+        out << '<';
         while (!q.empty()) {
             out << ' ' << q.front();
             q.pop();
@@ -233,7 +234,6 @@ namespace DS {
         return out;
     }
 
-
     /************************************************
      *           NUMERICAL TYPE UTILITIES           *
      ************************************************/
@@ -346,7 +346,6 @@ namespace DS {
         return repeat(std::move(str), n);
     }
 
-
     // std::wstring repeat(const std::wstring& input, size_t num) {
     //     std::wstringstream os;
     //     std::fill_n(std::ostream_iterator<std::wstring, wchar_t>(os), num, input);
@@ -390,7 +389,7 @@ namespace DS {
 
     // O(n)
     // *(out+i) = *(begin+i) - *(begin+i-1) when i, i-1 is valid
-    // NOTE: *out is left untouched
+    // @note *out is left untouched
     template<typename It1, typename It2>
     void make_suffix(const It1 &begin, const It1 &end, It2 out) {
         for (It1 it = begin; it != end; ) {

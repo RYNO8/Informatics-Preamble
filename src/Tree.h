@@ -13,11 +13,11 @@ namespace DS {
     constexpr size_t TREE_PRINT_SPACING = 2;
 
     // Tree
-    // @note: does not preserve/store order of children nodes
-    // @note: there is no distinction between weighted and unweighted trees
+    // @note does not preserve/store order of children nodes
+    // @note there is no distinction between weighted and unweighted trees
     // because all algorithms can be applied regardless
-    // @note: asserts that Weight() is the 0 (and minimum) weight
-    // @note: if one child in a binary tree, it is considered left child
+    // @note asserts that Weight() is the 0 (and minimum) weight
+    // @note if one child in a binary tree, it is considered left child
     template<
         // Max number of nodes allowed
         size_t maxV,
@@ -30,6 +30,7 @@ namespace DS {
         , bool> = true
     >
     class Tree {
+
         /************************************************
          *                 INITIALISATION               *
          ************************************************/
@@ -50,7 +51,7 @@ private:
 public:
         // Edges are represented internaly as (u, v) with weight w
         // u is the jmp, v is the child
-        // NOTE: allowing self cycles, because the root has an edge to itself in lca
+        // @note allowing self cycles, because the root has an edge to itself in lca
         struct UndirectedPath {
             Node u = 0, v = 0;
             Weight w = Weight(1);
@@ -205,7 +206,7 @@ public:
         Tree(const Graph<maxV, EdgeWeight, PathWeight, isDirected> &G, Node root_): root(root_) {
             assert(G.containsNode(root) && "Wanted root is not a node in input graph");
             assert(G.E() == G.V() - 1 && "Definitely not a tree"); // redundant check, remove?
-            
+
             depth.fill(INVALID_DEPTH);
             height.fill(INVALID_WEIGHT);
 
@@ -226,7 +227,7 @@ public:
             };
             jmp[0][root] = Edge(root, root, Weight());
             buildDfs(root, 0, Weight());
-            
+
             buildJumpPtrs(nodes);
         }
 
@@ -302,24 +303,6 @@ public:
         //     };
         //     findSize(tree->root, 0);
 
-        //     std::vector<Node> bfsOrder = tree->getBfsOrder();
-        //     size_t i = 0;
-        //     for (Depth d = 0; i < bfsOrder.size(); ++d) {
-        //         size_t currOffset = 0;
-        //         for ( ; i < bfsOrder.size() && tree->depth[bfsOrder[i]] == d; ++i) {
-        //             while (currOffset < offset[bfsOrder[i]]) {
-        //                 out << ' ';
-        //                 currOffset++;
-        //             }
-        //             out << bfsOrder[i];
-        //             currOffset += repr(bfsOrder[i]).size();
-        //         }
-        //         out << '\n';
-        //     }
-
-        //     return out;
-        // }
-
 private:
         // additional requirement that all lines have equal length
         struct Display {
@@ -345,12 +328,11 @@ private:
             }
         };
 
-
         Display print(Node node) const {
             std::string nodeData = repr(node);
             if (children[node].empty()) {
                 return Display{
-                    nodeData.size() + TREE_PRINT_SPACING, 
+                    nodeData.size() + TREE_PRINT_SPACING,
                     { nodeData + std::string(" ") * TREE_PRINT_SPACING },
                     nodeData.size() / 2
                 };
@@ -385,7 +367,7 @@ private:
 
             d.display.push_front(header);
             d.display.push_front(
-                std::string(" ") * (d.offset - nodeData.size() / 2) + 
+                std::string(" ") * (d.offset - nodeData.size() / 2) +
                 nodeData +
                 std::string(" ") * (d.width - d.offset + nodeData.size() / 2 - nodeData.size())
             );
@@ -398,7 +380,6 @@ public:
             out << tree->print(tree->root);
             return out;
         }
-
 
         /************************************************
          *                     NODES                    *
@@ -431,14 +412,14 @@ public:
         // O(1)
         // @returns whether `node` is within the acceptable bounds
         bool isNode(Node node) const {
-            // NOTE: dont need to check 0 <= node, because Node=size_t
+            // @note dont need to check 0 <= node, because Node=size_t
             return node < maxV;
         }
 
         // O(1)
         // @returns whether `node` is in the vertex set of this graph
         bool containsNode(Node node) const {
-            // NOTE: dont need to check 0 <= node, because Node=size_t
+            // @note dont need to check 0 <= node, because Node=size_t
             return node < maxV && depth[node] != INVALID_DEPTH;
         }
 
@@ -448,7 +429,6 @@ public:
             return std::vector<Node>(nodes.begin(), nodes.end());
         }
 
-        
         // O(1)
         // Determines if `node` is a leaf node (has no children)
         bool isLeaf(Node node) const {
@@ -524,7 +504,6 @@ public:
             return children[e.u].count(e);
         }
 
-
         // void initEdge(Edge e) const {
         //     assert(containsNode(e.u) && containsNode(e.v) && "Endpoint out of range");
         //     if (depth[e.u] > depth[e.v]) std::swap(e.u, e.v);
@@ -563,7 +542,7 @@ public:
         // O(log V)
         // Add a edge from an existing node (parent) to a new node, or error if this isn't possible
         void insert(Edge e) {
-            // NOTE: this check is duplicated, but included for clear error messages
+            // @note this check is duplicated, but included for clear error messages
             assert(containsNode(e.u) && "Parent node of edge already in graph");
             assert(!containsNode(e.v) && "Child node of edge already in graph");
 
@@ -578,7 +557,7 @@ public:
         // O(log V)
         // If the specified edge (with any edge weight) is present, remove it, otherwise silently do nothing
         // @note Can only remove edges incident to non-root leaves
-        // TODO: support remove proper subtrees
+        // @TODO support remove proper subtrees
         void erase(Node node) {
             assert(isLeaf(node) && node != root && "Only supports removing edges incident to leaves");
 
@@ -587,10 +566,9 @@ public:
             depth[node] = INVALID_DEPTH;
             height[node] = INVALID_WEIGHT;
             children[par].erase(children[par].lower_bound(Edge(par, node, Weight())));
-            // NOTE: leave jump pointers as is
+            // @note leave jump pointers as is
             // remember to not touch jump pointers if node is invalid
         }
-
 
         /************************************************
          *               ANCESTOR RELATED               *
@@ -620,18 +598,18 @@ public:
             }
             return Edge(par, node, w);
         }
- 
+
         // O(log V)
         // Finds whether `ancestor` is actually an ancestor of `node`
         bool isAncestor(Node ancestor, Node node) const {
             assert(containsNode(ancestor) && "Node index out of range"); // or should return false?
             assert(containsNode(node) && "Node index out of range"); // or should return false?
 
-            // TODO: test which implementation is faster
+            // @TODO test which implementation is faster
 
             // if (depth[ancestor] > depth[node]) return false;
             // return getParent(node, depth[node] - depth[ancestor]) == node;
-            
+
             for (Depth d = logMaxV; d-- > 0; ) {
                 if (depth[jmp[d][node].u] >= depth[ancestor]) {
                     node = jmp[d][node].u;
@@ -724,7 +702,7 @@ public:
             }
             return maxHeight;
         }
-        
+
         // O(maxV)
         // @returns array, where the ith weight is the height of node i from the root, or INVALID_WEIGHT if node i is invalid
         const std::array<Weight, maxV>& getHeightFromRoot() const {
@@ -754,7 +732,7 @@ public:
         Weight getDiameter() const {
             std::array<Weight, maxV> leafHeight = getHeightFromLeaves();
             Weight best = Weight();
-            
+
             for (Node node: nodes) {
                 Weight furthest1 = Weight(), furthest2 = Weight();
                 for (Edge edge : children[node]) {
@@ -921,13 +899,12 @@ public:
          *                     MISC                     *
          ************************************************/
 
-
         // void rootAt() {
-        //     // TODO
+        //     // @TODO
         // }
 
         // MyTree getSubtree(Node node) {
-        //     // TODO
+        //     // @TODO
         // }
     };
 };

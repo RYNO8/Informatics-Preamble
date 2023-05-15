@@ -46,6 +46,7 @@ namespace DS {
         std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>, bool> = true
     >
     struct Range : public std::pair<T, T> {
+
         /************************************************
          *                 INITIALISATION               *
          ************************************************/
@@ -87,7 +88,7 @@ namespace DS {
         // O(1)
         // @returns Midpoint of range (rounding down)
         constexpr T midpoint() const {
-            // NOTE: using the implementation so it still rounds down when
+            // @note using the implementation so it still rounds down when
             return l() + (r() - l()) / 2;
         }
 
@@ -113,13 +114,12 @@ namespace DS {
         bool covers(T i) const {
             return l() <= i && i <= r();
         }
-        
+
         // O(1)
         // @returns
         bool covers(const Range<T> &o) const {
             return l() <= o.l() && o.r() <= r();
         }
-        
 
         // O(1)
         // @returns
@@ -200,6 +200,7 @@ namespace DS {
 
     template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
     class Ranges: public std::set<Range<T>> {
+
         /************************************************
          *                 INITIALISATION               *
          ************************************************/

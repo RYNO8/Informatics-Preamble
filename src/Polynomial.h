@@ -7,9 +7,11 @@
 namespace DS {
     template<typename T, std::enable_if_t<is_my_integral_v<T>, bool> = true>
     class Polynomial {
+
         /************************************************
          *                INITIALISATION                *
          ************************************************/
+
     private:
         std::vector<T> coeff;
 
@@ -19,13 +21,12 @@ namespace DS {
         }
 
         Polynomial(std::vector<T> _coeff) : coeff(_coeff) {
-            
+
         }
 
         /************************************************
          *                    DISPLAY                   *
          ************************************************/
-
 
         // O(n)
         // Displays the natural maths representation of the polynomial
@@ -42,6 +43,7 @@ namespace DS {
         /************************************************
          *                   PROPERTIES                 *
          ************************************************/
+
         // O(1)
         int N() const {
             return coeff.size();
@@ -55,6 +57,7 @@ namespace DS {
         /************************************************
          *               BASCIC OPERATIONS              *
          ************************************************/
+
         // O(n), but usually O(1)
         // @returns The polynomial without the leading 0 coefficients
         Polynomial<T> norm() const {
@@ -82,7 +85,7 @@ namespace DS {
         // O(n log n)
         // @returns Q(x) = 1/P(x) mod x^t
         // in other words, the unique polynomial Q(x) such that P(x)Q(x) == 1 + x^t R(x)
-        // TODO: make iterative instead
+        // @TODO make iterative instead
         Polynomial<T> inv(int t) const {
             assert(t != 0);
             //assert(coeff.back() != 0ll); // poly only invertible when this condition holds
@@ -129,10 +132,10 @@ namespace DS {
             return false;
         }
 
-
         /************************************************
          *              COMPLEX OPERATIONS              *
          ************************************************/
+
         // O(n log n)
         // Number Theoric Transform (in place & iterative)
         // evaluate P(omega), P(omega^2), ..., P(omega^n), where omega is a primative `MOD` root of unity
@@ -179,7 +182,7 @@ namespace DS {
         // O(n log n)
         // Fast fourier transform
         // evaluate P(omega), P(omega^2), ..., P(omega^n), where omega is a complex `n`th root of unity
-        // TODO: implement
+        // @TODO implement
         std::vector<T> FFT(int n, bool inv = false) const {
 
         }
@@ -218,7 +221,7 @@ namespace DS {
             }
             return copy;
         }
-        
+
         // O(n) Subtraction assignment
         Polynomial<T> operator-=(Polynomial<T> o) {
             *this = (*this) - o;
@@ -238,7 +241,7 @@ namespace DS {
             for (int i = 0; i < n; ++i) output.coeff.push_back(aPoints[i] * bPoints[i]);
             return output.FT(n, true);
         }
-        
+
         // O(n log n) Multiplication assignment
         Polynomial<T> operator*=(Polynomial<T> o) {
             *this = (*this) * o;
@@ -251,13 +254,13 @@ namespace DS {
             for (int i = 0; i < N(); ++i) copy->coeff[i] *= a;
             return *copy;
         }
-        
+
         // O(n) Multiplication assignment
         Polynomial<T> operator*=(T a) {
             *this = (*this) * a;
             return *this;
         }
-        
+
         // O(n log n) Polynomial<T> division
         // @returns the divisor when `this` is divided by `o`
         Polynomial<T> operator/(Polynomial<T> o) const {
@@ -320,7 +323,7 @@ namespace DS {
     public:
         // O(n log^2 n)
         // Fast multipoint evaluation
-        // @return P(points[0]), P(points[1]), ...
+        // @returns P(points[0]), P(points[1]), ...
         std::vector<T> fastEval(std::vector<T> points) const {
             std::vector<Polynomial<T>> v = buildSubproduct(points);
             return fastEval_(v);

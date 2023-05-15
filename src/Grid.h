@@ -1,10 +1,12 @@
 #ifndef GRID_H
 #define GRID_H
 #include "Constants.h"
+#include "Util.h"
 
 namespace DS {
     template<typename T, std::enable_if_t<is_my_integral_v<T>, bool> = true>
     class Grid {
+
         /************************************************
          *                INITIALISATION                *
          ************************************************/
@@ -126,29 +128,18 @@ namespace DS {
                 }
             }
 
-            std::string sep = "+", space = "|";
-            for (int r = 0; r < R; ++r) {
-                sep += std::string(4 * spacing + 1, '-') + '+';
-                space += std::string(4 * spacing + 1, ' ') + '|';
-            }
-            sep += '\n';
-            space += '\n';
-            
-            for (int r = 0; r < R; ++r) {
-                out << sep;
+            std::string sep = "+" + (std::string("-") * (4 * spacing + 1) + "+") * R + "\n";
+            std::string space = "|" + (std::string(" ") * (4 * spacing + 1) + "|") * R + "\n";
 
-                for (int rep = 0; rep < spacing; ++rep) out << space;
-
-                out << '|';
+            for (int r = 0; r < R; ++r) {
+                out << sep << space * spacing << '|';
                 for (int c = 0; c < C; ++c) {
                     int paddingL = std::max(0, 2 * spacing - repr(grid[r][c]).size() / 2);
                     int paddingR = std::max(0, 2 * spacing - (repr(grid[r][c]) - 1).size() / 2);
 
-                    out << std::string(paddingL, ' ') << grid[r][c] << std::string(paddingR, ' ') << '|';
+                    out << std::string(" ") * paddingL << grid[r][c] << std::string(" ") * paddingR << '|';
                 }
-                out << '\n';
-
-                for (int rep = 0; rep < spacing; ++rep) out << space;
+                out << '\n' << space * spacing;
             }
             out << sep;
         }
@@ -159,7 +150,7 @@ namespace DS {
 
         // O(1)
         // Filter generator, to determine whether cell values are equal to `val`
-        // @returns A std::function which acts to "filter" cells 
+        // @returns A std::function which acts to "filter" cells
         std::function<bool(int, int)> compEQ(T val) {
             return [&, val](int r, int c) {
                 if (validCoord(r, c)) return getVal(r, c) == val;
@@ -169,7 +160,7 @@ namespace DS {
 
         // O(1)
         // Filter generator, to determine whether cell values are not equal to `val`
-        // @returns A std::function which acts to "filter" cells 
+        // @returns A std::function which acts to "filter" cells
         std::function<bool(int, int)> compNE(T val) {
             return [&, val](int r, int c) {
                 if (validCoord(r, c)) return getVal(r, c) != val;
@@ -179,7 +170,7 @@ namespace DS {
 
         // O(1)
         // Filter generator, to determine whether cell values are greater than `val`
-        // @returns A std::function which acts to "filter" cells 
+        // @returns A std::function which acts to "filter" cells
         std::function<bool(int, int)> compGT(T val) {
             return [&, val](int r, int c) {
                 if (validCoord(r, c)) return getVal(r, c) > val;
@@ -189,27 +180,27 @@ namespace DS {
 
         // O(1)
         // Filter generator, to determine whether cell values are greater or equal to `val`
-        // @returns A std::function which acts to "filter" cells 
+        // @returns A std::function which acts to "filter" cells
         std::function<bool(int, int)> compGE(T val) {
             return [&, val](int r, int c) {
                 if (validCoord(r, c)) return getVal(r, c) >= val;
                 return false;
             };
         }
-        
+
         // O(1)
         // Filter generator, to determine whether cell values are less than `val`
-        // @returns A std::function which acts to "filter" cells 
+        // @returns A std::function which acts to "filter" cells
         std::function<bool(int, int)> compLT(T val) {
             return [&, val](int r, int c) {
                 if (validCoord(r, c)) return getVal(r, c) < val;
                 return false;
             };
         }
-        
+
         // O(1)
         // Filter generator, to determine whether cell values are less or equal to `val`
-        // @returns A std::function which acts to "filter" cells 
+        // @returns A std::function which acts to "filter" cells
         std::function<bool(int, int)> compLE(T val) {
             return [&, val](int r, int c) {
                 if (validCoord(r, c)) return getVal(r, c) <= val;
@@ -325,7 +316,7 @@ namespace DS {
         void setVals(std::pair<int, int> coord1, std::pair<int, int> coord2, T val) {
             setVals(coord1.first, coord1.second, coord2.first, coord2.second, val);
         }
-        
+
         // O(1) If the provided coordinate is valid, increment its value by `val`
         void incrVal(int r, int c, T val) {
             if (validCoord(r, c)) {

@@ -6,6 +6,7 @@
 namespace DS {
     template<typename T, std::enable_if_t<is_my_integral_v<T>, bool> = true>
     class Matrix : public Grid<T> {
+
         /************************************************
          *                INITIALISATION                *
          ************************************************/
@@ -25,7 +26,7 @@ namespace DS {
         // O(RC)
         // Initialise Matrix from Grid
         Matrix(Grid<T> g) : Grid<T>(g) {
-            
+
         }
 
         /************************************************
@@ -83,7 +84,7 @@ namespace DS {
         void operator+=(Matrix o) {
             *this = *this + o;
         }
-        
+
         // O(RC)
         // Stamdard matrix subtraction
         Matrix operator-(Matrix o) const {
@@ -137,7 +138,7 @@ namespace DS {
             }
             return output;
         }
-        
+
         // O(N^3)
         // Multiplication assignment
         void operator*=(Matrix o) {
@@ -157,11 +158,11 @@ namespace DS {
             return output;
         }
 
-        // TODO: rref
-        // TODO: det
-        // TODO: matrix inverse
-        // TODO: eigenvectors and eigenvalues
-        // TODO: decompositions
+        // @TODO rref
+        // @TODO det
+        // @TODO matrix inverse
+        // @TODO eigenvectors and eigenvalues
+        // @TODO decompositions
     };
 };
 

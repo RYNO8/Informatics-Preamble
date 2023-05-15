@@ -17,14 +17,14 @@ namespace DS {
     // template<typename is_persistent_ = is_persistent, std::enable_if_t<!is_persistent_::value, bool> = true>
     // template<typename is_persistent_ = is_persistent, std::enable_if_t<is_persistent_::value, bool> = true>
     // oop turns out I'm not gonna do constexpr stuff
-    
+
     // I should be left and right identity of Combine
     // Combine should have `T operator()(T, T)` which is associative property
     // CombineAgg should have `operator()(T x, unsigned ll n)` which is defined as adding x to itself n times (n > 0)
-    // TODO: if not provided use fast exponentiation
+    // @TODO if not provided use fast exponentiation
     // Null should be the left (and right?) identity of Update
     // Update should have `T operator()(T, T)`
-    // TODO: what properties required?
+    // @TODO what properties required?
     template<
         typename T,
         T I,
@@ -167,7 +167,7 @@ namespace DS {
          ************************************************/
 
         // O(N)
-        // @note: not const segtree because queries do pushes
+        // @note not const segtree because queries do pushes
         friend std::ostream& operator<<(std::ostream &out, Segtree segtree) {
             out << '[';
             for (ll i = segtree.l(); i <= segtree.r(); ++i) {
@@ -178,7 +178,7 @@ namespace DS {
         }
 
         // O(displayRange.size())
-        // @note: not const segtree because queries do pushes
+        // @note not const segtree because queries do pushes
         // @TODO this a butchered solution until I do range views
         std::ostream& display(std::ostream &out, Range<ll> displayRange) {
             out << '[';
@@ -195,8 +195,6 @@ namespace DS {
             out << '[' << segtree->l() << ".." << segtree->r() << "] = " << segtree->val;
             return out;
         }
-
-        
 
         /************************************************
          *                     UPDATES                  *
@@ -269,7 +267,7 @@ namespace DS {
             return Combine()(lChild->query(queryRange), rChild->query(queryRange));
         }
 
-        // TODO: pandas view kinda thing?
+        // @TODO pandas view kinda thing?
         T operator[](const Range<ll> queryRange) {
             return query(queryRange);
         }
@@ -337,13 +335,12 @@ namespace DS {
             return root;
         }
 
-
         /************************************************
          *                   ITERATOR                   *
          ************************************************/
 
-        // TODO: test
-        // TODO: test with persistent segtree
+        // @TODO test
+        // @TODO test with persistent segtree
     private:
         enum ItPos {
             TOO_FAR_LEFT = -1,
@@ -401,7 +398,7 @@ namespace DS {
             // O(1)
             // defeference the interator
             // @returns reference to the leaf node corresponding to the index
-            reference operator*() const { 
+            reference operator*() const {
                 assert(m_ptr != nullptr && "cannot dereference out of bound interator");
                 return *m_ptr;
             }
@@ -469,7 +466,7 @@ namespace DS {
 
             friend bool operator==(const iterator& a, const iterator& b) { return a.m_ptr == b.m_ptr; };
             friend bool operator!=(const iterator& a, const iterator& b) { return a.m_ptr != b.m_ptr; };
-            // TODO: what if a and b are referencing different segtrees
+            // @TODO what if a and b are referencing different segtrees
             friend bool operator<(const iterator& a, const iterator& b) { return a.pos < b.pos; };
             friend bool operator>(const iterator& a, const iterator& b) { return a.pos > b.pos; };
             friend bool operator<=(const iterator& a, const iterator& b) { return a.pos <= b.pos; };
@@ -500,7 +497,7 @@ namespace DS {
                 return it2.pos - it1.pos;
             }
 
-            // TODO: what if a and b are referencing different segtrees
+            // @TODO what if a and b are referencing different segtrees
             friend bool operator<(const reverse_iterator& a, const reverse_iterator& b) { return -a.pos < -b.pos; };
             friend bool operator>(const reverse_iterator& a, const reverse_iterator& b) { return -a.pos > -b.pos; };
             friend bool operator<=(const reverse_iterator& a, const reverse_iterator& b) { return -a.pos <= -b.pos; };
@@ -559,13 +556,11 @@ public:
     template<typename T>
     using SumSegtreePersistent = Segtree<T, 0, std::plus<T>, std::multiplies<T>, 0, std::plus<T>, std::true_type>;
 
-
     template<typename T>
     using MaxSegtree = Segtree<T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>, std::false_type>;
 
     template<typename T>
     using MaxSegtreePersistent = Segtree<T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>, std::true_type>;
-
 
     template<typename T>
     using MinSegtree = Segtree<T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>, std::false_type>;

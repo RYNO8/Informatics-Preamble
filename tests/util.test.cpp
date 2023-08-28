@@ -29,22 +29,28 @@ void testDisplay() {
     assert(repr(dq) == "< 1, 2 >");
 
     assert(repr(map<int, int>({})) == "{ }");
-    assert(repr(map<int, int>({ {1, 2 }})) == "{ 1: 2 }");
+    assert(repr(map<int, int>({ { 1, 2 } })) == "{ 1: 2 }");
     assert(repr(unordered_map<int, int>({})) == "{ }");
-    assert(repr(unordered_map<int, int>({ {1, 2 }})) == "{ 1: 2 }");
+    assert(repr(unordered_map<int, int>({ { 1, 2 } })) == "{ 1: 2 }");
     assert(repr(multimap<int, int>({})) == "{ }");
-    assert(repr(multimap<int, int>({ {1, 2 }})) == "{ 1: 2 }");
+    assert(repr(multimap<int, int>({ { 1, 2 } })) == "{ 1: 2 }");
     assert(repr(unordered_multimap<int, int>({})) == "{ }");
-    assert(repr(unordered_multimap<int, int>({ {1, 2 }})) == "{ 1: 2 }");
+    assert(repr(unordered_multimap<int, int>({ { 1, 2 } })) == "{ 1: 2 }");
 
     assert(repr(set<int>()) == "{ }");
-    assert(repr(set<int>({1, 2})) == "{ 1, 2 }");
+    assert(repr(set<int>({ 1, 2 })) == "{ 1, 2 }");
     assert(repr(unordered_set<int>()) == "{ }");
-    assert(repr(unordered_set<int>({1, 2})) == "{ 1, 2 }" || repr(unordered_set<int>({1, 2})) == "{ 2, 1 }");
+    assert(
+        repr(unordered_set<int>({ 1, 2 })) == "{ 1, 2 }" ||
+        repr(unordered_set<int>({ 1, 2 })) == "{ 2, 1 }"
+    );
     assert(repr(multiset<int>()) == "{ }");
-    assert(repr(multiset<int>({1, 2})) == "{ 1, 2 }");
+    assert(repr(multiset<int>({ 1, 2 })) == "{ 1, 2 }");
     assert(repr(unordered_multiset<int>()) == "{ }");
-    assert(repr(unordered_multiset<int>({1, 2})) == "{ 1, 2 }" || repr(unordered_multiset<int>({1, 2})) == "{ 2, 1 }");
+    assert(
+        repr(unordered_multiset<int>({ 1, 2 })) == "{ 1, 2 }" ||
+        repr(unordered_multiset<int>({ 1, 2 })) == "{ 2, 1 }"
+    );
 }
 
 void testPopcount() {
@@ -59,7 +65,7 @@ void testPopcount() {
 void testGCD_speed() {
     uint64_t ans = 0; // prevent compiler optimisation
 
-    auto start1 = timeNow();
+    auto start1  = timeNow();
     for (ll i = 0; i < 1e8; ++i) {
         uint64_t x = ull_dis(rng);
         uint64_t y = ull_dis(rng);
@@ -90,12 +96,12 @@ void testGCD_speed() {
 }
 
 void testVec() {
-    vector<int> a = {1, 2, 3};
-    vector<int> b = {4, 6, 1};
+    vector<int> a = { 1, 2, 3 };
+    vector<int> b = { 4, 6, 1 };
     assert(a <= b);
     a += b;
-    assert(a == vector<int>({5, 8, 4}));
-    assert(a - b == vector<int>({1, 2, 3}));
+    assert(a == vector<int>({ 5, 8, 4 }));
+    assert(a - b == vector<int>({ 1, 2, 3 }));
     assert(a != b);
 
     stringstream ss;
@@ -108,6 +114,6 @@ void testVec() {
 int main() {
     testDisplay();
     testPopcount();
-    //testGCD_speed();
+    // testGCD_speed();
     testVec();
 }

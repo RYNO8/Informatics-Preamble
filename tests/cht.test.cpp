@@ -20,19 +20,22 @@ ll arr[1000005], prefix[1000005], dp[1000005];
 
 CHT commando(istream &in, ostream &out) {
     in >> N >> A >> B >> C;
-    for (ll i = 1; i <= N; ++i) in >> arr[i];
-    for (ll i = 1; i <= N; ++i) prefix[i] = prefix[i - 1] + arr[i];
-    
+    for (ll i = 1; i <= N; ++i)
+        in >> arr[i];
+    for (ll i = 1; i <= N; ++i)
+        prefix[i] = prefix[i - 1] + arr[i];
+
     CHT cht;
     dp[0] = 0;
     for (ll i = 0; i <= N; ++i) {
-        if (i == 0) dp[i] = 0;
-        else dp[i] = cht.getMinima(prefix[i]) + A * prefix[i] * prefix[i] + B * prefix[i] + C; // Ax^2 + Bx;
+        if (i == 0)
+            dp[i] = 0;
+        else
+            dp[i] = cht.getMinima(prefix[i]) + A * prefix[i] * prefix[i] + B * prefix[i] +
+                    C; // Ax^2 + Bx;
 
         CHTLine l = {
-            .m = -2 * A * prefix[i],
-            .b = A * prefix[i] * prefix[i] - B * prefix[i] + dp[i]
-        };
+            .m = -2 * A * prefix[i], .b = A * prefix[i] * prefix[i] - B * prefix[i] + dp[i]};
         cht.addLine(l);
     }
     out << dp[N] << "\n";
@@ -49,5 +52,6 @@ int main() {
     CHT cht = commando(in, out);
     assert(repr(cht) == "[ y = 0 y = 8x-52 y = 14x-114 y = 22x-222 ]");
     string ans;
-    out >> ans; assert(ans == "9");
+    out >> ans;
+    assert(ans == "9");
 }

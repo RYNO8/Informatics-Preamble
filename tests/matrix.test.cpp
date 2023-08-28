@@ -1,12 +1,8 @@
-﻿#include "../src/Constants.h"
+﻿#include "../src/Matrix.h"
+#include "../src/Constants.h"
 #include "../src/ModInt.h"
-#include "../src/Matrix.h"
 using namespace std;
 
-void testMatrix() {
-    
-}
+void testMatrix() {}
 
-signed main() {
-    testMatrix();
-}
+signed main() { testMatrix(); }

@@ -1,9 +1,9 @@
 #include "../src/BIT.h"
 #include "../src/Util.h"
 #include <assert.h>
-#include <vector>
 #include <random>
 #include <time.h>
+#include <vector>
 using namespace std;
 using namespace DS;
 
@@ -18,14 +18,16 @@ void testBIT_metadata() {
     assert(b.size() == 6);
     assert(b.dimensions() == 2);
     assert(b.shape() == vector<size_t>({2, 3}));
-    assert(b.index() == vector<vector<size_t>>({
-        {0, 0},
-        {0, 1},
-        {0, 2},
-        {1, 0},
-        {1, 1},
-        {1, 2},
-    }));
+    assert(
+        b.index() == vector<vector<size_t>>({
+                         {0, 0},
+                         {0, 1},
+                         {0, 2},
+                         {1, 0},
+                         {1, 1},
+                         {1, 2},
+                     })
+    );
     assert(b.data() == vector<int>({0, 1, 2, 3, 4, 5}));
 
     BIT_PQRU<int, 2> c;
@@ -35,7 +37,7 @@ void testBIT_metadata() {
 }
 
 void testBIT_rqpu() {
-    // if it works in 2 dimensions, it probably works for 
+    // if it works in 2 dimensions, it probably works for
     // all other dimensions
     BIT_RQPU<int, 10, 11> b;
     int fakeBit[10][11] = {};
@@ -64,14 +66,14 @@ void testBIT_rqpu() {
             // point add-update
             int i1 = rand() % 10;
             int i2 = rand() % 11;
-            int v = rand() % 69;
+            int v  = rand() % 69;
             fakeBit[i1][i2] += v;
             b.addIndex(v, i1, i2);
         } else if (opt == 3) {
             // point set-update
-            int i1 = rand() % 10;
-            int i2 = rand() % 11;
-            int v = rand() % 69;
+            int i1          = rand() % 10;
+            int i2          = rand() % 11;
+            int v           = rand() % 69;
             fakeBit[i1][i2] = v;
             b.setIndex(v, i1, i2);
         }
@@ -79,7 +81,7 @@ void testBIT_rqpu() {
 }
 
 void testBIT_pqru() {
-    // if it works in 2 dimensions, it probably works for 
+    // if it works in 2 dimensions, it probably works for
     // all other dimensions
     BIT_PQRU<int, 10, 11> b;
     int fakeBit[10][11] = {};
@@ -90,7 +92,7 @@ void testBIT_pqru() {
             // point query
             int i1 = rand() % 10;
             int i2 = rand() % 11;
-            
+
             assert(fakeBit[i1][i2] == b.queryIndex(i1, i2));
         } else if (opt == 1) {
             // range add-update
@@ -109,20 +111,19 @@ void testBIT_pqru() {
             // point add-update
             int i1 = rand() % 10;
             int i2 = rand() % 11;
-            int v = rand() % 69;
+            int v  = rand() % 69;
             fakeBit[i1][i2] += v;
             b.addIndex(v, i1, i2);
         } else if (opt == 3) {
             // point set-update
-            int i1 = rand() % 10;
-            int i2 = rand() % 11;
-            int v = rand() % 69;
+            int i1          = rand() % 10;
+            int i2          = rand() % 11;
+            int v           = rand() % 69;
             fakeBit[i1][i2] = v;
             b.setIndex(v, i1, i2);
         }
     }
 }
-
 
 void testBIT_display() {
     BIT_PQRU<int, 2, 2> b;

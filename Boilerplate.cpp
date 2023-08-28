@@ -15,22 +15,21 @@ using namespace DS;
 
 ll N, M, T, arr[MAXN];
 
-void solve() {
-
-}
+void solve() {}
 
 signed main() {
-	std::cin.tie(0); ios::sync_with_stdio(0);
-	//ifstream std::cin{ "_in.txt" };
-	//ofstream std::cout{ "_out.txt" };
+    std::cin.tie(0);
+    ios::sync_with_stdio(0);
+    // ifstream std::cin{ "_in.txt" };
+    // ofstream std::cout{ "_out.txt" };
 
-	solve();
+    solve();
 
-	/*
-	std::cin >> T;
-	for (int t = 1; t <= T; ++t) {
-		std::cout << "Case #" << t << ": ";
-		solve();
-		std::cout << "\n";
-	*/
+    /*
+    std::cin >> T;
+    for (int t = 1; t <= T; ++t) {
+        std::cout << "Case #" << t << ": ";
+        solve();
+        std::cout << "\n";
+    */
 }

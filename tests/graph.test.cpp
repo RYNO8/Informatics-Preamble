@@ -1,9 +1,9 @@
-﻿#include <iostream>
-#include <fstream>
-#include <sstream>
-#include "../src/Graph.h"
+﻿#include "../src/Graph.h"
 #include "../src/Util.h"
 #include "helpers.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
 using namespace std;
 using namespace DS;
 
@@ -14,7 +14,7 @@ using namespace DS;
  * |    /  |
  * v   |   v
  * 3<-`    4
- * 
+ *
  */
 void testDigraph() {
     using DiGraph = UnweightedDiGraph<10>;
@@ -39,17 +39,19 @@ void testDigraph() {
     assert(G1.V() == 4 && G1.N() == 4);
     assert(G1.E() == 6 && G1.M() == 6);
     assert(unordered_eq(G1.getNodes(), vector<DiGraph::Node>({1, 2, 3, 4})));
-    assert(unordered_eq(G1.getEdges(), vector<DiGraph::Edge>({
-        DiGraph::Edge(1, 2),
-        DiGraph::Edge(1, 3),
-        DiGraph::Edge(2, 1),
-        DiGraph::Edge(2, 3),
-        DiGraph::Edge(2, 4),
-        DiGraph::Edge(3, 1),
-    })));
-    assert(G1.getEdgesOut(3) == vector<DiGraph::Edge>({ DiGraph::Edge(3, 1) }));
+    assert(unordered_eq(
+        G1.getEdges(), vector<DiGraph::Edge>({
+                           DiGraph::Edge(1, 2),
+                           DiGraph::Edge(1, 3),
+                           DiGraph::Edge(2, 1),
+                           DiGraph::Edge(2, 3),
+                           DiGraph::Edge(2, 4),
+                           DiGraph::Edge(3, 1),
+                       })
+    ));
+    assert(G1.getEdgesOut(3) == vector<DiGraph::Edge>({DiGraph::Edge(3, 1)}));
     assert(G1.getSources() == vector<DiGraph::Node>({}));
-    assert(G1.getSinks() == vector<DiGraph::Node>({ 4}));
+    assert(G1.getSinks() == vector<DiGraph::Node>({4}));
     assert(G1.containsEdge(DiGraph::Edge(1, 2)));
     assert(G1.containsEdge(DiGraph::Edge(2, 1)));
     assert(!G1.containsEdge(DiGraph::Edge(3, 4)));
@@ -62,38 +64,40 @@ void testDigraph() {
     G1.insertEdge(DiGraph::Edge(1, 2));
 
     G1.eraseEdge(DiGraph::Edge(2, 4));
-    assert(G1.getComponent(4) == DiGraph(G1, vector<DiGraph::Node>({ 4 })));
-    assert(G1.getComponent(1) == DiGraph(G1, vector<DiGraph::Node>({ 1, 2, 3 })));
-    assert(G1.getComponents() == vector<DiGraph>({
-        DiGraph(G1, vector<DiGraph::Node>({ 1, 2, 3 })),
-        DiGraph(G1, vector<DiGraph::Node>({ 4 })),
-    })); // this could actually be any order but cbbs testing that
+    assert(G1.getComponent(4) == DiGraph(G1, vector<DiGraph::Node>({4})));
+    assert(G1.getComponent(1) == DiGraph(G1, vector<DiGraph::Node>({1, 2, 3})));
+    assert(
+        G1.getComponents() == vector<DiGraph>({
+                                  DiGraph(G1, vector<DiGraph::Node>({1, 2, 3})),
+                                  DiGraph(G1, vector<DiGraph::Node>({4})),
+                              })
+    ); // this could actually be any order but cbbs testing that
     G1.insertEdge(DiGraph::Edge(2, 4));
     assert(G1.getComponent(2) == G1);
 
-    DiGraph induced(G1, vector<DiGraph::Node>({ 3 }));
-    assert(induced.getEdges().empty() && induced.getNodes() == vector<DiGraph::Node>({ 3 }));
-    assert(induced == DiGraph(vector<DiGraph::Node>({ 3 })));
-    
+    DiGraph induced(G1, vector<DiGraph::Node>({3}));
+    assert(induced.getEdges().empty() && induced.getNodes() == vector<DiGraph::Node>({3}));
+    assert(induced == DiGraph(vector<DiGraph::Node>({3})));
+
     assert(G1 + induced == G1);
-    assert(G1 + DiGraph(3, vector<DiGraph::Edge>({ DiGraph::Edge(1, 2) })) == G1);
-    assert(G1 + DiGraph(5, vector<DiGraph::Edge>({ DiGraph::Edge(1, 4) })) != G1);
+    assert(G1 + DiGraph(3, vector<DiGraph::Edge>({DiGraph::Edge(1, 2)})) == G1);
+    assert(G1 + DiGraph(5, vector<DiGraph::Edge>({DiGraph::Edge(1, 4)})) != G1);
     assert(repr(G1.flip()) == "1: 2 3\n2: 1\n3: 1 2\n4: 2\n");
 
     auto a = std::array<int, 10>({
-        2147483647, 
-        0, 
-        1, 
-        1, 
-        2, 
-        2147483647, 
-        2147483647, 
-        2147483647, 
-        2147483647, 
-        2147483647, 
+        2147483647,
+        0,
+        1,
+        1,
+        2,
+        2147483647,
+        2147483647,
+        2147483647,
+        2147483647,
+        2147483647,
     });
     assert(G1.SSSP(1).first == a);
-    
+
     assert(G1.isReachable(2, 4));
     G1.eraseEdge(DiGraph::Edge(2, 4));
     assert(!G1.isReachable(2, 4));
@@ -102,20 +106,22 @@ void testDigraph() {
 
     G1.eraseEdge(DiGraph::Edge(2, 1));
     G1.eraseEdge(DiGraph::Edge(3, 1));
-    assert(G1.dfsTopsort() == vector<DiGraph::Node>({ 1, 2, 4, 3 }));
-    assert(G1.Kahns() == vector<DiGraph::Node>({ 1, 2, 4, 3 }));
+    assert(G1.dfsTopsort() == vector<DiGraph::Node>({1, 2, 4, 3}));
+    assert(G1.Kahns() == vector<DiGraph::Node>({1, 2, 4, 3}));
     assert(G1.isAcyclic());
     G1.insertEdge(DiGraph::Edge(2, 1));
     G1.insertEdge(DiGraph::Edge(3, 1));
 
-    assert(G1.Kosaraju() == vector<vector<DiGraph::Node>>({
-        vector<DiGraph::Node>({ 1, 2, 3 }),
-        vector<DiGraph::Node>({ 4 })
-    }));
-    assert(G1.Tarjan() == vector<vector<DiGraph::Node>>({
-        vector<DiGraph::Node>({ 4 }),
-        vector<DiGraph::Node>({ 3, 2, 1 })
-    }));
+    assert(
+        G1.Kosaraju() ==
+        vector<vector<DiGraph::Node>>({vector<DiGraph::Node>({1, 2, 3}), vector<DiGraph::Node>({4})}
+        )
+    );
+    assert(
+        G1.Tarjan() ==
+        vector<vector<DiGraph::Node>>({vector<DiGraph::Node>({4}), vector<DiGraph::Node>({3, 2, 1})}
+        )
+    );
 
     assert(G1.isCyclic());
 
@@ -167,20 +173,20 @@ void testGraph() {
     assert(G2.containsEdge(MyGraph::Edge(1, 7)));
     assert(G2.containsEdge(MyGraph::Edge(7, 1)));
 
-    assert(G2.shortestPath(7, 5) == vector<MyGraph::Edge>({
-        MyGraph::Edge(7, 1),
-        MyGraph::Edge(1, 8),
-        MyGraph::Edge(8, 5)
-    }));
+    assert(
+        G2.shortestPath(7, 5) ==
+        vector<MyGraph::Edge>({MyGraph::Edge(7, 1), MyGraph::Edge(1, 8), MyGraph::Edge(8, 5)})
+    );
 
     assert(G2.eccentricity(8) == 2);
     assert(G2.eccentricity(6) == 4);
-    assert(G2.diameter(1) == vector<MyGraph::Edge>({
-        MyGraph::Edge(6, 1),
-        MyGraph::Edge(1, 8),
-        MyGraph::Edge(8, 2),
-        MyGraph::Edge(2, 3)
-    }));; // many valid diameters but again cbbs making generic test
+    assert(
+        G2.diameter(1) ==
+        vector<MyGraph::Edge>(
+            {MyGraph::Edge(6, 1), MyGraph::Edge(1, 8), MyGraph::Edge(8, 2), MyGraph::Edge(2, 3)}
+        )
+    );
+    ; // many valid diameters but again cbbs making generic test
 
     auto f = G2.FloydWarshall();
     assert(f(3, 4) == 1 && f(5, 7) == 3 && f(7, 5) == 3 && f(6, 3) == 4);
@@ -190,10 +196,12 @@ void testGraph() {
     assert(f(1, 8) == 1);
     G2.insertEdge(MyGraph::Edge(1, 8));
 
-    assert(G2.bridgesDFS() == vector<MyGraph::Edge>({ 
-        MyGraph::Edge(1, 8),
-        MyGraph::Edge(10, 9),
-    }));
+    assert(
+        G2.bridgesDFS() == vector<MyGraph::Edge>({
+                               MyGraph::Edge(1, 8),
+                               MyGraph::Edge(10, 9),
+                           })
+    );
 
     assert(G2.EdmondsKarp(3, 8) == 2);
     assert(G2.EdmondsKarp(10, 9) == 1);
@@ -232,15 +240,17 @@ void testWeightedGraph() {
     assert(G3.containsEdgeUnweighted(WeightedGraph::Edge(1, 2, 10)));
     assert(G3.containsEdgeUnweighted(WeightedGraph::Edge(1, 2, 11)));
 
-    assert(G3 == WeightedGraph(vector<vector<WeightedGraph::EdgeWeight>>({
-        vector<WeightedGraph::EdgeWeight>({ INT_MAX, 10,      INT_MAX }),
-        vector<WeightedGraph::EdgeWeight>({ INT_MAX, INT_MAX, -1      }),
-        vector<WeightedGraph::EdgeWeight>({ INT_MAX, INT_MAX, INT_MAX }),
-    })));
+    assert(
+        G3 == WeightedGraph(vector<vector<WeightedGraph::EdgeWeight>>({
+                  vector<WeightedGraph::EdgeWeight>({INT_MAX, 10, INT_MAX}),
+                  vector<WeightedGraph::EdgeWeight>({INT_MAX, INT_MAX, -1}),
+                  vector<WeightedGraph::EdgeWeight>({INT_MAX, INT_MAX, INT_MAX}),
+              }))
+    );
 }
 
 void testEmptyGraph() {
-    using DegenGraph = Graph<1, UnitEdgeWeight, int, false>;
+    using DegenGraph   = Graph<1, UnitEdgeWeight, int, false>;
     using DegenDiGraph = Graph<1, UnitEdgeWeight, int, true>;
     DegenGraph G4_undirected{};
     DegenDiGraph G4_directed{};
@@ -261,11 +271,13 @@ void testEmptyGraph() {
     assert(G4_undirected.bridgesDFS() == vector<DegenGraph::Edge>());
     assert(!G4_directed.isCyclic());
     assert(G4_directed.isForest()); // yikes thats controversial
-    assert(!G4_directed.isTree()); // yikes thats controversial
+    assert(!G4_directed.isTree());  // yikes thats controversial
 }
 
 template<size_t N, typename EdgeWeight, typename PathWeight, bool isWeighted>
-void testShortestPath(Graph<N, EdgeWeight, PathWeight, isWeighted> G, array<array<int, N>, N> adj, bool testF = true) {
+void testShortestPath(
+    Graph<N, EdgeWeight, PathWeight, isWeighted> G, array<array<int, N>, N> adj, bool testF = true
+) {
     for (size_t u = 0; u < N; ++u) {
         auto SSSP = G.SSSP(u).first;
         for (size_t v = 0; v < N; ++v) {
@@ -286,56 +298,124 @@ void testShortestPaths() {
     using DirectedWeightedGraph = Graph<4, int, int, true>;
 
     testShortestPath(
-        DirectedWeightedGraph(3, vector<DirectedWeightedGraph::Edge>({
-            DirectedWeightedGraph::Edge(1, 2, 10),
-            DirectedWeightedGraph::Edge(2, 3, 1),
-        })),
+        DirectedWeightedGraph(
+            3, vector<DirectedWeightedGraph::Edge>({
+                   DirectedWeightedGraph::Edge(1, 2, 10),
+                   DirectedWeightedGraph::Edge(2, 3, 1),
+               })
+        ),
         array<array<int, 4>, 4>{
-            array<int, 4>{ 0,       INT_MAX, INT_MAX, INT_MAX },
-            array<int, 4>{ INT_MAX, 0,       10,      11,     },
-            array<int, 4>{ INT_MAX, INT_MAX, 0,       1,      },
-            array<int, 4>{ INT_MAX, INT_MAX, INT_MAX, 0,      },
+            array<int, 4>{0, INT_MAX, INT_MAX, INT_MAX},
+            array<int, 4>{
+                INT_MAX,
+                0,
+                10,
+                11,
+            },
+            array<int, 4>{
+                INT_MAX,
+                INT_MAX,
+                0,
+                1,
+            },
+            array<int, 4>{
+                INT_MAX,
+                INT_MAX,
+                INT_MAX,
+                0,
+            },
         }
     );
 
     testShortestPath(
-        DirectedWeightedGraph(3, vector<DirectedWeightedGraph::Edge>({
-            DirectedWeightedGraph::Edge(1, 2, 10),
-            DirectedWeightedGraph::Edge(2, 3, -11),
-        })),
+        DirectedWeightedGraph(
+            3, vector<DirectedWeightedGraph::Edge>({
+                   DirectedWeightedGraph::Edge(1, 2, 10),
+                   DirectedWeightedGraph::Edge(2, 3, -11),
+               })
+        ),
         array<array<int, 4>, 4>{
-            array<int, 4>{ 0,       INT_MAX, INT_MAX, INT_MAX },
-            array<int, 4>{ INT_MAX, 0,       10,      -1,     },
-            array<int, 4>{ INT_MAX, INT_MAX, 0,       -11,    },
-            array<int, 4>{ INT_MAX, INT_MAX, INT_MAX, 0,      },
+            array<int, 4>{0, INT_MAX, INT_MAX, INT_MAX},
+            array<int, 4>{
+                INT_MAX,
+                0,
+                10,
+                -1,
+            },
+            array<int, 4>{
+                INT_MAX,
+                INT_MAX,
+                0,
+                -11,
+            },
+            array<int, 4>{
+                INT_MAX,
+                INT_MAX,
+                INT_MAX,
+                0,
+            },
         }
     );
 
     using UndirectedWeightedGraph = Graph<4, int, int, false>;
 
     testShortestPath(
-        UndirectedWeightedGraph(3, vector<UndirectedWeightedGraph::Edge>({
-            UndirectedWeightedGraph::Edge(1, 2, 10),
-            UndirectedWeightedGraph::Edge(2, 3, 1),
-        })),
+        UndirectedWeightedGraph(
+            3, vector<UndirectedWeightedGraph::Edge>({
+                   UndirectedWeightedGraph::Edge(1, 2, 10),
+                   UndirectedWeightedGraph::Edge(2, 3, 1),
+               })
+        ),
         array<array<int, 4>, 4>{
-            array<int, 4>{ 0,       INT_MAX, INT_MAX, INT_MAX },
-            array<int, 4>{ INT_MAX, 0,       10,      11,     },
-            array<int, 4>{ INT_MAX, 10,      0,       1,      },
-            array<int, 4>{ INT_MAX, 11,      1,       0,      },
+            array<int, 4>{0, INT_MAX, INT_MAX, INT_MAX},
+            array<int, 4>{
+                INT_MAX,
+                0,
+                10,
+                11,
+            },
+            array<int, 4>{
+                INT_MAX,
+                10,
+                0,
+                1,
+            },
+            array<int, 4>{
+                INT_MAX,
+                11,
+                1,
+                0,
+            },
         }
     );
 
     testShortestPath(
-        UndirectedWeightedGraph(3, vector<UndirectedWeightedGraph::Edge>({
-        UndirectedWeightedGraph::Edge(1, 2, 10),
-            UndirectedWeightedGraph::Edge(2, 3, -11),
-        })),
+        UndirectedWeightedGraph(
+            3, vector<UndirectedWeightedGraph::Edge>({
+                   UndirectedWeightedGraph::Edge(1, 2, 10),
+                   UndirectedWeightedGraph::Edge(2, 3, -11),
+               })
+        ),
         array<array<int, 4>, 4>{
-            array<int, 4>{ 0,       INT_MAX, INT_MAX, INT_MAX },
-            array<int, 4>{ INT_MAX, 0,       10,      -1,     },
-            array<int, 4>{ INT_MAX, 10,      0,       -11,    },
-            array<int, 4>{ INT_MAX, -1,      -11,     0,      },
+            array<int, 4>{0, INT_MAX, INT_MAX, INT_MAX},
+            array<int, 4>{
+                INT_MAX,
+                0,
+                10,
+                -1,
+            },
+            array<int, 4>{
+                INT_MAX,
+                10,
+                0,
+                -11,
+            },
+            array<int, 4>{
+                INT_MAX,
+                -1,
+                -11,
+                0,
+            },
         },
         false
     );
@@ -343,30 +423,64 @@ void testShortestPaths() {
     using DirectedUnweightedGraph = Graph<4, UnitEdgeWeight, int, true>;
 
     testShortestPath(
-        DirectedUnweightedGraph(3, vector<DirectedUnweightedGraph::Edge>({
-            DirectedUnweightedGraph::Edge(1, 2),
-            DirectedUnweightedGraph::Edge(2, 3),
-        })),
+        DirectedUnweightedGraph(
+            3, vector<DirectedUnweightedGraph::Edge>({
+                   DirectedUnweightedGraph::Edge(1, 2),
+                   DirectedUnweightedGraph::Edge(2, 3),
+               })
+        ),
         array<array<int, 4>, 4>{
-            array<int, 4>{ 0,       INT_MAX, INT_MAX, INT_MAX },
-            array<int, 4>{ INT_MAX, 0,       1,       2,     },
-            array<int, 4>{ INT_MAX, INT_MAX, 0,       1,      },
-            array<int, 4>{ INT_MAX, INT_MAX, INT_MAX, 0,      },
+            array<int, 4>{0, INT_MAX, INT_MAX, INT_MAX},
+            array<int, 4>{
+                INT_MAX,
+                0,
+                1,
+                2,
+            },
+            array<int, 4>{
+                INT_MAX,
+                INT_MAX,
+                0,
+                1,
+            },
+            array<int, 4>{
+                INT_MAX,
+                INT_MAX,
+                INT_MAX,
+                0,
+            },
         }
     );
 
     using UndirectedUnweightedGraph = Graph<4, UnitEdgeWeight, int, false>;
-    
+
     testShortestPath(
-        UndirectedUnweightedGraph(3, vector<UndirectedUnweightedGraph::Edge>({
-            UndirectedUnweightedGraph::Edge(1, 2),
-            UndirectedUnweightedGraph::Edge(2, 3),
-        })),
+        UndirectedUnweightedGraph(
+            3, vector<UndirectedUnweightedGraph::Edge>({
+                   UndirectedUnweightedGraph::Edge(1, 2),
+                   UndirectedUnweightedGraph::Edge(2, 3),
+               })
+        ),
         array<array<int, 4>, 4>{
-            array<int, 4>{ 0,       INT_MAX, INT_MAX, INT_MAX },
-            array<int, 4>{ INT_MAX, 0,       1,       2,     },
-            array<int, 4>{ INT_MAX, 1,       0,       1,      },
-            array<int, 4>{ INT_MAX, 2,       1,       0,      },
+            array<int, 4>{0, INT_MAX, INT_MAX, INT_MAX},
+            array<int, 4>{
+                INT_MAX,
+                0,
+                1,
+                2,
+            },
+            array<int, 4>{
+                INT_MAX,
+                1,
+                0,
+                1,
+            },
+            array<int, 4>{
+                INT_MAX,
+                2,
+                1,
+                0,
+            },
         }
     );
 }
@@ -377,6 +491,6 @@ int main() {
     testWeightedGraph();
     testEmptyGraph();
     testShortestPaths();
-    
+
     // TODO: https://muscat2023b.contest.codeforces.com/group/cuULm9FF5q/contest/432252/problem/P
 }

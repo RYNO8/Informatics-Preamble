@@ -9,7 +9,7 @@ def doInline(filepath, seen=set()):
     if filepath in seen:
         return "", seen
     seen.add(filepath)
-    
+
     outcode = f"// BEGIN PACKED FROM {filepath}\n"
 
     for line in open(filepath, "r").readlines():
@@ -28,7 +28,6 @@ def doInline(filepath, seen=set()):
             if "\ufeff" in line:
                 print(line)
                 raise Exception
-        
 
     outcode += "\n"
     outcode += f"// END PACKED FROM {filepath}\n"
@@ -120,15 +119,15 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     assert args.filename.endswith(".cpp")
-    
+
     filepath = os.path.join(os.getcwd(), args.filename)
     code, libraries = doInline(filepath)
-    #print(libraries)
+    # print(libraries)
     if args.no_comments:
         code = remComments(code)
     if args.no_whitespace:
         code = remWhitespace(code)
-    
+
     assert args.output_suffix != ""
     output_filename = args.filename[:-4] + args.output_suffix + ".cpp"
     open(output_filename, "w").write(code)

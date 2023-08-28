@@ -3,7 +3,9 @@ Helpful datastructures and templates when doing informatics problems in C++. See
 
 My goal for this is to abstract the nitty gritty of implementations, so that informatics can be focused towards solving interesting problems instead. Hopefully this also makes informatics more accessible to newbies.
 
-Please let me know if there are any errors.
+I guess my secondary goal is now to learn C++ by trying to use it properly.
+
+Please let me know if there are any logic errors or footguns here.
 
 Functionalities include
  - lazy persistent segtrees
@@ -20,6 +22,7 @@ Functionalities include
 [] implement coordinate geometry (eww)
 [] dynamic tree for `Tree.h` (look at references)
 [] fast factorisation, fast isPrime, how?? Pollard rho was dodgy
+[] use RAII and smart pointers for segtree
 [] docstrings for ranges
 [] Graph with self edges and multiple edges? (This is so rare though, I feel like support isn't worth it)
 [] only works on C++17

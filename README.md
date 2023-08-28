@@ -18,18 +18,18 @@ Functionalities include
 
 
 # todo list (no particular order)
-[] combine `Grid.h` and `Matrix.h`
-[] implement coordinate geometry (eww)
-[] dynamic tree for `Tree.h` (look at references)
-[] fast factorisation, fast isPrime, how?? Pollard rho was dodgy
-[] use RAII and smart pointers for segtree
-[] docstrings for ranges
-[] Graph with self edges and multiple edges? (This is so rare though, I feel like support isn't worth it)
-[] only works on C++17
-[] cartesian product
-[] remove const value returns & reference returns 
-[] use the `noexpect` qualifier
-[] safe integer https://www.forrestthewoods.com/blog/perfect_prevention_of_int_overflows/
+- [ ] combine `Grid.h` and `Matrix.h`
+- [ ] implement coordinate geometry (eww)
+- [ ] dynamic tree for `Tree.h` (look at references)
+- [ ] fast factorisation, fast isPrime, how?? Pollard rho was dodgy
+- [ ] use RAII and smart pointers for segtree
+- [ ] docstrings for ranges
+- [ ] Graph with self edges and multiple edges? (This is so rare though, I feel like support isn't worth it)
+- [ ] only works on C++17
+- [ ] cartesian product
+- [ ] remove const value returns & reference returns 
+- [ ] use the `noexpect` qualifier
+- [ ] safe integer https://www.forrestthewoods.com/blog/perfect_prevention_of_int_overflows/
 
 # Notes
  - It is probably not the fastest or most memory efficient, because I have prioritised verbosity over constant factor optimisations.

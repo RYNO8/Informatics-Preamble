@@ -149,6 +149,15 @@ public:
             set(i, *it);
     }
 
+    ~Segtree() {
+        if (lChild != nullptr) {
+            delete lChild;
+        }
+        if (rChild != nullptr) {
+            delete rChild;
+        }
+    }
+
     // O(N)
     // Create the entire tree (such that is it no longer lazy propagation)
     // Cleans all nodes (no more lazy values)

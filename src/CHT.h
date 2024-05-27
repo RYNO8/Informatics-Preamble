@@ -4,6 +4,7 @@
 
 namespace DS {
 // Representation of an infinite line using intersection gradient form
+// TODO: bad, see CHT in icpc template
 struct CHTLine {
     ll m, b;
 
@@ -37,36 +38,44 @@ struct CHTLine {
 
 // Convex Hull Trick
 // "infinte" range and domain, but added lines need to have non-decreasing gradient
-// ahhh i know i shouldn't be inheriting from std types, but i dont want to implement my own
-// iterator stuff ;-;
-class CHT : public std::vector<CHTLine> {
+
+class CHT {
 public:
     // amortised O(1)
     // Include a unique line into the convex hull, where `m` is non-decreasing
     void addLine(CHTLine l) {
-        while (size() >= 2 && back().intersect(*++rbegin()) >= back().intersect(l)) {
-            pop_back();
+        while (L.size() >= 2 && L.back().intersect(*++L.rbegin()) >= L.back().intersect(l)) {
+            L.pop_back();
         }
-        while (!empty() && back().m == l.m && back().b >= l.b) {
-            pop_back();
+        // while (L.size() >= 2) {
+        //     CHTLine b = L.back();
+        //     CHTLine a = *++L.rbegin();
+        //     if ((a.b - b.b) * (l.m - b.m) >= (b.b - l.b) * (b.m - a.m)) {
+        //         L.pop_back();
+        //     } else break;
+        // }
+        while (!L.empty() && L.back().m == l.m && L.back().b <= l.b) {
+            L.pop_back();
         }
-        push_back(l);
+        if (L.empty() || l.m > L.back().m || l.b > L.back().b) L.push_back(l);
     }
 
     // O(log n)
     // @returns Minimum y value when x=`x`
-    ll getMinima(ll x) const {
-        if (empty()) return std::numeric_limits<ll>::max();
-        int l = -1, r = size() - 1;
+    ll getMaxima(ll x) const {
+        if (L.empty()) return LLONG_MIN;
+        int l = -1, r = L.size() - 1;
         while (l + 1 < r) {
             int m = (l + r) / 2;
-            if ((*this)[m].intersect((*this)[m + 1]) >= x)
-                r = m;
-            else
-                l = m;
+            // if (L[m].b - L[m+1].b >= x * (L[m+1].m - L[m].m)) r = m;
+            if (L[m].intersect(L[m + 1]) >= x) r = m;
+            else l = m;
         }
-        return (*this)[r](x);
+        return L[r](x);
     }
+
+private:
+    std::vector<CHTLine> L;
 };
 
 // Li Chao tree
@@ -79,51 +88,33 @@ private:
 public:
     // O(1)
     // Initialisation
-    LiChaoTree() {
+    LiChaoTree(CHTLine initLine) {
+        std::fill(std::begin(tree), std::end(tree), initLine);
     }
 
     // O(log MAXN)
     // Inserts a line
-    void addLine(CHTLine line) {
-        int node = 1, l = 0, r = MAXN - 1;
-        while (l != r) {
-            int m      = (l + r) / 2;
-            bool lGood = line(l) >= tree[node](l);
-            bool mGood = line(m) >= tree[node](m);
-            if (mGood) tree[node] = line;
+    void addLine(CHTLine line, int node = 1, int l = 0, int r = MAXN - 1) {
+        int m = (l + r) / 2;
+        bool lGood = line(l) < tree[node](l);
+        bool mGood = line(m) < tree[node](m);
+        if (mGood) std::swap(tree[node], line);
 
-            if (lGood != mGood) {
-                node = node * 2;
-                r    = m;
-            } else {
-                node = node * 2 + 1;
-                l    = m + 1;
-            }
-        }
+        if (l == r) return;
+        else if (lGood != mGood) addLine(line, node * 2, l, m);
+        else addLine(line, node * 2 + 1, m + 1, r);
     }
 
     // O(log MAXN)
-    // @returns Maximum y value when x=`x`
-    ll getLine(int x) {
-        // implemented iteratively
-        int node = 1, l = 0, r = MAXN - 1;
-        ll ans = LLONG_MIN;
+    // @returns Minimum y value when x=`x`
+    ll getMinima(int x, int node = 1, int l = 0, int r = MAXN - 1) {
         assert(l <= x && x <= r && "x out of range");
-
-        while (true) {
-            ans   = std::max(ans, tree[node](x));
-            int m = (l + r) / 2;
-
-            if (l == r)
-                return ans;
-            else if (x < m) {
-                node = node * 2;
-                r    = m;
-            } else {
-                node = node * 2 + 1;
-                l    = m + 1;
-            }
-        }
+        int m = (l + r) / 2;
+        ll ans = tree[node](x);
+        if (l == r) {}
+        else if (x <= m) ans = std::min(ans, getMinima(x, node * 2, l, m));
+        else ans = std::min(ans, getMinima(x, node * 2 + 1, m + 1, r));
+        return ans;
     }
 };
 }; // namespace DS

@@ -1,6 +1,5 @@
 #ifndef UTIL_H
 #define UTIL_H
-#include "Constants.h"
 #include <algorithm>
 #include <deque>
 #include <iostream>
@@ -14,6 +13,8 @@
 #include <utility>
 #include <vector>
 
+#include "Constants.h"
+
 namespace std {
 template<>
 struct hash<pair<int, int>> {
@@ -25,12 +26,10 @@ struct hash<pair<int, int>> {
 template<>
 struct hash<pair<unsigned int, unsigned int>> {
     size_t operator()(const pair<unsigned int, unsigned int> k) const {
-        return hash<unsigned long long>()(
-            ((unsigned long long)k.first) << 32 | (unsigned long long)k.second
-        );
+        return hash<unsigned long long>()(((unsigned long long)k.first) << 32 | (unsigned long long)k.second);
     }
 };
-} // namespace std
+}  // namespace std
 
 namespace DS {
 
@@ -48,15 +47,13 @@ std::ostream &operator<<(std::ostream &out, const std::pair<A, B> &c) {
 
 // Displays an array:
 // [ T T T ... T ]
-#define printArr0(a, N)                                                                            \
-    std::cout << "[ ";                                                                             \
-    for (int i = 0; i < N; ++i, std::cout << (i < N ? ", " : ""))                                  \
-        std::cout << a[i];                                                                         \
+#define printArr0(a, N)                                                              \
+    std::cout << "[ ";                                                               \
+    for (int i = 0; i < N; ++i, std::cout << (i < N ? ", " : "")) std::cout << a[i]; \
     std::cout << " ]";
-#define printArr1(a, N)                                                                            \
-    std::cout << "[ ";                                                                             \
-    for (int i = 1; i <= N; ++i, std::cout << (i < N ? ", " : ""))                                 \
-        std::cout << a[i];                                                                         \
+#define printArr1(a, N)                                                               \
+    std::cout << "[ ";                                                                \
+    for (int i = 1; i <= N; ++i, std::cout << (i < N ? ", " : "")) std::cout << a[i]; \
     std::cout << " ]";
 #define printArr(a, N) printArr0(a, N)
 
@@ -64,6 +61,7 @@ template<typename T>
 struct capture {
     T begin, end;
 };
+
 template<typename T>
 std::ostream &operator<<(std::ostream &out, const capture<T> &range) {
     out << "[ ";
@@ -81,8 +79,7 @@ template<typename T>
 std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
     out << "[ ";
     // copy(v.cbegin(), v.cend(), std::ostream_iterator<T>(out, " "));
-    for (auto val : v)
-        out << val << ' ';
+    for (auto val : v) out << val << ' ';
     out << ']';
     return out;
 }
@@ -93,8 +90,7 @@ template<typename T, std::size_t N>
 std::ostream &operator<<(std::ostream &out, const std::array<T, N> &arr) {
     out << "[ ";
     // copy(arr.cbegin(), arr.cend(), std::ostream_iterator<T>(out, " "));
-    for (auto val : arr)
-        out << val << ' ';
+    for (auto val : arr) out << val << ' ';
     out << ']';
     return out;
 }
@@ -256,8 +252,8 @@ template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
 T gcd(T x, T y) {
     while (y != 0) {
         T temp = y;
-        y      = x % temp;
-        x      = temp;
+        y = x % temp;
+        x = temp;
     }
     return x;
 }
@@ -284,8 +280,8 @@ U extendedEuclidean(U a, U b, S &x, S &y) {
     }
     S x1, y1;
     U d = extendedEuclidean(b, a % b, x1, y1);
-    x   = y1;
-    y   = x1 - y1 * (a / b);
+    x = y1;
+    y = x1 - y1 * (a / b);
     return d;
 }
 
@@ -298,10 +294,12 @@ uint popcount(uint x) {
     x = (x + (x >> 4)) & 0xf0f0f0f;
     return (x * 0x1010101) >> 24;
 }
+
 int popcount(int x) {
     assert(x >= 0);
     return popcount((uint)x);
 }
+
 ull popcount(ull x) {
     // note: faster than builtin __builtin_popcountll
     x -= (x >> 1) & 0x5555555555555555;
@@ -309,6 +307,7 @@ ull popcount(ull x) {
     x = (x + (x >> 4)) & 0x0f0f0f0f0f0f0f0f;
     return (x * 0x0101010101010101) >> 56;
 }
+
 ll popcount(ll x) {
     assert(x >= 0);
     return popcount((ull)x);
@@ -317,8 +316,7 @@ ll popcount(ll x) {
 // O(1)
 // @returns Whether the number is negative (-1), zero (0) or positive (+1)
 template<
-    typename T,
-    std::enable_if_t<std::is_integral<T>::value || std::is_floating_point<T>::value, bool> = true>
+    typename T, std::enable_if_t<std::is_integral<T>::value || std::is_floating_point<T>::value, bool> = true>
 int sgn(T x) {
     return (x > T(0)) - (x < T(0));
 }
@@ -327,8 +325,7 @@ int sgn(T x) {
 // Sets `a` to the minimum of `a` and `b`
 // @note `a` is provided by reference
 template<
-    typename T,
-    std::enable_if_t<std::is_integral<T>::value || std::is_floating_point<T>::value, bool> = true>
+    typename T, std::enable_if_t<std::is_integral<T>::value || std::is_floating_point<T>::value, bool> = true>
 void pMin(T &a, T b) {
     if (b < a) a = b;
 }
@@ -337,8 +334,7 @@ void pMin(T &a, T b) {
 // Sets `a` to the maximum of `a` and `b`
 // @note `a` is provided by reference
 template<
-    typename T,
-    std::enable_if_t<std::is_integral<T>::value || std::is_floating_point<T>::value, bool> = true>
+    typename T, std::enable_if_t<std::is_integral<T>::value || std::is_floating_point<T>::value, bool> = true>
 void pMax(T &a, T b) {
     if (b > a) a = b;
 }
@@ -347,7 +343,11 @@ void pMax(T &a, T b) {
  *                OTHER UTILITIES               *
  ************************************************/
 
-// @returns The number of characters of the printed representation of `obj`
+// @returns The string printed representation of `obj`
+std::string repr(const std::stringstream &obj) {
+    return obj.str();
+}
+
 template<typename T>
 std::string repr(const T &obj) {
     std::stringstream s;
@@ -399,8 +399,7 @@ typename std::iterator_traits<It>::value_type sum(const It &begin, const It &end
 // O(n)
 template<typename It1, typename It2>
 void make_prefix(const It1 &begin, const It1 &end, It2 out) {
-    typename std::iterator_traits<It1>::value_type total =
-        typename std::iterator_traits<It1>::value_type(0);
+    typename std::iterator_traits<It1>::value_type total = typename std::iterator_traits<It1>::value_type(0);
     for (It1 it = begin; it != end; it++, out++) {
         total += *it;
         *out = total;
@@ -429,31 +428,30 @@ template<typename T>
 std::vector<T> operator+(std::vector<T> &a, std::vector<T> &b) {
     assert(a.size() == b.size());
     std::vector<T> out(a.size());
-    for (size_t i = 0; i < a.size(); ++i)
-        out[i] = a[i] + b[i];
+    for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] + b[i];
     return out;
 }
+
 // O(n)
 template<typename T>
 std::vector<T> operator+=(std::vector<T> &a, const std::vector<T> &b) {
     assert(a.size() == b.size());
-    for (size_t i = 0; i < a.size(); ++i)
-        a[i] += b[i];
+    for (size_t i = 0; i < a.size(); ++i) a[i] += b[i];
     return a;
 }
+
 // O(n)
 template<typename T>
 std::vector<T> operator+(std::vector<T> &b, const T &lambda) {
     std::vector<T> out(b.size());
-    for (size_t i = 0; i < b.size(); ++i)
-        out[i] = lambda + b[i];
+    for (size_t i = 0; i < b.size(); ++i) out[i] = lambda + b[i];
     return out;
 }
+
 // O(n)
 template<typename T>
 std::vector<T> operator+=(std::vector<T> &b, const T &lambda) {
-    for (size_t i = 0; i < b.size(); ++i)
-        b[i] += lambda;
+    for (size_t i = 0; i < b.size(); ++i) b[i] += lambda;
     return b;
 }
 
@@ -462,31 +460,30 @@ template<typename T>
 std::vector<T> operator-(std::vector<T> &a, const std::vector<T> &b) {
     assert(a.size() == b.size());
     std::vector<T> out(a.size());
-    for (size_t i = 0; i < a.size(); ++i)
-        out[i] = a[i] - b[i];
+    for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] - b[i];
     return out;
 }
+
 // O(n)
 template<typename T>
 std::vector<T> operator-=(std::vector<T> &a, const std::vector<T> &b) {
     assert(a.size() == b.size());
-    for (size_t i = 0; i < a.size(); ++i)
-        a[i] -= b[i];
+    for (size_t i = 0; i < a.size(); ++i) a[i] -= b[i];
     return a;
 }
+
 // O(n)
 template<typename T>
 std::vector<T> operator-(std::vector<T> &v, const T &lambda) {
     std::vector<T> out(v.size());
-    for (size_t i = 0; i < v.size(); ++i)
-        out[i] = lambda - v[i];
+    for (size_t i = 0; i < v.size(); ++i) out[i] = lambda - v[i];
     return out;
 }
+
 // O(n)
 template<typename T>
 std::vector<T> operator-=(std::vector<T> &v, T &lambda) {
-    for (size_t i = 0; i < v.size(); ++i)
-        v[i] -= lambda;
+    for (size_t i = 0; i < v.size(); ++i) v[i] -= lambda;
     return v;
 }
 
@@ -495,31 +492,30 @@ template<typename T>
 std::vector<T> operator*(std::vector<T> &a, const std::vector<T> &b) {
     assert(a.size() == b.size());
     std::vector<T> out(a.size());
-    for (size_t i = 0; i < a.size(); ++i)
-        out[i] = a[i] * b[i];
+    for (size_t i = 0; i < a.size(); ++i) out[i] = a[i] * b[i];
     return out;
 }
+
 // O(n)
 template<typename T>
 std::vector<T> operator*=(std::vector<T> &a, const std::vector<T> &b) {
     assert(a.size() == b.size());
-    for (size_t i = 0; i < a.size(); ++i)
-        a[i] *= b[i];
+    for (size_t i = 0; i < a.size(); ++i) a[i] *= b[i];
     return a;
 }
+
 // O(n)
 template<typename T>
 std::vector<T> operator*(std::vector<T> &v, const T &lambda) {
     std::vector<T> out(v.size());
-    for (size_t i = 0; i < v.size(); ++i)
-        out[i] = lambda * v[i];
+    for (size_t i = 0; i < v.size(); ++i) out[i] = lambda * v[i];
     return out;
 }
+
 // O(n)
 template<typename T>
 std::vector<T> operator*=(std::vector<T> &v, const T &lambda) {
-    for (size_t i = 0; i < v.size(); ++i)
-        v[i] *= lambda;
+    for (size_t i = 0; i < v.size(); ++i) v[i] *= lambda;
     return v;
 }
 
@@ -567,10 +563,8 @@ template<typename T>
 bool operator<=(const std::vector<T> &a, const std::vector<T> &b) {
     assert(a.size() == b.size());
     for (size_t i = 0; i < a.size(); ++i) {
-        if (a[i] < b[i])
-            return true;
-        else if (a[i] > b[i])
-            return false;
+        if (a[i] < b[i]) return true;
+        else if (a[i] > b[i]) return false;
     }
     return true;
 }
@@ -580,10 +574,8 @@ template<typename T>
 bool operator<(const std::vector<T> &a, const std::vector<T> &b) {
     assert(a.size() == b.size());
     for (size_t i = 0; i < a.size(); ++i) {
-        if (a[i] < b[i])
-            return true;
-        else if (a[i] > b[i])
-            return false;
+        if (a[i] < b[i]) return true;
+        else if (a[i] > b[i]) return false;
     }
     return false;
 }
@@ -593,10 +585,8 @@ template<typename T>
 bool operator>=(const std::vector<T> &a, const std::vector<T> &b) {
     assert(a.size() == b.size());
     for (size_t i = 0; i < a.size(); ++i) {
-        if (a[i] > b[i])
-            return true;
-        else if (a[i] < b[i])
-            return false;
+        if (a[i] > b[i]) return true;
+        else if (a[i] < b[i]) return false;
     }
     return true;
 }
@@ -606,13 +596,11 @@ template<typename T>
 bool operator>(const std::vector<T> &a, const std::vector<T> &b) {
     assert(a.size() == b.size());
     for (size_t i = 0; i < a.size(); ++i) {
-        if (a[i] > b[i])
-            return true;
-        else if (a[i] < b[i])
-            return false;
+        if (a[i] > b[i]) return true;
+        else if (a[i] < b[i]) return false;
     }
     return false;
 }
-}; // namespace DS
+};  // namespace DS
 
 #endif

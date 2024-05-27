@@ -1,8 +1,10 @@
 ﻿// solution to Omo
 // https://orac.amt.edu.au/cgi-bin/train/problem.pl?problemid=1102
 #include "../src/SqrtDecomp.h"
+
 #include "../src/Constants.h"
 #include "../src/Ranges.h"
+
 using namespace DS;
 using namespace std;
 
@@ -11,28 +13,23 @@ void testSqrtDecomp(istream &in, ostream &out) {
     vector<pair<int, int>> queries;
 
     in >> N >> Q;
-    for (int i = 0; i < N; ++i)
-        in >> arr[i];
+    for (int i = 0; i < N; ++i) in >> arr[i];
     for (int a, b, i = 0; i < Q; ++i) {
         in >> a >> b;
-        queries.push_back({a - 1, b - 1});
+        queries.push_back({ a - 1, b - 1 });
     }
 
     coordCompressTransform(arr, arr + N);
 
     function<void(int)> add = [&](int i) {
-        if (curr[arr[i]] % 2 == 0)
-            ++bad;
-        else
-            --bad;
+        if (curr[arr[i]] % 2 == 0) ++bad;
+        else --bad;
         curr[arr[i]]++;
     };
 
     function<void(int)> rem = [&](int i) {
-        if (curr[arr[i]] % 2 == 0)
-            ++bad;
-        else
-            --bad;
+        if (curr[arr[i]] % 2 == 0) ++bad;
+        else --bad;
         curr[arr[i]]--;
     };
 

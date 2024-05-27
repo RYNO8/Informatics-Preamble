@@ -7,15 +7,14 @@
 namespace DS {
 template<typename T, std::enable_if_t<is_my_integral_v<T>, bool> = true>
 class Polynomial {
-
     /************************************************
      *                INITIALISATION                *
      ************************************************/
 
-private:
+   private:
     std::vector<T> coeff;
 
-public:
+   public:
     Polynomial() {}
 
     Polynomial(std::vector<T> _coeff) : coeff(_coeff) {}
@@ -41,10 +40,14 @@ public:
      ************************************************/
 
     // O(1)
-    int N() const { return coeff.size(); }
+    int N() const {
+        return coeff.size();
+    }
 
     // O(n), but usually O(1)
-    int deg() const { return this->norm().N() - 1; }
+    int deg() const {
+        return this->norm().N() - 1;
+    }
 
     /************************************************
      *               BASCIC OPERATIONS              *
@@ -54,8 +57,7 @@ public:
     // @returns The polynomial without the leading 0 coefficients
     Polynomial<T> norm() const {
         Polynomial<T> *copy = new Polynomial<T>(*this);
-        while (copy->coeff.back() == 0ll)
-            copy->coeff.pop_back();
+        while (copy->coeff.back() == 0ll) copy->coeff.pop_back();
         return *copy;
     }
 
@@ -63,8 +65,7 @@ public:
     // @returns P(x) MOD x^k, in other words, do coeff[k] = 0, coeff[k+1] = 0, ...
     Polynomial<T> mod(int k) const {
         Polynomial<T> *copy = new Polynomial<T>(*this);
-        while (copy->N() > k)
-            copy->coeff.pop_back();
+        while (copy->N() > k) copy->coeff.pop_back();
         return *copy;
     }
 
@@ -83,12 +84,12 @@ public:
     Polynomial<T> inv(int t) const {
         assert(t != 0);
         // assert(coeff.back() != 0ll); // poly only invertible when this condition holds
-        if (t == 1) return Polynomial<T>({coeff[0].modInv()});
+        if (t == 1) return Polynomial<T>({ coeff[0].modInv() });
 
         Polynomial<T> q = this->inv((t + 1) / 2);
-        Polynomial<T> one({1});
+        Polynomial<T> one({ 1 });
         Polynomial<T> inv =
-            (q - ((*this) * q - one) * q).mod(t); // idk why this expression fails when simplified
+            (q - ((*this) * q - one) * q).mod(t);  // idk why this expression fails when simplified
         // assert((inv * (*this)).mod(t) == one);
         return inv;
     }
@@ -106,7 +107,7 @@ public:
     // O(n)
     // @returns Whether 2 polynomials are identical
     bool operator==(Polynomial<T> o) const {
-        int deg  = this->deg();
+        int deg = this->deg();
         int oDeg = o.deg();
         if (deg != oDeg) return false;
         for (int i = 0; i < deg; ++i) {
@@ -118,7 +119,7 @@ public:
     // O(n)
     // @returns Whether 2 polynomials are not identical
     bool operator!=(Polynomial<T> o) const {
-        int deg  = this->deg();
+        int deg = this->deg();
         int oDeg = o.deg();
         if (deg != oDeg) return true;
         for (int i = 0; i < deg; ++i) {
@@ -144,8 +145,7 @@ public:
         // chance bit order, so that in place transform is possible
         for (int i = 1, j = 0; i < n; ++i) {
             int bit = n / 2;
-            for (; j >= bit; bit /= 2)
-                j -= bit;
+            for (; j >= bit; bit /= 2) j -= bit;
             j += bit;
             if (i < j) std::swap(a[i], a[j]);
         }
@@ -155,15 +155,14 @@ public:
             assert(MOD > 2);
             T wlen = 2;
             if (inv) wlen = wlen.modInv();
-            for (int i = len; i < MOD_POW; i *= 2)
-                wlen *= wlen;
+            for (int i = len; i < MOD_POW; i *= 2) wlen *= wlen;
 
             for (int i = 0; i < n; i += len) {
                 T w = 1;
                 for (int j = 0; j < len / 2; ++j) {
-                    T u                = a[i + j];
-                    T v                = a[i + j + len / 2] * w;
-                    a[i + j]           = u + v;
+                    T u = a[i + j];
+                    T v = a[i + j + len / 2] * w;
+                    a[i + j] = u + v;
                     a[i + j + len / 2] = u - v;
                     w *= wlen;
                 }
@@ -172,8 +171,7 @@ public:
 
         if (inv) {
             T nInv = T(n).modInv();
-            for (int i = 0; i < n; ++i)
-                a[i] *= nInv;
+            for (int i = 0; i < n; ++i) a[i] *= nInv;
         }
         return a;
     }
@@ -188,6 +186,7 @@ public:
     std::vector<T_> FT(int n, bool inv = false) const {
         return NTT(n, inv);
     }
+
     template<typename T_ = T, std::enable_if_t<std::is_integral_v<T_>, bool> = true>
     std::vector<T_> FT(int n, bool inv = false) const {
         return FFT(n, inv);
@@ -229,15 +228,13 @@ public:
     // Polynomial<T> multiplication
     Polynomial<T> operator*(Polynomial<T> o) const {
         int n = 1;
-        while (n < 2ll * std::max(N(), o.N()))
-            n *= 2;
+        while (n < 2ll * std::max(N(), o.N())) n *= 2;
 
         std::vector<T> aPoints = this->FT(n, false);
         std::vector<T> bPoints = o.FT(n, false);
 
         Polynomial<T> output;
-        for (int i = 0; i < n; ++i)
-            output.coeff.push_back(aPoints[i] * bPoints[i]);
+        for (int i = 0; i < n; ++i) output.coeff.push_back(aPoints[i] * bPoints[i]);
         return output.FT(n, true);
     }
 
@@ -250,8 +247,7 @@ public:
     // O(n) Polynomial<T> scaling
     Polynomial<T> operator*(T a) const {
         Polynomial *copy = new Polynomial(*this);
-        for (int i = 0; i < N(); ++i)
-            copy->coeff[i] *= a;
+        for (int i = 0; i < N(); ++i) copy->coeff[i] *= a;
         return *copy;
     }
 
@@ -265,9 +261,9 @@ public:
     // @returns the divisor when `this` is divided by `o`
     Polynomial<T> operator/(Polynomial<T> o) const {
         assert(N() >= o.N());
-        int divisorDeg     = N() - o.N() + 1;
+        int divisorDeg = N() - o.N() + 1;
         Polynomial<T> dRev = (this->rev() * o.rev().inv(divisorDeg)).mod(divisorDeg);
-        Polynomial<T> d    = dRev.rev();
+        Polynomial<T> d = dRev.rev();
         return d;
     }
 
@@ -291,20 +287,17 @@ public:
         return *this;
     }
 
-private:
+   private:
     // O(n log^2 n)
     // Build subproduct tree, where the root is v[1], left child is 2n, and right child is 2n+1
     // Each node contains the product of all the leaf node polynomials that it covers
     std::vector<Polynomial<T>> buildSubproduct(std::vector<T> points) const {
         int treeSize = 1;
-        while (treeSize < points.size())
-            treeSize *= 2;
+        while (treeSize < points.size()) treeSize *= 2;
         std::vector<Polynomial<T>> v = std::vector<Polynomial<T>>(treeSize);
 
-        for (int i = 0; i < points.size(); ++i)
-            v[i + treeSize] = Polynomial<T>({-points[i], 1ll});
-        for (int i = points.size(); i < treeSize; ++i)
-            v[i + treeSize] = Polynomial<T>({1ll});
+        for (int i = 0; i < points.size(); ++i) v[i + treeSize] = Polynomial<T>({ -points[i], 1ll });
+        for (int i = points.size(); i < treeSize; ++i) v[i + treeSize] = Polynomial<T>({ 1ll });
 
         for (int node = treeSize - 1; node >= 1; --node) {
             v[node] = v[node * 2] * v[node * 2 + 1];
@@ -315,15 +308,15 @@ private:
     // Divide and conquer, degree of f = degree of v[node] - 1
     std::vector<T> fastEval_(std::vector<Polynomial<T>> &v, int node = 1) const {
         if (2 * node >= v.size()) {
-            return {coeff[0]};
+            return { coeff[0] };
         }
-        std::vector<T> leftVals  = (*this % v[node * 2]).fastEval(v, node * 2);
+        std::vector<T> leftVals = (*this % v[node * 2]).fastEval(v, node * 2);
         std::vector<T> rightVals = (*this % v[node * 2 + 1]).fastEval(v, node * 2 + 1);
         leftVals.insert(leftVals.end(), rightVals.begin(), rightVals.end());
         return leftVals;
     }
 
-public:
+   public:
     // O(n log^2 n)
     // Fast multipoint evaluation
     // @returns P(points[0]), P(points[1]), ...
@@ -332,6 +325,6 @@ public:
         return fastEval_(v);
     }
 };
-}; // namespace DS
+};  // namespace DS
 
 #endif

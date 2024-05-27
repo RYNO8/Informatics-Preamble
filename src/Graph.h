@@ -19,25 +19,21 @@ namespace DS {
 // a default value
 // this makes reading input more convinient, and also saves some memory (this struct takes 1 byte)
 struct UnitEdgeWeight {
-    UnitEdgeWeight() {
-    }
+    UnitEdgeWeight() {}
 
     template<typename T>
-    UnitEdgeWeight(T _) {
-    }
+    UnitEdgeWeight(T _) {}
 
     template<
         typename PathWeight,
-        std::enable_if_t<
-            std::is_integral_v<PathWeight> || std::is_floating_point_v<PathWeight>, bool> = true>
+        std::enable_if_t<std::is_integral_v<PathWeight> || std::is_floating_point_v<PathWeight>, bool> = true>
     friend PathWeight operator+(const PathWeight &w1, const UnitEdgeWeight &w2) {
         return w1 + PathWeight(1);
     }
 
     template<
         typename PathWeight,
-        std::enable_if_t<
-            std::is_integral_v<PathWeight> || std::is_floating_point_v<PathWeight>, bool> = true>
+        std::enable_if_t<std::is_integral_v<PathWeight> || std::is_floating_point_v<PathWeight>, bool> = true>
     friend PathWeight operator+=(PathWeight &w1, const UnitEdgeWeight &w2) {
         return ++w1;
     }
@@ -83,15 +79,15 @@ template<
     // accumulation of weight data over many edges
     typename PathWeight_,
     // Whether edges are directed or bidirectional
-    bool isDirectedEdges                                                   = false,
+    bool isDirectedEdges = false,
     std::enable_if_t<std::is_arithmetic_v<PathWeight_> && maxV != 0, bool> = true>
 class Graph {
-public:
+   public:
     using EdgeWeight = EdgeWeight_;
     using PathWeight = PathWeight_;
     // id of node is an unsigned integer
-    using Node                             = size_t;
-    using MyGraph                          = Graph<maxV, EdgeWeight, PathWeight, isDirectedEdges>;
+    using Node = size_t;
+    using MyGraph = Graph<maxV, EdgeWeight, PathWeight, isDirectedEdges>;
     constexpr static PathWeight MAX_WEIGHT = std::numeric_limits<PathWeight>::max();
 
     // Edges are represented internaly as (u, v) with weight w
@@ -101,8 +97,7 @@ public:
         Node u = 0, v = 0;
         EdgeWeight w;
 
-        Edge() {
-        }
+        Edge() {}
 
         Edge(Node u_, Node v_, EdgeWeight w_) : u(u_), v(v_), w(w_) {
             assert(u != v && "Self cycles not supported yet");
@@ -125,18 +120,14 @@ public:
 
         Edge directFrom(Node node) {
             assert((node == v || node == u) && "Must provide an endpoint of this edge");
-            if (node == u)
-                return Edge(*this);
-            else
-                return flip();
+            if (node == u) return Edge(*this);
+            else return flip();
         }
 
         Edge directTo(Node node) {
             assert((node == v || node == u) && "Must provide an endpoint of this edge");
-            if (node == v)
-                return Edge(*this);
-            else
-                return flip();
+            if (node == v) return Edge(*this);
+            else return flip();
         }
 
         // Given u, return v
@@ -156,8 +147,7 @@ public:
         // }
 
         friend bool operator==(const Edge &a, const Edge &b) {
-            return a.w == b.w &&
-                   ((a.u == b.u && a.v == b.v) || (isUndirected && a.u == b.v && a.v == b.u));
+            return a.w == b.w && ((a.u == b.u && a.v == b.v) || (isUndirected && a.u == b.v && a.v == b.u));
         }
 
         friend bool operator!=(const Edge &a, const Edge &b) {
@@ -181,7 +171,7 @@ public:
 
     using Path = std::vector<Edge>;
 
-private:
+   private:
     // comparison ignoring weights - use this in containers
     struct EdgeComp {
         bool operator()(const Edge &a, const Edge &b) const {
@@ -195,8 +185,8 @@ private:
         }
     };
 
-private:
-    std::vector<Node> nodes; // not garunteed sorted!
+   private:
+    std::vector<Node> nodes;  // not garunteed sorted!
     std::array<bool, maxV> validNode;
 
     // @TODO is it reasonable to support multiset?
@@ -208,7 +198,7 @@ private:
     // `edgesOut[node]` is the set of edges leading out of `node`
     std::array<std::set<Edge, EdgeComp>, maxV> edgesOut;
 
-public:
+   public:
     /************************************************
      *                 INITIALISATION               *
      ************************************************/
@@ -224,20 +214,16 @@ public:
     Graph(size_t V, const std::vector<Edge> &_edges = {}) {
         assert(V < maxV && "Not enough capacity");
         validNode.fill(false);
-        for (Node node = 1; node <= V; ++node)
-            pushNode(node);
-        for (Edge edge : _edges)
-            insertEdge(edge);
+        for (Node node = 1; node <= V; ++node) pushNode(node);
+        for (Edge edge : _edges) insertEdge(edge);
     }
 
     // O(V + E log E)
     // Initialses a G with node set `_nodes` and edge set `_edges`
     Graph(const std::vector<Node> &_nodes, const std::vector<Edge> &_edges = {}) {
         validNode.fill(false);
-        for (Node node : _nodes)
-            pushNode(node);
-        for (Edge edge : _edges)
-            insertEdge(edge);
+        for (Node node : _nodes) pushNode(node);
+        for (Edge edge : _edges) insertEdge(edge);
     }
 
     // O(V^2)
@@ -248,8 +234,7 @@ public:
         size_t V = _adj.size();
         assert(V < maxV && "Not enough capacity");
         validNode.fill(false);
-        for (Node node = 1; node <= V; ++node)
-            pushNode(node);
+        for (Node node = 1; node <= V; ++node) pushNode(node);
         for (Node u = 1; u <= V; ++u) {
             assert(_adj[u - 1].size() == V && "Not square matrix");
             for (Node v = 1; v <= V; ++v) {
@@ -274,12 +259,10 @@ public:
     // @note `V` does not change, so there may be disconnected nodes
     Graph(const MyGraph &_g, const std::vector<Node> &_nodes) {
         validNode.fill(false);
-        for (Node node : _nodes)
-            pushNode(node);
+        for (Node node : _nodes) pushNode(node);
         for (Node node : _nodes) {
             for (Edge incident : _g.getEdges(node)) {
-                if (containsNode(incident.otherSide(node)) && !containsEdge(incident))
-                    insertEdge(incident);
+                if (containsNode(incident.otherSide(node)) && !containsEdge(incident)) insertEdge(incident);
             }
         }
     }
@@ -331,6 +314,7 @@ public:
     size_t V() const {
         return nodes.size();
     }
+
     // @returns `V`, the number of nodes
     size_t N() const {
         return nodes.size();
@@ -341,6 +325,7 @@ public:
     size_t E() const {
         return edges.size();
     }
+
     // O(1)
     // @returns `E`, the number of edges
     size_t M() const {
@@ -369,8 +354,8 @@ public:
         assert(containsNode(node) && "Node index out of range");
         std::vector<Edge> out(edgesIn[node].size() + edgesOut[node].size());
         auto it = std::set_union(
-            edgesIn[node].begin(), edgesIn[node].end(), edgesOut[node].begin(),
-            edgesOut[node].end(), out.begin(), EdgeComp()
+            edgesIn[node].begin(), edgesIn[node].end(), edgesOut[node].begin(), edgesOut[node].end(),
+            out.begin(), EdgeComp()
         );
         out.resize(it - out.begin());
         return out;
@@ -501,9 +486,7 @@ public:
     void insertEdge(Edge e) {
         // @note this check is duplicated, but included for clear error messages
         assert(containsNode(e.u) && containsNode(e.v) && "Node index out of range");
-        assert(
-            !containsEdgeUnweighted(e) && "Edge already in graph, is this an unintended operation?"
-        );
+        assert(!containsEdgeUnweighted(e) && "Edge already in graph, is this an unintended operation?");
 
         edges.insert(e);
         // @note this is preventing support of multiedges
@@ -522,7 +505,7 @@ public:
     void eraseEdge(Edge e) {
         if (!containsEdgeUnweighted(e)) return;
 
-        edges.erase(e); // @TODO if edge weight is different is this logic error?
+        edges.erase(e);  // @TODO if edge weight is different is this logic error?
         edgesIn[e.v].erase(e);
         edgesOut[e.u].erase(e);
         if (isUndirected()) {
@@ -570,10 +553,8 @@ public:
     EdgeWeight getEdge(Node u, Node v, EdgeWeight defaultWeight) {
         if (!containsNode(u) || !containsNode(v)) return defaultWeight;
         auto edgeIt = edges.find(Edge(u, v));
-        if (edgeIt == edges.end())
-            return defaultWeight;
-        else
-            return edgeIt->w;
+        if (edgeIt == edges.end()) return defaultWeight;
+        else return edgeIt->w;
     }
 
     /************************************************
@@ -613,8 +594,8 @@ public:
 
         for (Node node : nodes) {
             if (!seen[node]) {
-                seen[node]                  = true;
-                std::vector<Node> component = {node};
+                seen[node] = true;
+                std::vector<Node> component = { node };
                 for (size_t i = 0; i < component.size(); ++i) {
                     for (Node child : getNeighbours(component[i])) {
                         if (!seen[child]) {
@@ -639,7 +620,7 @@ public:
     // @returns The union of 2 graphs
     // @note Does not cause edge doubling
     friend MyGraph operator+(const MyGraph &a, const MyGraph &b) {
-        MyGraph out = a; // make a copy
+        MyGraph out = a;  // make a copy
         for (Edge edge : b.getEdges()) {
             if (!out.containsNode(edge.u)) out.pushNode(edge.u);
             if (!out.containsNode(edge.v)) out.pushNode(edge.v);
@@ -667,10 +648,8 @@ public:
     MyGraph flip() const {
         assert(isDirected() && "cannot flip undirected graph");
         MyGraph out;
-        for (Node node : getNodes())
-            out.pushNode(node);
-        for (Edge edge : getEdges())
-            out.insertEdge(edge.flip());
+        for (Node node : getNodes()) out.pushNode(node);
+        for (Edge edge : getEdges()) out.insertEdge(edge.flip());
         return out;
     }
 
@@ -691,8 +670,8 @@ public:
 
     // leave as placeholder, not worthwhile implementing this
     // https://en.wikipedia.org/wiki/Shortest_path_problem#Directed_graphs_with_arbitrary_weights_with_negative_cycles
-    std::pair<std::array<PathWeight, maxV>, std::array<Edge, maxV>>
-    NegativeCycleShortestPath(Node node) const {
+    std::pair<std::array<PathWeight, maxV>, std::array<Edge, maxV>> NegativeCycleShortestPath(Node node
+    ) const {
         assert("negative weight cycle, cannot SSSP");
         throw std::exception();
     }
@@ -709,17 +688,17 @@ public:
         std::array<PathWeight, maxV> cost;
         cost.fill(MAX_WEIGHT);
         cost[node] = PathWeight(0);
-        std::array<Edge, maxV> pred; // predecessor
+        std::array<Edge, maxV> pred;  // predecessor
 
         if (containsNode(node)) {
             std::priority_queue<
                 std::pair<PathWeight, Node>, std::vector<std::pair<PathWeight, Node>>,
                 std::greater<std::pair<PathWeight, Node>>>
                 pq;
-            pq.push({PathWeight(0), node});
+            pq.push({ PathWeight(0), node });
 
             while (!pq.empty()) {
-                Node currNode       = pq.top().second;
+                Node currNode = pq.top().second;
                 PathWeight currCost = pq.top().first;
                 pq.pop();
                 if (cost[currNode] < currCost) continue;
@@ -728,17 +707,17 @@ public:
                     assert(!(incident.w < 0) && "negative weights, use BellmanFord algo instead");
 
                     PathWeight newCost = currCost + incident.w;
-                    Node newNode       = incident.otherSide(currNode);
+                    Node newNode = incident.otherSide(currNode);
                     if (newCost < cost[newNode]) {
                         cost[newNode] = newCost;
                         pred[newNode] = incident;
-                        pq.push({newCost, newNode});
+                        pq.push({ newCost, newNode });
                     }
                 }
             }
         }
 
-        return {cost, pred};
+        return { cost, pred };
     }
 
     // O(maxV E)
@@ -750,7 +729,7 @@ public:
         std::array<PathWeight, maxV> cost;
         cost.fill(MAX_WEIGHT);
         cost[node] = PathWeight(0);
-        std::array<Edge, maxV> pred; // predecessor
+        std::array<Edge, maxV> pred;  // predecessor
 
         if (containsNode(node)) {
             for (size_t rep = 0; rep < V() - 1; ++rep) {
@@ -774,20 +753,17 @@ public:
                 if (cost[edge.u] != MAX_WEIGHT && cost[edge.v] != MAX_WEIGHT) {
                     // any more simplification of this expression assume properties of PathWeight
                     if (isDirected()) {
-                        if (cost[edge.u] + edge.w < cost[edge.v])
-                            return NegativeCycleShortestPath(node);
+                        if (cost[edge.u] + edge.w < cost[edge.v]) return NegativeCycleShortestPath(node);
                     } else if (edge != pred[edge.u]) {
-                        if (cost[edge.u] + edge.w < cost[edge.v])
-                            return NegativeCycleShortestPath(node);
+                        if (cost[edge.u] + edge.w < cost[edge.v]) return NegativeCycleShortestPath(node);
                     } else if (edge != pred[edge.v]) {
-                        if (cost[edge.v] + edge.w < cost[edge.u])
-                            return NegativeCycleShortestPath(node);
+                        if (cost[edge.v] + edge.w < cost[edge.u]) return NegativeCycleShortestPath(node);
                     }
                 }
             }
         }
 
-        return {cost, pred};
+        return { cost, pred };
     }
 
     // O(maxV + E log V), or O(maxV E) if negative edge weights
@@ -800,9 +776,9 @@ public:
             std::array<PathWeight, maxV> cost;
             cost.fill(MAX_WEIGHT);
             cost[node] = PathWeight(0);
-            std::array<Edge, maxV> pred; // predecessor
+            std::array<Edge, maxV> pred;  // predecessor
 
-            return {cost, pred};
+            return { cost, pred };
         }
 
         for (const Edge edge : edges) {
@@ -823,12 +799,9 @@ public:
     // @note Component containing `u` and `v` cannot have negative weight cycles
     // @note return MAX_WEIGHT when nodes are unreachable/out of range
     PathWeight shortestDist(Node u, Node v) const {
-        if (isNode(u) && u == v)
-            return PathWeight(0);
-        else if (!containsNode(u) || !containsNode(v))
-            return MAX_WEIGHT;
-        else
-            return SSSP(u).first[v];
+        if (isNode(u) && u == v) return PathWeight(0);
+        else if (!containsNode(u) || !containsNode(v)) return MAX_WEIGHT;
+        else return SSSP(u).first[v];
     }
 
     // O(maxV + E log V), or O(maxV E) if negative edge weights
@@ -840,8 +813,8 @@ public:
 
         // @note Important to start from `u` and reverse path later, because digraphs
         std::pair<std::array<PathWeight, maxV>, std::array<Edge, maxV>> res = SSSP(u);
-        std::array<PathWeight, maxV> &cost                                  = res.first;
-        std::array<Edge, maxV> &pred                                        = res.second;
+        std::array<PathWeight, maxV> &cost = res.first;
+        std::array<Edge, maxV> &pred = res.second;
 
         Path path;
         if (cost[v] != MAX_WEIGHT) {
@@ -860,7 +833,7 @@ public:
     PathWeight eccentricity(Node root) const {
         assert(containsNode(root) && "Node index out of range");
         std::array<PathWeight, maxV> cost = SSSP(root).first;
-        PathWeight furthest               = 0;
+        PathWeight furthest = 0;
         for (Node node = 0; node < maxV; ++node) {
             if (cost[node] != MAX_WEIGHT) furthest = std::max(furthest, cost[node]);
         }
@@ -875,7 +848,7 @@ public:
         assert(containsNode(root) && "Node index out of range");
         std::array<PathWeight, maxV> cost1 = SSSP(root).first;
 
-        Node furthestNode1                 = root;
+        Node furthestNode1 = root;
         for (const Node &node : nodes) {
             if (cost1[node] != MAX_WEIGHT && cost1[node] > cost1[furthestNode1]) {
                 furthestNode1 = node;
@@ -883,10 +856,10 @@ public:
         }
 
         std::pair<std::array<PathWeight, maxV>, std::array<Edge, maxV>> res2 = SSSP(furthestNode1);
-        std::array<PathWeight, maxV> &cost2                                  = res2.first;
-        std::array<Edge, maxV> &pred2                                        = res2.second;
+        std::array<PathWeight, maxV> &cost2 = res2.first;
+        std::array<Edge, maxV> &pred2 = res2.second;
 
-        Node furthestNode2                                                   = root;
+        Node furthestNode2 = root;
         for (const Node &node : nodes) {
             if (cost2[node] != MAX_WEIGHT && cost2[node] > cost2[furthestNode2]) {
                 furthestNode2 = node;
@@ -1014,7 +987,7 @@ public:
     // Standard DFS topsort
     std::vector<Node> dfsTopsort() const {
         std::vector<Node> topsort;
-        std::array<int, maxV> state; // @TODO actually only needs to hold 3 states
+        std::array<int, maxV> state;  // @TODO actually only needs to hold 3 states
         state.fill(0);
 
         std::function<void(int)> dfs;
@@ -1023,8 +996,7 @@ public:
             assert(state[node] != 1 && "Graph contains cycle");
 
             state[node] = 1;
-            for (Node v : getNeighboursOut(node))
-                dfs(v);
+            for (Node v : getNeighboursOut(node)) dfs(v);
             state[node] = 2;
             topsort.push_back(node);
         };
@@ -1046,12 +1018,10 @@ public:
         dfs1 = [&](Node node) {
             if (seen[node]) return;
             seen[node] = true;
-            for (Node v : getNeighboursOut(node))
-                dfs1(v);
+            for (Node v : getNeighboursOut(node)) dfs1(v);
             order.push_back(node);
         };
-        for (const Node &node : nodes)
-            dfs1(node);
+        for (const Node &node : nodes) dfs1(node);
         reverse(order.begin(), order.end());
 
         seen.fill(false);
@@ -1099,7 +1069,7 @@ public:
             for (Edge edge : edgesOut[u]) {
                 Node v = edge.otherSide(u);
                 if (getIndex[v] == -1) {
-                    index      = dfs(v);
+                    index = dfs(v);
                     lowLink[u] = std::min(lowLink[u], lowLink[v]);
                 } else if (seen[v]) {
                     lowLink[u] = std::min(lowLink[u], getIndex[v]);
@@ -1156,13 +1126,12 @@ public:
         // huh this looks very similar to Tarjan's
         std::function<void(Node, Node)> dfs;
         dfs = [&](Node u, Node parent) {
-            seen[u]    = true;
+            seen[u] = true;
             minTime[u] = entryTime[u] = ++t;
 
             for (Edge edge : edgesOut[u]) {
                 Node v = edge.otherSide(u);
-                if (v == parent)
-                    continue;
+                if (v == parent) continue;
                 else if (seen[v]) {
                     minTime[u] = std::min(minTime[u], entryTime[v]);
                 } else {
@@ -1228,21 +1197,21 @@ public:
             // find flow of augmenting path
             PathWeight newFlow = MAX_WEIGHT;
             for (Node u = sink; u != source; u = prev[u]) {
-                newFlow = std::min(newFlow, remainingCap[{prev[u], u}]);
+                newFlow = std::min(newFlow, remainingCap[{ prev[u], u }]);
             }
 
             // update path
             for (Node u = sink; u != source; u = prev[u]) {
-                remainingCap[{prev[u], u}] -= newFlow;
-                remainingCap[{u, prev[u]}] += newFlow;
+                remainingCap[{ prev[u], u }] -= newFlow;
+                remainingCap[{ u, prev[u] }] += newFlow;
             }
             return newFlow;
         };
 
         for (Edge edge : edges) {
-            remainingCap[{edge.u, edge.v}] += edge.w;
+            remainingCap[{ edge.u, edge.v }] += edge.w;
             if (isUndirected()) {
-                remainingCap[{edge.v, edge.u}] += edge.w;
+                remainingCap[{ edge.v, edge.u }] += edge.w;
             }
         }
 
@@ -1260,7 +1229,7 @@ public:
                 q.pop();
                 for (Edge edge : getEdgesOut(u)) {
                     Node v = edge.otherSide(u);
-                    if (prev[v] == maxV && remainingCap[{u, v}] > 0) {
+                    if (prev[v] == maxV && remainingCap[{ u, v }] > 0) {
                         prev[v] = u;
                         q.push(v);
                     }
@@ -1295,11 +1264,11 @@ public:
 
             for (; lastSeen[u] != edgesOut[u].end(); lastSeen[u]++) {
                 Node v = lastSeen[u]->otherSide(u);
-                if (level[u] + 1 == level[v] && remainingCap[{u, v}] > 0) {
-                    PathWeight tr = dfs(v, std::min(pushed, remainingCap[{u, v}]));
+                if (level[u] + 1 == level[v] && remainingCap[{ u, v }] > 0) {
+                    PathWeight tr = dfs(v, std::min(pushed, remainingCap[{ u, v }]));
                     if (tr != 0) {
-                        remainingCap[{u, v}] -= tr;
-                        remainingCap[{v, u}] += tr;
+                        remainingCap[{ u, v }] -= tr;
+                        remainingCap[{ v, u }] += tr;
                         return tr;
                     }
                 }
@@ -1318,7 +1287,7 @@ public:
                 q.pop();
                 for (Edge edge : getEdgesOut(u)) {
                     Node v = edge.otherSide(u);
-                    if (remainingCap[{u, v}] > 0 && level[v] == PathWeight(0)) {
+                    if (remainingCap[{ u, v }] > 0 && level[v] == PathWeight(0)) {
                         level[v] = level[u] + 1;
                         q.push(v);
                     }
@@ -1327,9 +1296,9 @@ public:
         };
 
         for (Edge edge : edges) {
-            remainingCap[{edge.u, edge.v}] += edge.w;
+            remainingCap[{ edge.u, edge.v }] += edge.w;
             if (isUndirected()) {
-                remainingCap[{edge.v, edge.u}] += edge.w;
+                remainingCap[{ edge.v, edge.u }] += edge.w;
             }
         }
 
@@ -1337,10 +1306,8 @@ public:
         while (true) {
             bfs();
             if (level[sink] == PathWeight(0)) break;
-            for (const Node &node : nodes)
-                lastSeen[node] = edgesOut[node].begin();
-            for (PathWeight pushed; (pushed = dfs(source, MAX_WEIGHT)) != PathWeight(0);
-                 f += pushed)
+            for (const Node &node : nodes) lastSeen[node] = edgesOut[node].begin();
+            for (PathWeight pushed; (pushed = dfs(source, MAX_WEIGHT)) != PathWeight(0); f += pushed)
                 ;
         }
         return f;
@@ -1410,15 +1377,13 @@ public:
     // @param `root` If specified, consider its connected component. Otherwise consider the whole
     // graph
     bool isCyclic() const {
-        std::array<int, maxV> state; // @TODO actually only needs to hold 3 states
+        std::array<int, maxV> state;  // @TODO actually only needs to hold 3 states
         state.fill(0);
 
         std::function<bool(Node)> dfs;
         dfs = [&](Node u) {
-            if (state[u] == 2)
-                return false;
-            else if (state[u] == 1)
-                return true;
+            if (state[u] == 2) return false;
+            else if (state[u] == 1) return true;
 
             state[u] = 1;
             for (Node v : getNeighboursOut(u)) {
@@ -1496,6 +1461,6 @@ template<size_t maxV>
 using UnWeightedGraph = Graph<maxV, UnitEdgeWeight, int, false>;
 template<size_t maxV>
 using UndirectedUnweightedGraph = Graph<maxV, UnitEdgeWeight, int, false>;
-}; // namespace DS
+};  // namespace DS
 
 #endif

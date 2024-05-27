@@ -7,23 +7,22 @@ namespace DS {
 class ModIntIndicator : MyIntegralIndicator {};
 
 template<typename T>
-using is_modint = typename std::conditional_t<
-    std::is_base_of<ModIntIndicator, T>::value, std::true_type, std::false_type>;
+using is_modint =
+    typename std::conditional_t<std::is_base_of<ModIntIndicator, T>::value, std::true_type, std::false_type>;
 template<typename T>
 inline constexpr bool is_modint_v = is_modint<T>::value;
 
 // @TODO Montgomery
 template<uintmax_t N>
 class ModInt : ModIntIndicator {
-
     /************************************************
      *                INITIALISATION                *
      ************************************************/
 
-private:
+   private:
     uintmax_t val;
 
-public:
+   public:
     // O(1)
     // if not given an initialiser value, initalise to 0
     ModInt() : val(0) {}
@@ -59,11 +58,15 @@ public:
 
     // O(1)
     // @returns val
-    const uintmax_t num() const { return val; }
+    const uintmax_t num() const {
+        return val;
+    }
 
     // O(1)
     // @returns N
-    static constexpr uintmax_t mod() { return N; }
+    static constexpr uintmax_t mod() {
+        return N;
+    }
 
     /************************************************
      *                   OPERATIONS                 *
@@ -73,11 +76,15 @@ public:
     // Equality
     // note: implicit conversions to modint happening here
     // e.g. ModInt<N>(x) == x + N
-    friend bool operator==(const ModInt<N> &a, const ModInt<N> &b) { return a.num() == b.num(); }
+    friend bool operator==(const ModInt<N> &a, const ModInt<N> &b) {
+        return a.num() == b.num();
+    }
 
     // O(1)
     // Inequality
-    friend bool operator!=(const ModInt<N> &a, const ModInt<N> &b) { return a.num() != b.num(); }
+    friend bool operator!=(const ModInt<N> &a, const ModInt<N> &b) {
+        return a.num() != b.num();
+    }
 
     // O(1)
     // Standard modular addition
@@ -95,7 +102,9 @@ public:
 
     // O(1)
     // Do nothing / make copy
-    ModInt<N> operator+() const { return ModInt<N>(val); }
+    ModInt<N> operator+() const {
+        return ModInt<N>(val);
+    }
 
     // O(1)
     // Prefix increment
@@ -108,7 +117,7 @@ public:
     // Postfix increment
     ModInt<N> operator++(int) {
         ModInt<N> tmp = *this;
-        *this         = *this + 1;
+        *this = *this + 1;
         return tmp;
     }
 
@@ -136,15 +145,19 @@ public:
 
     // O(1)
     // Negation
-    friend ModInt<N> operator-(const ModInt<N> &a) { return ModInt<N>(N - a.val); }
+    friend ModInt<N> operator-(const ModInt<N> &a) {
+        return ModInt<N>(N - a.val);
+    }
 
     // O(1) Prefix decrement
-    ModInt<N> operator--() { return *this = *this - 1; }
+    ModInt<N> operator--() {
+        return *this = *this - 1;
+    }
 
     // O(1) Postfix decrement
     ModInt<N> operator--(int) {
         ModInt<N> tmp = *this;
-        *this         = *this - 1;
+        *this = *this - 1;
         return tmp;
     }
 
@@ -155,14 +168,20 @@ public:
 
     // O(1)
     // Multiplcation assignment
-    friend ModInt<N> operator*=(ModInt<N> &a, const ModInt<N> &b) { return a = a * b; }
+    friend ModInt<N> operator*=(ModInt<N> &a, const ModInt<N> &b) {
+        return a = a * b;
+    }
 
     // O(log N) Division using modular inverse
-    friend ModInt<N> operator/(const ModInt<N> &a, const ModInt<N> &b) { return a * b.inv(); }
+    friend ModInt<N> operator/(const ModInt<N> &a, const ModInt<N> &b) {
+        return a * b.inv();
+    }
 
     // O(log N)
     // Division assignment
-    friend ModInt<N> operator/=(ModInt<N> &a, const ModInt<N> &b) { return a = a / b; }
+    friend ModInt<N> operator/=(ModInt<N> &a, const ModInt<N> &b) {
+        return a = a / b;
+    }
 
     // O(1) Standard modulo
     // template<uintmax_t newMod> ModInt<newMod> operator%(uintmax_t o) const {
@@ -176,7 +195,7 @@ public:
         ModInt<N> curr = *this;
         if (x < 0) {
             curr = curr.inv();
-            x    = -x;
+            x = -x;
         }
         for (; x; x /= 2) {
             if (x & 1) output *= curr;
@@ -185,7 +204,7 @@ public:
         return output;
     }
 
-public:
+   public:
     // O(log N)
     // @returns Inverse of this number modulo `N`
     ModInt<N> inv() const {
@@ -213,8 +232,8 @@ public:
     }
 };
 
-using ModInt998244353  = ModInt<998244353>;
+using ModInt998244353 = ModInt<998244353>;
 using ModInt1000000007 = ModInt<1000000007>;
-}; // namespace DS
+};  // namespace DS
 
 #endif

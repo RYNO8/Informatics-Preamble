@@ -1,7 +1,9 @@
 #include "../src/Segtree.h"
+
 #include "../src/Constants.h"
 #include "../src/Ranges.h"
 #include "../src/Util.h"
+
 using namespace std;
 using namespace DS;
 
@@ -43,30 +45,30 @@ void testSegtree_manual() {
 
         ll tl, tr, x;
         switch (op) {
-        case 'S':
-            cin >> tl >> tr >> x;
-            tSum->set({tl, tr}, x);
-            tMax->set({tl, tr}, x);
-            tMin->set({tl, tr}, x);
-            break;
-        case 'A':
-            cin >> tl >> tr >> x;
-            tSum->add({tl, tr}, x);
-            tMax->add({tl, tr}, x);
-            tMin->add({tl, tr}, x);
-            break;
-        case 'm':
-            cin >> tl >> tr;
-            cout << tMin->query({tl, tr}) << '\n';
-            break;
-        case 'M':
-            cin >> tl >> tr;
-            cout << tMax->query({tl, tr}) << '\n';
-            break;
-        case 'T':
-            cin >> tl >> tr;
-            cout << tSum->query({tl, tr}) << '\n';
-            break;
+            case 'S':
+                cin >> tl >> tr >> x;
+                tSum->set({ tl, tr }, x);
+                tMax->set({ tl, tr }, x);
+                tMin->set({ tl, tr }, x);
+                break;
+            case 'A':
+                cin >> tl >> tr >> x;
+                tSum->add({ tl, tr }, x);
+                tMax->add({ tl, tr }, x);
+                tMin->add({ tl, tr }, x);
+                break;
+            case 'm':
+                cin >> tl >> tr;
+                cout << tMin->query({ tl, tr }) << '\n';
+                break;
+            case 'M':
+                cin >> tl >> tr;
+                cout << tMax->query({ tl, tr }) << '\n';
+                break;
+            case 'T':
+                cin >> tl >> tr;
+                cout << tSum->query({ tl, tr }) << '\n';
+                break;
         }
 
         // cout << *tSum << '\n';
@@ -89,27 +91,38 @@ void testSegtree_manual() {
 struct fakeSegtree {
     int N;
     vector<int> t;
-    fakeSegtree(int _N, int initVal) : N(_N) { t = vector<int>(N, initVal); }
+
+    fakeSegtree(int _N, int initVal) : N(_N) {
+        t = vector<int>(N, initVal);
+    }
 
     void set(int l, int r, int x) {
-        for (int i = l; i <= r; ++i)
-            t[i] = x;
+        for (int i = l; i <= r; ++i) t[i] = x;
     }
 
     void add(int l, int r, int x) {
-        for (int i = l; i <= r; ++i)
-            t[i] += x;
+        for (int i = l; i <= r; ++i) t[i] += x;
     }
 
-    int sum(int l, int r) { return accumulate(t.begin() + l, t.begin() + r + 1, 0); }
+    int sum(int l, int r) {
+        return accumulate(t.begin() + l, t.begin() + r + 1, 0);
+    }
 
-    int min(int l, int r) { return *min_element(t.begin() + l, t.begin() + r + 1); }
+    int min(int l, int r) {
+        return *min_element(t.begin() + l, t.begin() + r + 1);
+    }
 
-    int max(int l, int r) { return *max_element(t.begin() + l, t.begin() + r + 1); }
+    int max(int l, int r) {
+        return *max_element(t.begin() + l, t.begin() + r + 1);
+    }
 
-    int minIndex() { return min_element(t.begin(), t.end()) - t.begin(); }
+    int minIndex() {
+        return min_element(t.begin(), t.end()) - t.begin();
+    }
 
-    int maxIndex() { return max_element(t.begin(), t.end()) - t.begin(); }
+    int maxIndex() {
+        return max_element(t.begin(), t.end()) - t.begin();
+    }
 
     void extendRight(int x) {
         int s = t.size();
@@ -118,7 +131,9 @@ struct fakeSegtree {
         }
     }
 
-    size_t size() { return t.size(); }
+    size_t size() {
+        return t.size();
+    }
 };
 
 void testSegtree_auto() {
@@ -126,10 +141,10 @@ void testSegtree_auto() {
     for (int tI = 0; tI < 20; ++tI) {
         // cout << "REP: " << tI << "\n";
 
-        int N       = 5;
+        int N = 5;
         int initVal = 69;
         fakeSegtree t(N, initVal);
-        ll shift             = -rand();
+        ll shift = -rand();
 
         SumSegtree<ll> *tSum = new SumSegtree<ll>(0 + shift, N - 1 + shift, initVal);
         MaxSegtree<ll> *tMax = new MaxSegtree<ll>(0 + shift, N - 1 + shift, initVal);
@@ -144,28 +159,28 @@ void testSegtree_auto() {
             if (opt == 0) {
                 // set
                 t.set(l, r, x);
-                tSum->set({l + shift, r + shift}, x);
-                tMax->set({l + shift, r + shift}, x);
-                tMin->set({l + shift, r + shift}, x);
+                tSum->set({ l + shift, r + shift }, x);
+                tMax->set({ l + shift, r + shift }, x);
+                tMin->set({ l + shift, r + shift }, x);
 
             } else if (opt == 1) {
                 // add
                 t.add(l, r, x);
-                tSum->add({l + shift, r + shift}, x);
-                tMax->add({l + shift, r + shift}, x);
-                tMin->add({l + shift, r + shift}, x);
+                tSum->add({ l + shift, r + shift }, x);
+                tMax->add({ l + shift, r + shift }, x);
+                tMin->add({ l + shift, r + shift }, x);
 
             } else if (opt == 2) {
                 // get sum
-                assert(t.sum(l, r) == tSum->query({l + shift, r + shift}));
+                assert(t.sum(l, r) == tSum->query({ l + shift, r + shift }));
 
             } else if (opt == 3) {
                 // get min
-                assert(t.min(l, r) == tMin->query({l + shift, r + shift}));
+                assert(t.min(l, r) == tMin->query({ l + shift, r + shift }));
 
             } else if (opt == 4) {
                 // get max
-                assert(t.max(l, r) == tMax->query({l + shift, r + shift}));
+                assert(t.max(l, r) == tMax->query({ l + shift, r + shift }));
 
             } else if (opt == 5) {
                 // get index of min
@@ -202,31 +217,31 @@ void testSegtree_benchmark() {
 
         if (opt == 0) {
             if (l > r) swap(l, r);
-            t->set({l, r}, rand());
+            t->set({ l, r }, rand());
         } else {
-            t->query({l, r});
+            t->query({ l, r });
         }
     }
 }
 
 void testSegtree_iterators() {
-    ll a[]            = {1, 2, 3, 4};
+    ll a[] = { 1, 2, 3, 4 };
     SumSegtree<ll> t_ = SumSegtree<ll>(begin(a), end(a));
     assert(repr(t_) == "[ 1 2 3 4 ]");
     assert(repr(&t_) == "[0..3] = 10");
     assert(repr(SumSegtree<ll>(1, 2, t_)) == "[ 2 3 ]");
 
-    vector<ll> v{1, 2, 3, 4};
+    vector<ll> v{ 1, 2, 3, 4 };
     SumSegtree<ll> t = SumSegtree<ll>(v.begin(), v.end());
     assert(repr(t) == "[ 1 2 3 4 ]");
 
     using It = SumSegtree<ll>::iterator;
 
-    It it1   = t.begin();
-    It it2   = ++t.begin();
-    It it3   = ++ ++t.begin();
-    It it4   = ++ ++ ++t.begin();
-    It it5   = ++ ++ ++ ++t.begin();
+    It it1 = t.begin();
+    It it2 = ++t.begin();
+    It it3 = ++ ++t.begin();
+    It it4 = ++ ++ ++t.begin();
+    It it5 = ++ ++ ++ ++t.begin();
 
     assert((*it1).query() == 1 && it1->query() == 1);
     assert((*it2).query() == 2 && it2->query() == 2);
@@ -247,7 +262,7 @@ void testSegtree_iterators() {
     It temp3 = It();
     It temp4 = It{};
 
-    temp1    = it1;
+    temp1 = it1;
     assert(--temp1 == t.end() /* && ++temp1 == it1*/);
     temp2 = it2;
     assert(--temp2 == it1 && ++temp2 == it2);

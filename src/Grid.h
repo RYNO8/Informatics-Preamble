@@ -6,12 +6,11 @@
 namespace DS {
 template<typename T, std::enable_if_t<is_my_integral_v<T>, bool> = true>
 class Grid {
-
     /************************************************
      *                INITIALISATION                *
      ************************************************/
 
-private:
+   private:
     // Number of rows
     int R = 0;
     // Number of columns;
@@ -26,17 +25,15 @@ private:
     // O(RC)
     // Initialises all variables
     void init(int _R, int _C) {
-        R    = _R;
-        C    = _C;
+        R = _R;
+        C = _C;
         grid = std::vector<std::vector<T>>(R);
-        for (int r = 0; r < R; ++r)
-            grid[r] = std::vector<T>(C);
+        for (int r = 0; r < R; ++r) grid[r] = std::vector<T>(C);
         prefix = std::vector<std::vector<T>>(R + 1);
-        for (int r = 0; r < R + 1; ++r)
-            prefix[r] = std::vector<T>(C + 1);
+        for (int r = 0; r < R + 1; ++r) prefix[r] = std::vector<T>(C + 1);
     }
 
-public:
+   public:
     // O(1)
     // Initialises an empty grid
     Grid() {}
@@ -95,8 +92,7 @@ public:
         hasPrecomp = true;
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
-                prefix[r + 1][c + 1] =
-                    grid[r][c] + (prefix[r + 1][c] + prefix[r][c + 1] - prefix[r][c]);
+                prefix[r + 1][c + 1] = grid[r][c] + (prefix[r + 1][c] + prefix[r][c + 1] - prefix[r][c]);
             }
         }
     }
@@ -126,12 +122,11 @@ public:
         if (spacing == -1) {
             // find max repr length of grid values
             for (int r = 0; r < R; ++r) {
-                for (int c = 0; c < C; ++c)
-                    spacing = std::max(spacing, (repr(grid[r][c]).size() + 3) / 4);
+                for (int c = 0; c < C; ++c) spacing = std::max(spacing, (repr(grid[r][c]).size() + 3) / 4);
             }
         }
 
-        std::string sep   = "+" + (std::string("-") * (4 * spacing + 1) + "+") * R + "\n";
+        std::string sep = "+" + (std::string("-") * (4 * spacing + 1) + "+") * R + "\n";
         std::string space = "|" + (std::string(" ") * (4 * spacing + 1) + "|") * R + "\n";
 
         for (int r = 0; r < R; ++r) {
@@ -140,8 +135,7 @@ public:
                 int paddingL = std::max(0, 2 * spacing - repr(grid[r][c]).size() / 2);
                 int paddingR = std::max(0, 2 * spacing - (repr(grid[r][c]) - 1).size() / 2);
 
-                out << std::string(" ") * paddingL << grid[r][c] << std::string(" ") * paddingR
-                    << '|';
+                out << std::string(" ") * paddingL << grid[r][c] << std::string(" ") * paddingR << '|';
             }
             out << '\n' << space * spacing;
         }
@@ -224,19 +218,28 @@ public:
 
     // O(1)
     // @returns R - the number of rows
-    inline const int getR() const { return R; }
+    inline const int getR() const {
+        return R;
+    }
 
     // O(1)
     // @returns C - the number of columns
-    inline const int getC() const { return C; }
+    inline const int getC() const {
+        return C;
+    }
 
     // O(1)
     // @returns The size of the grid
-    inline const int size() const { return R * C; }
+    inline const int size() const {
+        return R * C;
+    }
 
     // O(1)
     // @returns Whether a coordinate is within the grid
-    inline bool validCoord(int r, int c) const { return 0 <= r && r < R && 0 <= c && c < C; }
+    inline bool validCoord(int r, int c) const {
+        return 0 <= r && r < R && 0 <= c && c < C;
+    }
+
     inline bool validCoord(std::pair<int, int> coord) const {
         return validCoord(coord.first, coord.second);
     }
@@ -247,10 +250,10 @@ public:
     std::pair<int, int> findVal(std::function<bool(int, int)> isValid) {
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
-                if (isValid(r, c)) return {r, c};
+                if (isValid(r, c)) return { r, c };
             }
         }
-        return {-1, -1};
+        return { -1, -1 };
     }
 
     // O(RC)
@@ -265,7 +268,7 @@ public:
         std::vector<std::pair<int, int>> output;
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
-                if (isValid(r, c)) output.push_back({r, c});
+                if (isValid(r, c)) output.push_back({ r, c });
             }
         }
         return output;
@@ -276,8 +279,7 @@ public:
     int count(std::function<bool(int, int)> isValid) const {
         int total = 0;
         for (int r = 0; r < R; ++r) {
-            for (int c = 0; c < C; ++c)
-                total += (bool)isValid(r, c);
+            for (int c = 0; c < C; ++c) total += (bool)isValid(r, c);
         }
         return total;
     }
@@ -291,7 +293,10 @@ public:
             grid[r][c] = val;
         }
     }
-    void setVal(std::pair<int, int> coord, T val) { setVal(coord.first, coord.second, val); }
+
+    void setVal(std::pair<int, int> coord, T val) {
+        setVal(coord.first, coord.second, val);
+    }
 
     // O(area of rectangular region) <= O(RC) Sets the value of all cells within a rectangular
     // region (inclusive)
@@ -306,10 +311,10 @@ public:
         c2 = std::max(C - 1, c2);
 
         for (int r = r1; r <= r2; ++r) {
-            for (int c = c1; c <= c2; ++c)
-                grid[r][c] = val;
+            for (int c = c1; c <= c2; ++c) grid[r][c] = val;
         }
     }
+
     void setVals(std::pair<int, int> coord1, std::pair<int, int> coord2, T val) {
         setVals(coord1.first, coord1.second, coord2.first, coord2.second, val);
     }
@@ -321,7 +326,10 @@ public:
             grid[r][c] += val;
         }
     }
-    void incrVal(std::pair<int, int> coord, T val) { incrVal(coord.first, coord.second, val); }
+
+    void incrVal(std::pair<int, int> coord, T val) {
+        incrVal(coord.first, coord.second, val);
+    }
 
     // O(area of rectangular region) <= O(RC) Increments the value of all cells within a rectangular
     // region (inclusive)
@@ -336,10 +344,10 @@ public:
         c2 = std::max(C - 1, c2);
 
         for (int r = r1; r <= r2; ++r) {
-            for (int c = c1; c <= c2; ++c)
-                grid[r][c] += val;
+            for (int c = c1; c <= c2; ++c) grid[r][c] += val;
         }
     }
+
     void incrVals(std::pair<int, int> coord1, std::pair<int, int> coord2, T val) {
         incrVals(coord1.first, coord1.second, coord2.first, coord2.second, val);
     }
@@ -350,6 +358,7 @@ public:
         if (validCoord(r, c)) return grid[r][c];
         return defaultVal;
     }
+
     T getVal(std::pair<int, int> coord, T defaultVal = T()) const {
         return getVal(coord.first, coord.second, defaultVal);
     }
@@ -368,17 +377,16 @@ public:
         c2 = std::max(C - 1, c2);
 
         if (hasPrecomp) {
-            return prefix[r2 + 1][c2 + 1] + prefix[r1][c1] - prefix[r2 + 1][c1] -
-                   prefix[r1][c2 + 1];
+            return prefix[r2 + 1][c2 + 1] + prefix[r1][c1] - prefix[r2 + 1][c1] - prefix[r1][c2 + 1];
         } else {
             T total = 0;
             for (int r = r1; r <= r2; ++r) {
-                for (int c = c1; c <= c2; ++c)
-                    total += grid[r][c];
+                for (int c = c1; c <= c2; ++c) total += grid[r][c];
             }
             return total;
         }
     }
+
     T sumVals(std::pair<int, int> coord1, std::pair<int, int> coord2) const {
         return sumVals(coord1.first, coord1.second, coord2.first, coord2.second);
     }
@@ -409,8 +417,7 @@ public:
     Grid<T> flipRows() const {
         Grid<T> output(R, C, 0);
         for (int r = 0; r < R; ++r) {
-            for (int c = 0; c < C; ++c)
-                output.setVal(R - r - 1, c, grid[r][c]);
+            for (int c = 0; c < C; ++c) output.setVal(R - r - 1, c, grid[r][c]);
         }
         return output;
     }
@@ -421,15 +428,16 @@ public:
     Grid<T> flipCols() const {
         Grid<T> output(R, C, 0);
         for (int r = 0; r < R; ++r) {
-            for (int c = 0; c < C; ++c)
-                output.setVal(r, C - c - 1, grid[r][c]);
+            for (int c = 0; c < C; ++c) output.setVal(r, C - c - 1, grid[r][c]);
         }
         return output;
     }
 
     // O(RC) Rotates the grid clockwise/anticlockwise by 180 degrees, about its center
     // @returns grid object of the modified grid
-    Grid<T> rot180() const { return flipRows().flipCols(); }
+    Grid<T> rot180() const {
+        return flipRows().flipCols();
+    }
 
     // O(RC)
     // Flips the grid over its primary diagonal (top left to bottom right)
@@ -437,8 +445,7 @@ public:
     Grid<T> flipPrimaryDiag() const {
         Grid<T> output(C, R, 0);
         for (int r = 0; r < R; ++r) {
-            for (int c = 0; c < C; ++c)
-                output.setVal(c, r, grid[r][c]);
+            for (int c = 0; c < C; ++c) output.setVal(c, r, grid[r][c]);
         }
         return output;
     }
@@ -446,23 +453,29 @@ public:
     // O(RC)
     // Flips the grid over its secondary diagonal (top right to bottom left)
     // @returns Grid object of the modified grid
-    Grid<T> flipSecondaryDiag() const { return rot180().flipPrimaryDiag(); }
+    Grid<T> flipSecondaryDiag() const {
+        return rot180().flipPrimaryDiag();
+    }
 
     // O(RC)
     // Rotates the grid clockwise by 90 degrees, about its center
     // @returns grid object of the modified grid
-    Grid<T> rotClockwise() { return flipPrimaryDiag().flipCols(); }
+    Grid<T> rotClockwise() {
+        return flipPrimaryDiag().flipCols();
+    }
 
     // O(RC)
     // Rotates the grid anticlockwise by 90 degrees, about its center
     // @returns grid object of the modified grid
-    Grid<T> rotAnticlockwise() const { return flipPrimaryDiag().flipRows(); }
+    Grid<T> rotAnticlockwise() const {
+        return flipPrimaryDiag().flipRows();
+    }
 
     // O(RC)
     // Replaces every instance of `prevVal` with `newVal`
     // @returns Grid object of the modified grid`
     Grid<T> replace(T prevVal, T newVal) const {
-        Grid<T> *output = new Grid<T>(*this); // make a copy
+        Grid<T> *output = new Grid<T>(*this);  // make a copy
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
                 if (output->getVal(r, c) == prevVal) output->setVal(r, c, newVal);
@@ -479,8 +492,7 @@ public:
     // @returns All coordinates in a particular row, sorted by increasing order
     std::vector<std::pair<int, int>> getRowCoords(int r) const {
         std::vector<std::pair<int, int>> output;
-        for (int c = 0; c < C; ++c)
-            output.push_back({r, c});
+        for (int c = 0; c < C; ++c) output.push_back({ r, c });
         return output;
     }
 
@@ -488,8 +500,7 @@ public:
     // @returns All coordinates in a particular column, sorted by increasing order
     std::vector<std::pair<int, int>> getColCoords(int c) const {
         std::vector<std::pair<int, int>> output;
-        for (int r = 0; r < R; ++r)
-            output.push_back({r, c});
+        for (int r = 0; r < R; ++r) output.push_back({ r, c });
         return output;
     }
 
@@ -500,7 +511,7 @@ public:
         std::vector<std::pair<int, int>> output;
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
-                output.push_back({r, c});
+                output.push_back({ r, c });
             }
         }
         return output;
@@ -513,7 +524,7 @@ public:
         std::vector<std::pair<int, int>> output;
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
-                if (isValid(r, c)) output.push_back({r, c});
+                if (isValid(r, c)) output.push_back({ r, c });
             }
         }
         return output;
@@ -522,17 +533,19 @@ public:
     // O(1)
     // @param `dirs` the valid directions to move to adjacent nodes
     // @returns coordinates which are adjacent to `(r, c)`
-    std::vector<std::pair<int, int>>
-    getAdjCoords(int r, int c, std::vector<std::pair<int, int>> &dirs) const {
+    std::vector<std::pair<int, int>> getAdjCoords(int r, int c, std::vector<std::pair<int, int>> &dirs)
+        const {
         std::vector<std::pair<int, int>> output;
         for (std::pair<int, int> dir : dirs) {
             int newR = r + dir.first, newC = c + dir.second;
-            if (validCoord(r, c) && validCoord(newR, newC)) output.push_back({newR, newC});
+            if (validCoord(r, c) && validCoord(newR, newC)) output.push_back({ newR, newC });
         }
         return output;
     }
-    std::vector<std::pair<int, int>>
-    getAdjCoords(std::pair<int, int> coord, std::vector<std::pair<int, int>> &dirs) const {
+
+    std::vector<std::pair<int, int>> getAdjCoords(
+        std::pair<int, int> coord, std::vector<std::pair<int, int>> &dirs
+    ) const {
         return getAdjCoords(coord.first, coord.second, dirs);
     }
 
@@ -540,7 +553,7 @@ public:
      *               BFS & VARIATIONS               *
      ************************************************/
 
-private:
+   private:
     // O(RC)
     // Standard Breadth First Search, starting from (r, c)
     // @param `isValid` Specifies which coordinates to explore that satisfy in the directions of
@@ -549,14 +562,15 @@ private:
     // @param `depth` Stores the shortest distance to the starting node, and it is also used as the
     // seen array
     // @param `maxD` Indicates the number of BFS steps taken
-    void
-    bfs(int r, int c, std::function<bool(int, int)> isValid, std::vector<std::pair<int, int>> dirs,
-        std::vector<std::vector<int>> &depth, int maxD = INT_MAX) const {
+    void bfs(
+        int r, int c, std::function<bool(int, int)> isValid, std::vector<std::pair<int, int>> dirs,
+        std::vector<std::vector<int>> &depth, int maxD = INT_MAX
+    ) const {
         if (!validCoord(r, c)) return;
         if (!isValid(r, c)) return;
 
         std::queue<std::pair<int, int>> q;
-        q.push({r, c});
+        q.push({ r, c });
         depth[r][c] = 0;
 
         for (int d = 1; !q.empty() && d < maxD; ++d) {
@@ -574,34 +588,34 @@ private:
             }
         }
     }
-    void
-    bfs(std::pair<int, int> coord, std::function<bool(int, int)> isValid,
-        std::vector<std::pair<int, int>> &dirs, std::vector<std::vector<int>> &depth,
-        int maxD = INT_MAX) const {
+
+    void bfs(
+        std::pair<int, int> coord, std::function<bool(int, int)> isValid,
+        std::vector<std::pair<int, int>> &dirs, std::vector<std::vector<int>> &depth, int maxD = INT_MAX
+    ) const {
         return bfs(coord, isValid, dirs, depth);
     }
 
-public:
+   public:
     // O(RC)
     // Finds coordinates that satisfy `isValid`, and are connected to (startR, startC)
     // @param `dirs` the valid directions to move to adjacent nodes
     // @returns a vector of coordinates, where each coordinate is a pair of (r, c)
     std::vector<std::pair<int, int>> getRegion(
-        int startR, int startC, std::function<bool(int, int)> isValid,
-        std::vector<std::pair<int, int>> &dirs
+        int startR, int startC, std::function<bool(int, int)> isValid, std::vector<std::pair<int, int>> &dirs
     ) const {
-        std::vector<std::vector<int>> depth =
-            std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
+        std::vector<std::vector<int>> depth = std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
         bfs(startR, startC, isValid, dirs, depth);
 
         std::vector<std::pair<int, int>> output;
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
-                if (depth[r][c] >= 0) output.push_back({r, c});
+                if (depth[r][c] >= 0) output.push_back({ r, c });
             }
         }
         return output;
     }
+
     std::vector<std::pair<int, int>> getRegion(
         std::pair<int, int> coord, std::function<bool(int, int)> isValid,
         std::vector<std::pair<int, int>> &dirs
@@ -616,8 +630,7 @@ public:
     std::vector<std::vector<std::pair<int, int>>> getRegions(
         std::function<bool(int, int)> isValid, std::vector<std::pair<int, int>> &dirs
     ) const {
-        std::vector<std::vector<int>> depth =
-            std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
+        std::vector<std::vector<int>> depth = std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
 
         std::vector<std::vector<std::pair<int, int>>> output;
         for (int r = 0; r < R; ++r) {
@@ -638,8 +651,7 @@ public:
         int startR, int startC, std::function<bool(int, int)> isValid,
         std::function<bool(int, int)> isBoundary, std::vector<std::pair<int, int>> &dirs
     ) const {
-        std::vector<std::vector<int>> depth =
-            std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
+        std::vector<std::vector<int>> depth = std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
         bfs(startR, startC, isValid, dirs, depth);
 
         for (int r = 0; r < R; ++r) {
@@ -654,6 +666,7 @@ public:
         }
         return true;
     }
+
     bool isSurroundedBy(
         std::pair<int, int> coord, T val, std::function<bool(int, int)> isValid,
         std::function<bool(int, int)> isBoundary, std::vector<std::pair<int, int>> &dirs
@@ -669,14 +682,13 @@ public:
         int r1, int c1, int r2, int c2, std::function<bool(int, int)> isValid,
         std::vector<std::pair<int, int>> &dirs
     ) const {
-        std::vector<std::vector<int>> depth =
-            std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
+        std::vector<std::vector<int>> depth = std::vector<std::vector<int>>(R, std::vector<int>(C, -1));
         bfs(r2, c2, isValid, dirs, depth);
         assert(depth[r1][c1] != -1 && "No path found");
 
         std::vector<std::pair<int, int>> output;
         for (int r = r1, c = c1; !(r == r2 && c == c2);) {
-            output.push_back({r, c});
+            output.push_back({ r, c });
             for (std::pair<int, int> adj : getAdjCoords(r, c, dirs)) {
                 int newDepth = depth[adj.first][adj.second];
                 if (newDepth != -1 && newDepth < depth[r][c]) {
@@ -685,19 +697,18 @@ public:
                 }
             }
         }
-        output.push_back({r2, c2});
+        output.push_back({ r2, c2 });
 
         return output;
     }
+
     std::vector<std::pair<int, int>> shortestPath(
-        std::pair<int, int> coord1, std::pair<int, int> coord2,
-        std::function<bool(int, int)> isValid, std::vector<std::pair<int, int>> &dirs
+        std::pair<int, int> coord1, std::pair<int, int> coord2, std::function<bool(int, int)> isValid,
+        std::vector<std::pair<int, int>> &dirs
     ) const {
-        return shortestPath(
-            coord1.first, coord1.second, coord2.first, coord2.second, isValid, dirs
-        );
+        return shortestPath(coord1.first, coord1.second, coord2.first, coord2.second, isValid, dirs);
     }
 };
-}; // namespace DS
+};  // namespace DS
 
 #endif

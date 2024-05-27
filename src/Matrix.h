@@ -6,22 +6,21 @@
 namespace DS {
 template<typename T, std::enable_if_t<is_my_integral_v<T>, bool> = true>
 class Matrix : public Grid<T> {
-
     /************************************************
      *                INITIALISATION                *
      ************************************************/
 
-public:
+   public:
     // lift `Grid` constructor into `Matrix` constructor
     // this means all means to initialise a `Grid` can also be used to initialise a `Matrix`
     using Grid<T>::Grid;
+
     // using Grid<T>::rotClockwise;
 
     // O(max(R, C))
     // Initialise a NxN identity matrix
     Matrix(int N) : Matrix(N, N, 0) {
-        for (int i = 0; i < N; ++i)
-            this->setVal(i, i, 1);
+        for (int i = 0; i < N; ++i) this->setVal(i, i, 1);
     }
 
     // O(RC)
@@ -38,8 +37,7 @@ public:
         out << "[\n";
         for (int r = 0; r < matrix.getR(); ++r) {
             out << ' ';
-            for (int c = 0; c < matrix.getC(); ++c)
-                out << matrix.getVal(r, c) << ' ';
+            for (int c = 0; c < matrix.getC(); ++c) out << matrix.getVal(r, c) << ' ';
             out << '\n';
         }
         out << "]\n";
@@ -52,15 +50,16 @@ public:
 
     // O(RC)
     // Standard matrix transposition - flip along primary diagonal
-    Matrix transpose() const { return Matrix(this->flipPrimaryDiag()); }
+    Matrix transpose() const {
+        return Matrix(this->flipPrimaryDiag());
+    }
 
     // O(N)
     // @returns Matrix trace - sum of entries along main diagonal
     T trace() {
         assert(this->getR() == this->getC() && "Can't calculate trace of non-square matrix");
         T total = T(0);
-        for (int i = 0; i < this->getR(); ++i)
-            total += this->getVal(i, i);
+        for (int i = 0; i < this->getR(); ++i) total += this->getVal(i, i);
         return total;
     }
 
@@ -68,8 +67,7 @@ public:
     // Standard matrix addition
     Matrix operator+(Matrix o) const {
         assert(
-            this->getC() == o.getC() && this->getR() == o.getR() &&
-            "Can't add matricies of different shapes"
+            this->getC() == o.getC() && this->getR() == o.getR() && "Can't add matricies of different shapes"
         );
 
         Matrix *output = new Matrix<T>(*this);
@@ -83,7 +81,9 @@ public:
 
     // O(RC)
     // Addition assignment
-    void operator+=(Matrix o) { *this = *this + o; }
+    void operator+=(Matrix o) {
+        *this = *this + o;
+    }
 
     // O(RC)
     // Stamdard matrix subtraction
@@ -104,7 +104,9 @@ public:
 
     // O(RC)
     // Subtraction assignment
-    void operator-=(Matrix o) { *this = *this - o; }
+    void operator-=(Matrix o) {
+        *this = *this - o;
+    }
 
     // O(RC)
     // Scalar multiplication
@@ -120,7 +122,9 @@ public:
 
     // O(RC)
     // Multiplication assignment
-    void operator*=(ll mul) { *this = *this * mul; }
+    void operator*=(ll mul) {
+        *this = *this * mul;
+    }
 
     // O(N^3)
     // Naive matrix multiplication
@@ -140,7 +144,9 @@ public:
 
     // O(N^3)
     // Multiplication assignment
-    void operator*=(Matrix o) { *this = *this * o; }
+    void operator*=(Matrix o) {
+        *this = *this * o;
+    }
 
     // O(N^3 log P)
     // Fast exponentiation, since p an integer
@@ -161,6 +167,6 @@ public:
     // @TODO eigenvectors and eigenvalues
     // @TODO decompositions
 };
-}; // namespace DS
+};  // namespace DS
 
 #endif

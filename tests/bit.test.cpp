@@ -1,9 +1,12 @@
 #include "../src/BIT.h"
-#include "../src/Util.h"
+
 #include <assert.h>
-#include <random>
 #include <time.h>
+
+#include <random>
 #include <vector>
+
+#include "../src/Util.h"
 using namespace std;
 using namespace DS;
 
@@ -17,23 +20,23 @@ void testBIT_metadata() {
     b.addIndex(5, 1, 2);
     assert(b.size() == 6);
     assert(b.dimensions() == 2);
-    assert(b.shape() == vector<size_t>({2, 3}));
+    assert(b.shape() == vector<size_t>({ 2, 3 }));
     assert(
         b.index() == vector<vector<size_t>>({
-                         {0, 0},
-                         {0, 1},
-                         {0, 2},
-                         {1, 0},
-                         {1, 1},
-                         {1, 2},
+                         { 0, 0 },
+                         { 0, 1 },
+                         { 0, 2 },
+                         { 1, 0 },
+                         { 1, 1 },
+                         { 1, 2 },
                      })
     );
-    assert(b.data() == vector<int>({0, 1, 2, 3, 4, 5}));
+    assert(b.data() == vector<int>({ 0, 1, 2, 3, 4, 5 }));
 
     BIT_PQRU<int, 2> c;
     c.addIndex(0, 0);
     c.addIndex(1, 1);
-    assert(c.data() == vector<int>({0, 1}));
+    assert(c.data() == vector<int>({ 0, 1 }));
 }
 
 void testBIT_rqpu() {
@@ -66,14 +69,14 @@ void testBIT_rqpu() {
             // point add-update
             int i1 = rand() % 10;
             int i2 = rand() % 11;
-            int v  = rand() % 69;
+            int v = rand() % 69;
             fakeBit[i1][i2] += v;
             b.addIndex(v, i1, i2);
         } else if (opt == 3) {
             // point set-update
-            int i1          = rand() % 10;
-            int i2          = rand() % 11;
-            int v           = rand() % 69;
+            int i1 = rand() % 10;
+            int i2 = rand() % 11;
+            int v = rand() % 69;
             fakeBit[i1][i2] = v;
             b.setIndex(v, i1, i2);
         }
@@ -111,14 +114,14 @@ void testBIT_pqru() {
             // point add-update
             int i1 = rand() % 10;
             int i2 = rand() % 11;
-            int v  = rand() % 69;
+            int v = rand() % 69;
             fakeBit[i1][i2] += v;
             b.addIndex(v, i1, i2);
         } else if (opt == 3) {
             // point set-update
-            int i1          = rand() % 10;
-            int i2          = rand() % 11;
-            int v           = rand() % 69;
+            int i1 = rand() % 10;
+            int i2 = rand() % 11;
+            int v = rand() % 69;
             fakeBit[i1][i2] = v;
             b.setIndex(v, i1, i2);
         }

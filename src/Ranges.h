@@ -1,13 +1,15 @@
 #ifndef RANGES_H
 #define RANGES_H
-#include <algorithm>
 #include <assert.h>
+
+#include <algorithm>
 #include <iostream>
 #include <limits>
 #include <map>
 #include <set>
 #include <type_traits>
 #include <vector>
+
 
 namespace DS {
 // retrieve the underlying value given an iterator
@@ -37,15 +39,12 @@ std::map<value_type<T>, value_type<T>> coordCompressMap(T begin, T end, int star
 template<typename T, std::enable_if_t<std::is_integral_v<value_type<T>>, bool> = true>
 void coordCompressTransform(T begin, T end, int startI = 0) {
     std::map<value_type<T>, value_type<T>> m = coordCompressMap(begin, end, startI);
-    for (T it = begin; it != end; it++)
-        *it = m[*it];
+    for (T it = begin; it != end; it++) *it = m[*it];
 }
 
 // ahhh its probably bad to inherit from std types, but i really want the comparison operators ;-;
-template<
-    typename T, std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>, bool> = true>
+template<typename T, std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>, bool> = true>
 struct Range : public std::pair<T, T> {
-
     /************************************************
      *                 INITIALISATION               *
      ************************************************/
@@ -55,7 +54,9 @@ struct Range : public std::pair<T, T> {
     using std::pair<T, T>::second;
 
     // inclusive inclusive
-    Range(T lVal, T rVal) : std::pair<T, T>(lVal, rVal) { assert(l() <= r()); }
+    Range(T lVal, T rVal) : std::pair<T, T>(lVal, rVal) {
+        assert(l() <= r());
+    }
 
     /************************************************
      *                    DISPLAY                   *
@@ -72,11 +73,15 @@ struct Range : public std::pair<T, T> {
 
     // O(1)
     // @returns Inclusive left endpoint of range
-    T l() const { return first; }
+    T l() const {
+        return first;
+    }
 
     // O(1)
     // @returns Inclusive right endpoint of range
-    T r() const { return second; }
+    T r() const {
+        return second;
+    }
 
     // O(1)
     // @returns Midpoint of range (rounding down)
@@ -94,7 +99,9 @@ struct Range : public std::pair<T, T> {
 
     // O(1)
     // @returns
-    bool isEmpty() const { return l() == r(); }
+    bool isEmpty() const {
+        return l() == r();
+    }
 
     /************************************************
      *                  OPERATIONS                  *
@@ -102,36 +109,48 @@ struct Range : public std::pair<T, T> {
 
     // O(1)
     // @returns
-    bool covers(T i) const { return l() <= i && i <= r(); }
+    bool covers(T i) const {
+        return l() <= i && i <= r();
+    }
 
     // O(1)
     // @returns
-    bool covers(const Range<T> &o) const { return l() <= o.l() && o.r() <= r(); }
+    bool covers(const Range<T> &o) const {
+        return l() <= o.l() && o.r() <= r();
+    }
 
     // O(1)
     // @returns
-    bool coveredBy(const Range<T> &o) const { return o.l() <= l() && r() <= o.r(); }
+    bool coveredBy(const Range<T> &o) const {
+        return o.l() <= l() && r() <= o.r();
+    }
 
     // O(1)
     // @returns
-    bool touches(const Range<T> &o) const { return l() == o.r() || o.l() == r(); }
+    bool touches(const Range<T> &o) const {
+        return l() == o.r() || o.l() == r();
+    }
 
     // O(1)
     // @returns
-    bool overlaps(const Range<T> &o) const { return l() <= o.r() && o.l() <= r(); }
+    bool overlaps(const Range<T> &o) const {
+        return l() <= o.r() && o.l() <= r();
+    }
 
-    bool canMerge(const Range<T> &o) const { return l() <= o.r() + 1 && o.l() <= r() + 1; }
+    bool canMerge(const Range<T> &o) const {
+        return l() <= o.r() + 1 && o.l() <= r() + 1;
+    }
 
     // what to do if range is invalid?
     // O(1) intersect
     // @returns
     Range<T> operator&(const Range<T> &o) const {
-        return {std::max(l(), o.l()), std::min(r(), o.r())};
+        return { std::max(l(), o.l()), std::min(r(), o.r()) };
     }
 
     Range<T> operator|(const Range<T> &o) const {
         assert(canMerge(o));
-        return {std::min(l(), o.l()), std::max(r(), o.r())};
+        return { std::min(l(), o.l()), std::max(r(), o.r()) };
     }
 
     // should be defined by comparison on pairs
@@ -160,23 +179,28 @@ struct Range : public std::pair<T, T> {
      *               TRANSFORMATIONS                *
      ************************************************/
 
-    Range<T> operator+(T shift) { return {l() + shift, r() + shift}; }
+    Range<T> operator+(T shift) {
+        return { l() + shift, r() + shift };
+    }
 
-    Range<T> operator-(T shift) { return {l() - shift, r() - shift}; }
+    Range<T> operator-(T shift) {
+        return { l() - shift, r() - shift };
+    }
 
-    Range<T> operator*(T scale) { return {l() * scale, r() * scale}; }
+    Range<T> operator*(T scale) {
+        return { l() * scale, r() * scale };
+    }
 
     std::pair<Range<T>, Range<T>> split(T val) {}
 };
 
 template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
 class Ranges : public std::set<Range<T>> {
-
     /************************************************
      *                 INITIALISATION               *
      ************************************************/
 
-public:
+   public:
     // inherit constructors and all constructor overloads
     using std::set<Range<T>>::set;
     using std::set<Range<T>>::begin;
@@ -226,7 +250,9 @@ public:
 
     // O(N)
     // @returns
-    bool coversAll(const Ranges<T> &o) const { return (*this & o) == o; }
+    bool coversAll(const Ranges<T> &o) const {
+        return (*this & o) == o;
+    }
 
     // O(N log N)
     // intersect
@@ -235,8 +261,7 @@ public:
         Ranges<T> out;
         auto it2 = o.begin();
         for (auto it1 = begin(); it1 != end(); ++it1) {
-            while (it2 != o.end() && it2->r() < it1->l())
-                ++it2;
+            while (it2 != o.end() && it2->r() < it1->l()) ++it2;
             while (it2 != o.end() && it1->overlaps(*it2)) {
                 out.insert(*it1 & *it2);
                 ++it2;
@@ -266,16 +291,18 @@ public:
         Ranges<T> out;
         T prevEnd = std::numeric_limits<T>::min();
         for (Range<T> r : *this) {
-            if (prevEnd <= r.l() - 1) out.insert({prevEnd, r.l() - 1});
+            if (prevEnd <= r.l() - 1) out.insert({ prevEnd, r.l() - 1 });
             prevEnd = r.r() + 1;
         }
         if (rbegin()->r() + 1 <= std::numeric_limits<T>::max()) {
-            out.insert({rbegin()->r() + 1, std::numeric_limits<T>::max()});
+            out.insert({ rbegin()->r() + 1, std::numeric_limits<T>::max() });
         }
         return out;
     }
 
-    bool isDisjoint(const Ranges<T> &o) const { return (*this & o).empty(); }
+    bool isDisjoint(const Ranges<T> &o) const {
+        return (*this & o).empty();
+    }
 
     /************************************************
      *               TRANSFORMATIONS                *
@@ -297,6 +324,6 @@ public:
         return out;
     }
 };
-}; // namespace DS
+};  // namespace DS
 
 #endif

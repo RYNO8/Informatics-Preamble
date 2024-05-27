@@ -1,4 +1,5 @@
 #include "../src/Util.h"
+
 #include "../src/Constants.h"
 using namespace DS;
 using namespace std;
@@ -41,8 +42,7 @@ void testDisplay() {
     assert(repr(set<int>({ 1, 2 })) == "{ 1, 2 }");
     assert(repr(unordered_set<int>()) == "{ }");
     assert(
-        repr(unordered_set<int>({ 1, 2 })) == "{ 1, 2 }" ||
-        repr(unordered_set<int>({ 1, 2 })) == "{ 2, 1 }"
+        repr(unordered_set<int>({ 1, 2 })) == "{ 1, 2 }" || repr(unordered_set<int>({ 1, 2 })) == "{ 2, 1 }"
     );
     assert(repr(multiset<int>()) == "{ }");
     assert(repr(multiset<int>({ 1, 2 })) == "{ 1, 2 }");
@@ -63,9 +63,9 @@ void testPopcount() {
 }
 
 void testGCD_speed() {
-    uint64_t ans = 0; // prevent compiler optimisation
+    uint64_t ans = 0;  // prevent compiler optimisation
 
-    auto start1  = timeNow();
+    auto start1 = timeNow();
     for (ll i = 0; i < 1e8; ++i) {
         uint64_t x = ull_dis(rng);
         uint64_t y = ull_dis(rng);

@@ -2,10 +2,13 @@
 #include "Constants.h"
 #include "Graph.h"
 #include "Util.h"
+
 #include <limits>
 #include <type_traits>
 
-constexpr size_t numberOfBits(size_t x) { return x < 2 ? x : 1 + numberOfBits(x >> 1); }
+constexpr size_t numberOfBits(size_t x) {
+    return x < 2 ? x : 1 + numberOfBits(x >> 1);
+}
 
 namespace DS {
 constexpr size_t TREE_PRINT_SPACING = 2;
@@ -22,8 +25,7 @@ template<
     // accumulation of weight data over many edges
     typename Weight_,
     std::enable_if_t<
-        std::is_arithmetic_v<Weight_> && Weight_() == std::numeric_limits<Weight_>::min() &&
-            maxV != 0,
+        std::is_arithmetic_v<Weight_> && Weight_() == std::numeric_limits<Weight_>::min() && maxV != 0,
         bool> = true>
 class Tree {
 
@@ -31,20 +33,20 @@ class Tree {
      *                 INITIALISATION               *
      ************************************************/
 
-public:
+  public:
     using Weight = Weight_;
     // id of node is an unsigned integer
-    using Node                             = size_t;
-    using Depth                            = size_t;
+    using Node = size_t;
+    using Depth = size_t;
 
     constexpr static Weight INVALID_WEIGHT = 0;
-    constexpr static Depth logMaxV         = numberOfBits(maxV);
-    constexpr static Depth INVALID_DEPTH   = std::numeric_limits<Depth>::max();
+    constexpr static Depth logMaxV = numberOfBits(maxV);
+    constexpr static Depth INVALID_DEPTH = std::numeric_limits<Depth>::max();
 
-private:
+  private:
     using MyTree = Tree<maxV, Weight>;
 
-public:
+  public:
     // Edges are represented internaly as (u, v) with weight w
     // u is the jmp, v is the child
     // @note allowing self cycles, because the root has an edge to itself in lca
@@ -83,9 +85,7 @@ public:
             return a.w == b.w && ((a.u == b.u && a.v == b.v) || (a.u == b.v && a.v == b.u));
         }
 
-        friend bool operator!=(const UndirectedPath &a, const UndirectedPath &b) {
-            return !(a == b);
-        }
+        friend bool operator!=(const UndirectedPath &a, const UndirectedPath &b) { return !(a == b); }
 
         friend std::istream &operator>>(std::istream &in, UndirectedPath &e) {
             in >> e.u >> e.v >> e.w;
@@ -127,7 +127,7 @@ public:
     // because every simple path is defined uniquely by its endpoints
     using DirectedPath = Edge;
 
-private:
+  private:
     struct EdgeComp {
         bool operator()(const Edge &a, const Edge &b) const {
             if (a.u != b.u) return a.u < b.u;
@@ -168,7 +168,7 @@ private:
         }
     }
 
-public:
+  public:
     // O(V)
     // Initialises a singleton tree with the node labeled `root`
     Tree(Node root_) : root(root_) {
@@ -177,11 +177,11 @@ public:
         depth.fill(INVALID_DEPTH);
         height.fill(INVALID_WEIGHT);
 
-        nodes          = {root};
-        depth[root]    = 0;
-        height[root]   = Weight();
+        nodes = { root };
+        depth[root] = 0;
+        height[root] = Weight();
         children[root] = {};
-        jmp[0][root]   = Edge(root, root, Weight());
+        jmp[0][root] = Edge(root, root, Weight());
         buildJumpPtrs(nodes);
     }
 
@@ -199,7 +199,7 @@ public:
         std::function<void(Node, Depth, Weight)> buildDfs;
         buildDfs = [&](Node node, Depth d, Weight h) {
             nodes.insert(node);
-            depth[node]  = d;
+            depth[node] = d;
             height[node] = h;
             for (auto edge : G.getEdges(node)) {
                 Node child = edge.otherSide(node);
@@ -243,7 +243,7 @@ public:
      *                    DISPLAY                   *
      ************************************************/
 
-public:
+  public:
     // O(V) Displays the graph to `out` with fancy indenting for depth, showing the jmp of each node
     friend std::ostream &operator<<(std::ostream &out, const MyTree &tree) {
         std::function<void(Node, std::string)> print;
@@ -251,7 +251,7 @@ public:
             size_t i = 0;
             for (Edge edge : tree.children[node]) {
                 bool isLast = i++ == tree.children[node].size() - 1;
-                Node child  = edge.otherSide(node);
+                Node child = edge.otherSide(node);
                 out << prefix << (isLast ? "└" : "├") << std::string("─") * edge.w << child << '\n';
                 print(child, prefix + (isLast ? " " : "│") + std::string(" ") * edge.w);
             }
@@ -291,7 +291,7 @@ public:
     //     };
     //     findSize(tree->root, 0);
 
-private:
+  private:
     // additional requirement that all lines have equal length
     struct Display {
         size_t width;
@@ -319,14 +319,13 @@ private:
     Display print(Node node) const {
         std::string nodeData = repr(node);
         if (children[node].empty()) {
-            return Display{
-                nodeData.size() + TREE_PRINT_SPACING,
-                {nodeData + std::string(" ") * TREE_PRINT_SPACING},
-                nodeData.size() / 2};
+            return Display{ nodeData.size() + TREE_PRINT_SPACING,
+                            { nodeData + std::string(" ") * TREE_PRINT_SPACING },
+                            nodeData.size() / 2 };
         }
 
         std::vector<size_t> offsets;
-        Display d = Display{0, {}};
+        Display d = Display{ 0, {} };
         for (Node child : getChildren(node)) {
             Display childDisplay = print(child);
             offsets.push_back(d.width + childDisplay.offset);
@@ -337,11 +336,9 @@ private:
 
         std::string header;
         size_t i = 0;
-        for (; i < offsets[0]; ++i)
-            header += " ";
+        for (; i < offsets[0]; ++i) header += " ";
         for (size_t offsetI = 0; offsetI < offsets.size(); i++, offsetI++) {
-            for (; i < offsets[offsetI]; ++i)
-                header += i == d.offset ? "┴" : "─";
+            for (; i < offsets[offsetI]; ++i) header += i == d.offset ? "┴" : "─";
             if (offsets.size() == 1) {
                 header += i == d.offset ? "│" : "│";
             } else if (offsetI == 0) {
@@ -352,8 +349,7 @@ private:
                 header += i == d.offset ? "┼" : "┬";
             }
         }
-        for (; i < d.width; ++i)
-            header += " ";
+        for (; i < d.width; ++i) header += " ";
 
         d.display.push_front(header);
         d.display.push_front(
@@ -363,7 +359,7 @@ private:
         return d;
     };
 
-public:
+  public:
     // O(maxV ^ 2) probably
     friend std::ostream &operator<<(std::ostream &out, const MyTree *tree) {
         out << tree->print(tree->root);
@@ -406,9 +402,7 @@ public:
 
     // O(1)
     // @returns the imutable set of all ndoes
-    const std::vector<Node> getNodes() const {
-        return std::vector<Node>(nodes.begin(), nodes.end());
-    }
+    const std::vector<Node> getNodes() const { return std::vector<Node>(nodes.begin(), nodes.end()); }
 
     // O(1)
     // Determines if `node` is a leaf node (has no children)
@@ -432,6 +426,7 @@ public:
     // O(1)
     // @returns `E`, the number of edges
     size_t E() const { return nodes.size() - 1; }
+
     // O(1)
     // @returns `E`, the number of edges
     size_t M() const { return nodes.size() - 1; }
@@ -522,11 +517,11 @@ public:
         assert(!containsNode(e.v) && "Child node of edge already in graph");
 
         nodes.insert(e.v);
-        depth[e.v]  = depth[e.u] + 1;
+        depth[e.v] = depth[e.u] + 1;
         height[e.v] = height[e.u] + e.w;
         children[e.u].insert(e);
         jmp[0][e.v] = e;
-        buildJumpPtrs({e.v});
+        buildJumpPtrs({ e.v });
     }
 
     // O(log V)
@@ -538,8 +533,8 @@ public:
         assert(isLeaf(node) && node != root && "Only supports removing edges incident to leaves");
 
         nodes.erase(node);
-        Node par     = jmp[0][node].u;
-        depth[node]  = INVALID_DEPTH;
+        Node par = jmp[0][node].u;
+        depth[node] = INVALID_DEPTH;
         height[node] = INVALID_WEIGHT;
         children[par].erase(children[par].lower_bound(Edge(par, node, Weight())));
         // @note leave jump pointers as is
@@ -564,8 +559,8 @@ public:
         assert(containsNode(node) && "Node index out of range");
         size_t bits = std::min(n, E());
 
-        Node par    = node;
-        Weight w    = Weight();
+        Node par = node;
+        Weight w = Weight();
         for (Depth d = 0; bits; bits /= 2, d++) {
             if (bits & 1) {
                 w += jmp[d][par].w;
@@ -621,7 +616,7 @@ public:
     Weight dist(Node u, Node v) const {
         assert(containsNode(u) && containsNode(v) && "Node index out of range");
         Depth targetDepth = depth[lca(u, v)];
-        Weight total      = Weight();
+        Weight total = Weight();
         for (Depth d = logMaxV; d-- > 0;) {
             if (depth[jmp[d][u].u] >= targetDepth) {
                 total += jmp[d][u].w;
@@ -642,13 +637,11 @@ public:
     std::vector<Node> getPathNodes(Edge e) const {
         std::vector<Node> path;
         Node mid = lca(e.u, e.v);
-        for (Node node = e.u; node != mid; node = jmp[0][node].u)
-            path.push_back(node);
+        for (Node node = e.u; node != mid; node = jmp[0][node].u) path.push_back(node);
         path.push_back(mid);
 
         Node midLen = path.size();
-        for (Node node = e.v; node != mid; node = jmp[0][node].u)
-            path.push_back(node);
+        for (Node node = e.v; node != mid; node = jmp[0][node].u) path.push_back(node);
         reverse(path.begin() + midLen, path.end());
 
         return path;
@@ -660,12 +653,10 @@ public:
     std::vector<Edge> getPathEdges(Edge e) const {
         std::vector<Edge> path;
         Node mid = lca(e.u, e.v);
-        for (Node node = e.u; node != mid; node = jmp[0][node].u)
-            path.push_back(jmp[0][node].flip());
+        for (Node node = e.u; node != mid; node = jmp[0][node].u) path.push_back(jmp[0][node].flip());
 
         Node midLen = path.size();
-        for (Node node = e.v; node != mid; node = jmp[0][node].u)
-            path.push_back(jmp[0][node]);
+        for (Node node = e.v; node != mid; node = jmp[0][node].u) path.push_back(jmp[0][node]);
         reverse(path.begin() + midLen, path.end());
 
         return path;
@@ -711,7 +702,7 @@ public:
     // @returns Distance of the path, and a vector of nodes representing the path
     Weight getDiameter() const {
         std::array<Weight, maxV> leafHeight = getHeightFromLeaves();
-        Weight best                         = Weight();
+        Weight best = Weight();
 
         for (Node node : nodes) {
             Weight furthest1 = Weight(), furthest2 = Weight();
@@ -739,7 +730,7 @@ public:
     // @returns the bfs order of the tree
     // @note children in increasing order
     std::vector<Node> getBfsOrder() const {
-        std::vector<Node> traversal = {root};
+        std::vector<Node> traversal = { root };
         traversal.reserve(V());
         for (size_t i = 0; i < traversal.size(); ++i) {
             for (Node child : getChildren(traversal[i])) {
@@ -835,8 +826,8 @@ public:
             Depth maxDepth = 0;
             for (Node child : getChildren(node)) {
                 Depth currDepth = dfs(child);
-                minDepth        = std::min(minDepth, currDepth);
-                maxDepth        = std::max(maxDepth, currDepth);
+                minDepth = std::min(minDepth, currDepth);
+                maxDepth = std::max(maxDepth, currDepth);
             }
             balanced &= maxDepth - minDepth <= 1;
             return maxDepth;
@@ -874,8 +865,7 @@ public:
     // O(1)
     bool isStar() const {
         Node node = *nodes.begin();
-        return degree(node) == V() - 1 ||
-               (degree(node) == 1 && degree(getChildren(node)[0]) == V() - 1);
+        return degree(node) == V() - 1 || (degree(node) == 1 && degree(getChildren(node)[0]) == V() - 1);
     }
 
     /************************************************
@@ -891,3 +881,6 @@ public:
     // }
 };
 }; // namespace DS
+
+namespace Foo { namespace Bar { namespace Extra {
+}}} // namespace Foo::Bar::Extra

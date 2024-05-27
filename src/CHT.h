@@ -1,6 +1,7 @@
 #ifndef CHT_H
 #define CHT_H
 #include "Constants.h"
+#include "Util.h"
 
 namespace DS {
 // Representation of an infinite line using intersection gradient form
@@ -41,6 +42,11 @@ struct CHTLine {
 
 class CHT {
 public:
+
+    friend std::ostream &operator<<(std::ostream &out, const CHT &c) {
+        return out << c.L;
+    }
+
     // amortised O(1)
     // Include a unique line into the convex hull, where `m` is non-decreasing
     void addLine(CHTLine l) {

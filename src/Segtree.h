@@ -1,10 +1,12 @@
 #ifndef SEGTREE_H
 #define SEGTREE_H
-#include "Constants.h"
-#include "Ranges.h"
 #include <algorithm>
 #include <functional>
 #include <type_traits>
+
+#include "Constants.h"
+#include "Ranges.h"
+
 
 namespace DS {
 // `T` should preferably be a real number
@@ -27,8 +29,8 @@ namespace DS {
 // Update should have `T operator()(T, T)`
 // @TODO what properties required?
 template<
-    typename T, T I, typename Combine, typename CombineAgg, T Null, typename Update,
-    typename is_persistent, std::enable_if_t<is_my_integral_v<T>, bool> = true>
+    typename T, T I, typename Combine, typename CombineAgg, T Null, typename Update, typename is_persistent,
+    std::enable_if_t<is_my_integral_v<T>, bool> = true>
 class Segtree : public Range<ll> {
     using MySegtree = Segtree<T, I, Combine, CombineAgg, Null, Update, is_persistent>;
 
@@ -36,7 +38,7 @@ class Segtree : public Range<ll> {
      *                INITIALISATION                *
      ************************************************/
 
-private:
+   private:
     enum LazyMode {
         // no lazy needs to be performed here
         CLEAN,
@@ -49,8 +51,8 @@ private:
         SET
     };
 
-    T val             = I;
-    T lazy            = Null;
+    T val = I;
+    T lazy = Null;
     LazyMode lazyMode = CLEAN;
     MySegtree *lChild = nullptr, *rChild = nullptr, *parent = nullptr;
 
@@ -79,17 +81,17 @@ private:
             rChild = rChild->copy();
         }
 
-        if (lazyMode == SET) { // absolute, always override
-            lChild->val      = CombineAgg()(lazy, (ull)lChild->length());
-            rChild->val      = CombineAgg()(lazy, (ull)rChild->length());
+        if (lazyMode == SET) {  // absolute, always override
+            lChild->val = CombineAgg()(lazy, (ull)lChild->length());
+            rChild->val = CombineAgg()(lazy, (ull)rChild->length());
 
-            lChild->lazy     = lazy;
-            rChild->lazy     = lazy;
+            lChild->lazy = lazy;
+            rChild->lazy = lazy;
             lChild->lazyMode = SET;
             rChild->lazyMode = SET;
-        } else if (lazyMode == AUGMENT) { // relative, add lChild absolute
-            lChild->val  = Update()(lChild->val, CombineAgg()(lazy, (ull)lChild->length()));
-            rChild->val  = Update()(rChild->val, CombineAgg()(lazy, (ull)rChild->length()));
+        } else if (lazyMode == AUGMENT) {  // relative, add lChild absolute
+            lChild->val = Update()(lChild->val, CombineAgg()(lazy, (ull)lChild->length()));
+            rChild->val = Update()(rChild->val, CombineAgg()(lazy, (ull)rChild->length()));
 
             lChild->lazy = Update()(lChild->lazy, lazy);
             rChild->lazy = Update()(rChild->lazy, lazy);
@@ -97,7 +99,7 @@ private:
             if (rChild->lazyMode == CLEAN) rChild->lazyMode = AUGMENT;
         }
 
-        lazy     = Null;
+        lazy = Null;
         lazyMode = CLEAN;
     }
 
@@ -106,28 +108,26 @@ private:
         val = Combine()(lChild->val, rChild->val);
     }
 
-public:
+   public:
     // O(1)
     // Initialises an empty segtree containing elements from `l` to `r` inclusive, which are all I
     Segtree(ll _l, ll _r, T initVal = I) : Range(_l, _r) {
-        val      = CombineAgg()(initVal, (ull)length());
-        lazy     = initVal;
+        val = CombineAgg()(initVal, (ull)length());
+        lazy = initVal;
         lazyMode = SET;
     }
 
     // O(N log N)
     // Initialises segtree from existing segtree, in a the given range from `l` to `r` inclusive
     Segtree(ll _l, ll _r, MySegtree t) : Range(_l, _r) {
-        for (ll i = l(); i <= r(); ++i)
-            set(i, t.query(i));
+        for (ll i = l(); i <= r(); ++i) set(i, t.query(i));
     }
 
     // O(N log N)
     // Initialise from brace enclosed initializer list
     Segtree(T *begin, T *end) : Range(0, std::distance(begin, end) - 1) {
         size_t i = 0;
-        for (auto it = begin; it != end; it++, ++i)
-            set(i, *it);
+        for (auto it = begin; it != end; it++, ++i) set(i, *it);
     }
 
     // O(N log N)
@@ -135,8 +135,7 @@ public:
     Segtree(typename std::vector<T>::iterator begin, typename std::vector<T>::iterator end)
         : Range(0, std::distance(begin, end) - 1) {
         size_t i = 0;
-        for (auto it = begin; it != end; it++, ++i)
-            set(i, *it);
+        for (auto it = begin; it != end; it++, ++i) set(i, *it);
     }
 
     // O(N log N)
@@ -145,8 +144,7 @@ public:
     Segtree(typename std::array<T, N>::iterator begin, typename std::array<T, N>::iterator end)
         : Range(0, std::distance(begin, end) - 1) {
         size_t i = 0;
-        for (auto it = begin; it != end; it++, ++i)
-            set(i, *it);
+        for (auto it = begin; it != end; it++, ++i) set(i, *it);
     }
 
     ~Segtree() {
@@ -213,10 +211,9 @@ public:
     // // performs T[l] = Update(T[l], x), ..., T[r] = Update(T[r], x),
     // // @note Modifies segtree in place
     void add(Range<ll> queryRange, T x) {
-        if (!overlaps(queryRange))
-            return;
+        if (!overlaps(queryRange)) return;
         else if (coveredBy(queryRange)) {
-            val  = Update()(val, CombineAgg()(x, (ull)length()));
+            val = Update()(val, CombineAgg()(x, (ull)length()));
             lazy = Update()(lazy, x);
             if (lazyMode == CLEAN) lazyMode = AUGMENT;
         } else {
@@ -230,18 +227,17 @@ public:
     // O(log N) Point update: add
     // performs T[i] = Update(T[i], x)
     void add(ll i, T x) {
-        add({i, i}, x);
+        add({ i, i }, x);
     }
 
     // O(log N) Range update: set
     // performs T[l] = x, ..., T[r] = x
     // @note Modifies segtree in place
     void set(const Range<ll> &queryRange, T x) {
-        if (!overlaps(queryRange))
-            return;
+        if (!overlaps(queryRange)) return;
         else if (coveredBy(queryRange)) {
-            val      = CombineAgg()(x, (ull)length());
-            lazy     = x;
+            val = CombineAgg()(x, (ull)length());
+            lazy = x;
             lazyMode = SET;
         } else {
             push();
@@ -254,12 +250,12 @@ public:
     // O(log N) Point update: set
     // performs T[i] = x
     void set(ll i, T x) {
-        set({i, i}, x);
+        set({ i, i }, x);
     }
 
     // O(log N) Range update: set all values to I
     void clear() {
-        set({l(), r()}, I);
+        set({ l(), r() }, I);
     }
 
     /************************************************
@@ -270,10 +266,8 @@ public:
     // @returns Combine(T[l], Combine(..., Combine(T[r-1], T[r])))
     // @returns I if the segtree range has no overlap with the query range
     T query(const Range<ll> &queryRange) {
-        if (!overlaps(queryRange))
-            return I;
-        else if (coveredBy(queryRange))
-            return val;
+        if (!overlaps(queryRange)) return I;
+        else if (coveredBy(queryRange)) return val;
 
         push();
         return Combine()(lChild->query(queryRange), rChild->query(queryRange));
@@ -288,34 +282,30 @@ public:
     T query() const {
         return val;
     }
+
     // O(log N) get value at index `i`
     T query(ll i) {
         assert(covers(i) && "Invalid index");
         if (isLeaf()) return val;
         push();
-        if (i <= midpoint())
-            return lChild->query(i);
-        else
-            return rChild->query(i);
+        if (i <= midpoint()) return lChild->query(i);
+        else return rChild->query(i);
     }
 
     T operator[](ll i) {
         return query(i);
     }
 
-public:
+   public:
     // treewalk down the filtered tree, finding the leftmost lowest node
     MySegtree *findFirst(std::function<bool(MySegtree *)> isTarget) {
         if (!isTarget(this)) return nullptr;
         MySegtree *node = this;
         while (!node->isLeaf()) {
             node->push();
-            if (isTarget(node->lChild))
-                node = node->lChild;
-            else if (isTarget(node->rChild))
-                node = node->rChild;
-            else
-                return node;
+            if (isTarget(node->lChild)) node = node->lChild;
+            else if (isTarget(node->rChild)) node = node->rChild;
+            else return node;
         }
         return node;
     }
@@ -325,32 +315,29 @@ public:
         MySegtree *node = this;
         while (!node->isLeaf()) {
             node->push();
-            if (isTarget(node->rChild))
-                node = node->rChild;
-            else if (isTarget(node->lChild))
-                node = node->lChild;
-            else
-                return node;
+            if (isTarget(node->rChild)) node = node->rChild;
+            else if (isTarget(node->lChild)) node = node->lChild;
+            else return node;
         }
         return node;
     }
 
     MySegtree *extendRight(int initVal) {
         MySegtree *root = new MySegtree(l(), r() + length());
-        root->lazy      = Null;
-        root->lazyMode  = CLEAN;
-        root->lChild    = this;
-        root->rChild    = new MySegtree(l() + length(), r() + length(), initVal);
+        root->lazy = Null;
+        root->lazyMode = CLEAN;
+        root->lChild = this;
+        root->rChild = new MySegtree(l() + length(), r() + length(), initVal);
         root->pull();
         return root;
     }
 
     MySegtree *extendLeft(int initVal) {
         MySegtree *root = new MySegtree(l(), r() + length());
-        root->lazy      = Null;
-        root->lazyMode  = CLEAN;
-        root->lChild    = new MySegtree(l() + length(), r() + length(), initVal);
-        root->rChild    = this;
+        root->lazy = Null;
+        root->lazyMode = CLEAN;
+        root->lChild = new MySegtree(l() + length(), r() + length(), initVal);
+        root->rChild = this;
         root->pull();
         return root;
     }
@@ -361,10 +348,10 @@ public:
 
     // @TODO test
     // @TODO test with persistent segtree
-private:
+   private:
     enum ItPos {
-        TOO_FAR_LEFT  = -1,
-        GOOD          = 0,
+        TOO_FAR_LEFT = -1,
+        GOOD = 0,
         TOO_FAR_RIGHT = 1,
     };
 
@@ -382,7 +369,7 @@ private:
         }
     }
 
-public:
+   public:
     // to do interator incr we need to backtrack up the tree
     // I have a choice to:
     // 1. store a backtrack chain of length log N in the iterator (log N space per iterator)
@@ -392,17 +379,17 @@ public:
 
     struct iterator {
         using iterator_category = std::random_access_iterator_tag;
-        using difference_type   = std::ptrdiff_t;
-        using value_type        = MySegtree const;
-        using pointer           = MySegtree const *;
-        using reference         = MySegtree const &;
-        using internal_type     = MySegtree *;
+        using difference_type = std::ptrdiff_t;
+        using value_type = MySegtree const;
+        using pointer = MySegtree const *;
+        using reference = MySegtree const &;
+        using internal_type = MySegtree *;
 
-    protected:
+       protected:
         ll pos;
         internal_type m_ptr;
 
-    public:
+       public:
         iterator(MySegtree *segtree, ll pos_) : pos(pos_) {
             if (segtree->covers(pos)) {
                 m_ptr = segtree->findLeaf(pos);
@@ -410,8 +397,9 @@ public:
                 m_ptr = nullptr;
             }
         }
-        iterator() : m_ptr(nullptr) {
-        }
+
+        iterator() : m_ptr(nullptr) {}
+
         iterator(internal_type ptr) : m_ptr(ptr) {
             assert(m_ptr == nullptr || m_ptr->isLeaf());
         }
@@ -449,10 +437,12 @@ public:
             }
             return *this;
         }
+
         friend iterator operator+(const iterator it, difference_type n) {
             iterator temp = it;
             return temp += n;
         }
+
         friend iterator operator+(difference_type n, const iterator it) {
             iterator temp = it;
             return temp += n;
@@ -477,6 +467,7 @@ public:
         iterator &operator-=(difference_type n) {
             return *this += -n;
         }
+
         friend iterator operator-(const iterator it, difference_type n) {
             iterator temp = it;
             return temp -= n;
@@ -511,19 +502,24 @@ public:
         friend bool operator==(const iterator &a, const iterator &b) {
             return a.m_ptr == b.m_ptr;
         };
+
         friend bool operator!=(const iterator &a, const iterator &b) {
             return a.m_ptr != b.m_ptr;
         };
+
         // @TODO what if a and b are referencing different segtrees
         friend bool operator<(const iterator &a, const iterator &b) {
             return a.pos < b.pos;
         };
+
         friend bool operator>(const iterator &a, const iterator &b) {
             return a.pos > b.pos;
         };
+
         friend bool operator<=(const iterator &a, const iterator &b) {
             return a.pos <= b.pos;
         };
+
         friend bool operator>=(const iterator &a, const iterator &b) {
             return a.pos >= b.pos;
         };
@@ -531,10 +527,10 @@ public:
 
     struct reverse_iterator : public iterator {
         using iterator_category = typename std::iterator_traits<iterator>::iterator_category;
-        using difference_type   = typename std::iterator_traits<iterator>::difference_type;
-        using value_type        = typename std::iterator_traits<iterator>::value_type;
-        using pointer           = typename std::iterator_traits<iterator>::pointer;
-        using reference         = typename std::iterator_traits<iterator>::reference;
+        using difference_type = typename std::iterator_traits<iterator>::difference_type;
+        using value_type = typename std::iterator_traits<iterator>::value_type;
+        using pointer = typename std::iterator_traits<iterator>::pointer;
+        using reference = typename std::iterator_traits<iterator>::reference;
         using iterator::iterator;
 
         reverse_iterator &operator++() {
@@ -557,12 +553,15 @@ public:
         friend bool operator<(const reverse_iterator &a, const reverse_iterator &b) {
             return -a.pos < -b.pos;
         };
+
         friend bool operator>(const reverse_iterator &a, const reverse_iterator &b) {
             return -a.pos > -b.pos;
         };
+
         friend bool operator<=(const reverse_iterator &a, const reverse_iterator &b) {
             return -a.pos <= -b.pos;
         };
+
         friend bool operator>=(const reverse_iterator &a, const reverse_iterator &b) {
             return -a.pos >= -b.pos;
         };
@@ -595,7 +594,7 @@ public:
 
 template<typename T>
 class MaxOp {
-public:
+   public:
     constexpr T operator()(const T &lhs, const T &rhs) const {
         return std::max(lhs, rhs);
     }
@@ -603,7 +602,7 @@ public:
 
 template<typename T>
 class MinOp {
-public:
+   public:
     constexpr T operator()(const T &lhs, const T &rhs) const {
         return std::min(lhs, rhs);
     }
@@ -611,36 +610,34 @@ public:
 
 template<typename T>
 class FirstOp {
-public:
+   public:
     constexpr T operator()(const T &lhs, const ll &rhs) const {
         return lhs;
     }
 };
 
 template<typename T>
-using SumSegtree =
-    Segtree<T, 0, std::plus<T>, std::multiplies<T>, 0, std::plus<T>, std::false_type>;
+using SumSegtree = Segtree<T, 0, std::plus<T>, std::multiplies<T>, 0, std::plus<T>, std::false_type>;
 
 template<typename T>
-using SumSegtreePersistent =
-    Segtree<T, 0, std::plus<T>, std::multiplies<T>, 0, std::plus<T>, std::true_type>;
+using SumSegtreePersistent = Segtree<T, 0, std::plus<T>, std::multiplies<T>, 0, std::plus<T>, std::true_type>;
 
 template<typename T>
-using MaxSegtree = Segtree<
-    T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>, std::false_type>;
+using MaxSegtree =
+    Segtree<T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>, std::false_type>;
 
 template<typename T>
-using MaxSegtreePersistent = Segtree<
-    T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>, std::true_type>;
+using MaxSegtreePersistent =
+    Segtree<T, std::numeric_limits<T>::min(), MaxOp<T>, FirstOp<T>, 0, std::plus<T>, std::true_type>;
 
 template<typename T>
-using MinSegtree = Segtree<
-    T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>, std::false_type>;
+using MinSegtree =
+    Segtree<T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>, std::false_type>;
 
 template<typename T>
-using MinSegtreePersistent = Segtree<
-    T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>, std::true_type>;
+using MinSegtreePersistent =
+    Segtree<T, std::numeric_limits<T>::max(), MinOp<T>, FirstOp<T>, 0, std::plus<T>, std::true_type>;
 
-}; // namespace DS
+};  // namespace DS
 
 #endif
